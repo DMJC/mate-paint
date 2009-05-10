@@ -25,6 +25,7 @@
 
 #include "callbacks.h"
 #include "color.h"
+#include "toolbar.h"
 
 typedef enum
 {
@@ -121,3 +122,154 @@ on_color_palette_entry_button_press_event ( GtkWidget	   *widget,
 	
 	return TRUE;
 }
+
+
+
+
+void 
+on_tool_free_select_toggled	(GtkObject *object, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
+	{
+		g_print("on_tool_free_select_toggled\n");
+	}
+}
+
+void 
+on_tool_eraser_toggled	(GtkObject *object, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
+	{
+		g_print("on_tool_eraser_toggled\n");
+	}
+}
+
+void 
+on_tool_color_picker_toggled (GtkObject *object, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
+	{
+		g_print("on_tool_color_picker_toggled\n");
+	}
+}
+
+void 
+on_tool_pencil_toggled	(GtkObject *object, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
+	{
+		g_print("on_tool_pencil_toggled\n");
+	}
+}
+
+void 
+on_tool_airbrush_toggled (GtkObject *object, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
+	{
+		g_print("on_tool_airbrush_toggled\n");
+	}
+}
+
+void 
+on_draw_line_toggled (GtkObject *object, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
+	{
+		g_print("on_draw_line_toggled\n");
+	}
+}
+
+void 
+on_draw_rectangle_toggled (GtkObject *object, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
+	{
+		g_print("on_draw_rectangle_toggled\n");
+	}
+}
+
+void 
+on_draw_ellipse_toggled	(GtkObject *object, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
+	{
+		g_print("on_draw_ellipse_toggled\n");
+	}
+}
+
+void
+on_tool_rect_select_toggled	(GtkObject *object, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
+	{
+		g_print("on_tool_rect-select_toggled\n");
+	}
+}
+
+void
+on_tool_bucket_fill_toggled	(GtkObject *object, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
+	{
+		g_print("on_tool_bucket_fill_toggled\n");
+	}
+}
+
+void
+on_tool_zoom_toggled (GtkObject *object, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
+	{
+		g_print("on_tool_zoom_toggled\n");
+	}
+}
+
+void
+on_tool_paintbrush_toggled	(GtkObject *object, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
+	{
+		g_print("on_tool_paintbrush_toggled\n");
+	}
+}
+
+void
+on_tool_text_toggled (GtkObject *object, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
+	{
+		g_print("on_tool_text_toggled\n");
+	}
+}
+
+void
+on_draw_curve_toggled (GtkObject *object, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
+	{
+		g_print("on_draw_curve_toggled\n");
+	}
+}
+
+void
+on_draw_polygon_toggled	(GtkObject *object, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
+	{
+		g_print("on_draw_polygon_toggled\n");
+	}
+}
+
+void
+on_draw_rounded_rectangle_toggled  (GtkObject *object, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
+	{
+		g_print("on_draw_rounded_rectangle_toggled\n");
+	}
+}
+
+
+
+

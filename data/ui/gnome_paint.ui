@@ -4,7 +4,8 @@
   <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkWindow" id="window">
     <property name="visible">True</property>
-    <property name="title" translatable="yes">window</property>
+    <property name="title" translatable="yes">Gnome Paint</property>
+    <property name="window_position">center</property>
     <property name="default_width">100</property>
     <property name="default_height">100</property>
     <signal name="destroy" handler="on_window_destroy"/>
@@ -65,6 +66,7 @@
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <signal name="activate" handler="on_window_destroy"/>
                       </object>
                     </child>
                   </object>
@@ -180,7 +182,6 @@
             <child>
               <object class="GtkHandleBox" id="handlebox1">
                 <property name="visible">True</property>
-                <property name="shadow_type">etched-out</property>
                 <property name="handle_position">top</property>
                 <property name="snap_edge_set">True</property>
                 <child>
@@ -190,7 +191,7 @@
                       <object class="GtkHBox" id="hbox1">
                         <property name="visible">True</property>
                         <child>
-                          <object class="GtkToolbar" id="toolbar3">
+                          <object class="GtkToolbar" id="toolbar1">
                             <property name="visible">True</property>
                             <property name="orientation">vertical</property>
                             <property name="show_arrow">False</property>
@@ -198,9 +199,11 @@
                             <property name="icon_size">1</property>
                             <property name="icon_size_set">True</property>
                             <child>
-                              <object class="GtkToggleToolButton" id="tool-free-select">
-                                <property name="visible">True</property>
+                              <object class="GtkRadioToolButton" id="tool-free-select">
+                                <property name="can_focus">True</property>
+                                <property name="tooltip_text" translatable="yes">Free select tool</property>
                                 <property name="icon_name">stock-tool-free-select</property>
+                                <signal name="toggled" handler="on_tool_free_select_toggled"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -208,9 +211,12 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkToggleToolButton" id="tool-eraser">
+                              <object class="GtkRadioToolButton" id="tool-eraser">
                                 <property name="visible">True</property>
+                                <property name="can_focus">True</property>
                                 <property name="icon_name">stock-tool-eraser</property>
+                                <property name="group">tool-free-select</property>
+                                <signal name="toggled" handler="on_tool_eraser_toggled"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -218,10 +224,12 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkToggleToolButton" id="tool-color-picker">
+                              <object class="GtkRadioToolButton" id="tool-color-picker">
                                 <property name="visible">True</property>
+                                <property name="can_focus">True</property>
                                 <property name="icon_name">stock-tool-color-picker</property>
-                                <property name="active">True</property>
+                                <property name="group">tool-free-select</property>
+                                <signal name="toggled" handler="on_tool_color_picker_toggled"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -229,9 +237,12 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkToggleToolButton" id="tool-pencil">
+                              <object class="GtkRadioToolButton" id="tool-pencil">
                                 <property name="visible">True</property>
+                                <property name="can_focus">True</property>
                                 <property name="icon_name">stock-tool-pencil</property>
+                                <property name="group">tool-free-select</property>
+                                <signal name="toggled" handler="on_tool_pencil_toggled"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -239,9 +250,12 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkToggleToolButton" id="tool-airbrush">
+                              <object class="GtkRadioToolButton" id="tool-airbrush">
                                 <property name="visible">True</property>
+                                <property name="can_focus">True</property>
                                 <property name="icon_name">stock-tool-airbrush</property>
+                                <property name="group">tool-free-select</property>
+                                <signal name="toggled" handler="on_tool_airbrush_toggled"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -249,9 +263,12 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkToggleToolButton" id="draw-line">
+                              <object class="GtkRadioToolButton" id="draw-line">
                                 <property name="visible">True</property>
+                                <property name="can_focus">True</property>
                                 <property name="icon_name">stock_draw-line</property>
+                                <property name="group">tool-free-select</property>
+                                <signal name="toggled" handler="on_draw_line_toggled"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -259,9 +276,12 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkToggleToolButton" id="draw-rectangle">
+                              <object class="GtkRadioToolButton" id="draw-rectangle">
                                 <property name="visible">True</property>
+                                <property name="can_focus">True</property>
                                 <property name="icon_name">stock_draw-rectangle</property>
+                                <property name="group">tool-free-select</property>
+                                <signal name="toggled" handler="on_draw_rectangle_toggled"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -269,9 +289,12 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkToggleToolButton" id="draw-ellipse">
+                              <object class="GtkRadioToolButton" id="draw-ellipse">
                                 <property name="visible">True</property>
+                                <property name="can_focus">True</property>
                                 <property name="icon_name">stock_draw-ellipse</property>
+                                <property name="group">tool-free-select</property>
+                                <signal name="toggled" handler="on_draw_ellipse_toggled"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -286,7 +309,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkToolbar" id="toolbar4">
+                          <object class="GtkToolbar" id="toolbar2">
                             <property name="visible">True</property>
                             <property name="orientation">vertical</property>
                             <property name="show_arrow">False</property>
@@ -294,9 +317,12 @@
                             <property name="icon_size">1</property>
                             <property name="icon_size_set">True</property>
                             <child>
-                              <object class="GtkToggleToolButton" id="tool-rect-select">
+                              <object class="GtkRadioToolButton" id="tool-rect-select">
                                 <property name="visible">True</property>
-                                <property name="icon_name">stock-tool-rect-select-16</property>
+                                <property name="can_focus">True</property>
+                                <property name="icon_name">stock-tool-rect-select</property>
+                                <property name="group">tool-free-select</property>
+                                <signal name="toggled" handler="on_tool_rect_select_toggled"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -304,10 +330,12 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkToggleToolButton" id="tool-bucket-fill">
+                              <object class="GtkRadioToolButton" id="tool-bucket-fill">
                                 <property name="visible">True</property>
+                                <property name="can_focus">True</property>
                                 <property name="icon_name">stock-tool-bucket-fill</property>
-                                <property name="active">True</property>
+                                <property name="group">tool-free-select</property>
+                                <signal name="toggled" handler="on_tool_bucket_fill_toggled"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -315,10 +343,12 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkToggleToolButton" id="tool-zoom">
+                              <object class="GtkRadioToolButton" id="tool-zoom">
                                 <property name="visible">True</property>
+                                <property name="can_focus">True</property>
                                 <property name="icon_name">stock-tool-zoom</property>
-                                <property name="active">True</property>
+                                <property name="group">tool-free-select</property>
+                                <signal name="toggled" handler="on_tool_zoom_toggled"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -326,10 +356,12 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkToggleToolButton" id="tool-paintbrush">
+                              <object class="GtkRadioToolButton" id="tool-paintbrush">
                                 <property name="visible">True</property>
+                                <property name="can_focus">True</property>
                                 <property name="icon_name">stock-tool-paintbrush</property>
-                                <property name="active">True</property>
+                                <property name="group">tool-free-select</property>
+                                <signal name="toggled" handler="on_tool_paintbrush_toggled"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -337,10 +369,12 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkToggleToolButton" id="tool-text">
+                              <object class="GtkRadioToolButton" id="tool-text">
                                 <property name="visible">True</property>
+                                <property name="can_focus">True</property>
                                 <property name="icon_name">stock-tool-text</property>
-                                <property name="active">True</property>
+                                <property name="group">tool-free-select</property>
+                                <signal name="toggled" handler="on_tool_text_toggled"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -348,10 +382,12 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkToggleToolButton" id="draw-curve">
+                              <object class="GtkRadioToolButton" id="draw-curve">
                                 <property name="visible">True</property>
+                                <property name="can_focus">True</property>
                                 <property name="icon_name">stock_draw-curve</property>
-                                <property name="active">True</property>
+                                <property name="group">tool-free-select</property>
+                                <signal name="toggled" handler="on_draw_curve_toggled"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -359,9 +395,12 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkToggleToolButton" id="draw-polygon">
+                              <object class="GtkRadioToolButton" id="draw-polygon">
                                 <property name="visible">True</property>
+                                <property name="can_focus">True</property>
                                 <property name="icon_name">stock_draw-polygon</property>
+                                <property name="group">tool-free-select</property>
+                                <signal name="toggled" handler="on_draw_polygon_toggled"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -369,9 +408,12 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkToggleToolButton" id="draw-rounded-rectangle">
+                              <object class="GtkRadioToolButton" id="draw-rounded-rectangle">
                                 <property name="visible">True</property>
+                                <property name="can_focus">True</property>
                                 <property name="icon_name">stock_draw-rounded-rectangle</property>
+                                <property name="group">tool-free-select</property>
+                                <signal name="toggled" handler="on_draw_rounded_rectangle_toggled"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -447,8 +489,6 @@
                 <child>
                   <object class="GtkHandleBox" id="handlebox2">
                     <property name="visible">True</property>
-                    <property name="app_paintable">True</property>
-                    <property name="shadow_type">etched-out</property>
                     <property name="snap_edge">left</property>
                     <property name="snap_edge_set">True</property>
                     <child>
@@ -1321,7 +1361,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkStatusbar" id="statusbar1">
+          <object class="GtkStatusbar" id="statusbar">
             <property name="visible">True</property>
             <property name="spacing">2</property>
           </object>

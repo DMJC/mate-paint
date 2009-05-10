@@ -22,7 +22,9 @@ gnome_paint_SOURCES = \
 	callbacks.h  \
 	color.c  \
 	color.h  \
-	main.c
+	main.c  \
+	toolbar.c  \
+	toolbar.h
 
 gnome_paint_LDFLAGS = \
 	-Wl,--export-dynamic
