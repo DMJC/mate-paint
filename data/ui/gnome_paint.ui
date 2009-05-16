@@ -7,7 +7,8 @@
     <property name="title" translatable="yes">Gnome Paint</property>
     <property name="window_position">center</property>
     <property name="default_width">100</property>
-    <property name="default_height">100</property>
+    <property name="default_height">200</property>
+    <property name="type_hint">menu</property>
     <signal name="destroy" handler="on_window_destroy"/>
     <child>
       <object class="GtkVBox" id="vbox1">
@@ -187,6 +188,7 @@
                 <child>
                   <object class="GtkVBox" id="vbox3">
                     <property name="visible">True</property>
+                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkHBox" id="hbox1">
                         <property name="visible">True</property>
@@ -436,19 +438,98 @@
                     </child>
                     <child>
                       <object class="GtkAlignment" id="alignment1">
-                        <property name="height_request">100</property>
                         <property name="visible">True</property>
-                        <property name="top_padding">5</property>
-                        <property name="bottom_padding">5</property>
+                        <property name="top_padding">3</property>
+                        <property name="bottom_padding">3</property>
                         <property name="left_padding">3</property>
-                        <property name="right_padding">2</property>
+                        <property name="right_padding">3</property>
                         <child>
-                          <object class="GtkFrame" id="frame1">
+                          <object class="GtkNotebook" id="notebook1">
                             <property name="visible">True</property>
-                            <property name="resize_mode">queue</property>
-                            <property name="label_xalign">0</property>
-                            <property name="shadow_type">in</property>
+                            <property name="show_tabs">False</property>
+                            <property name="show_border">False</property>
+                            <property name="tab_border">0</property>
+                            <property name="tab_hborder">0</property>
+                            <property name="tab_vborder">0</property>
                             <child>
+                              <object class="GtkFrame" id="frame1">
+                                <property name="visible">True</property>
+                                <property name="label_xalign">0</property>
+                                <property name="shadow_type">in</property>
+                                <child>
+                                  <object class="GtkToolbar" id="toolbar3">
+                                    <property name="visible">True</property>
+                                    <property name="orientation">vertical</property>
+                                    <property name="show_arrow">False</property>
+                                    <property name="icon_size">1</property>
+                                    <property name="icon_size_set">True</property>
+                                    <child>
+                                      <object class="GtkRadioToolButton" id="line0">
+                                        <property name="active">True</property>
+                                        <signal name="realize" handler="on_line0_realize"/>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="homogeneous">True</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkRadioToolButton" id="line1">
+                                        <property name="group">line0</property>
+                                        <signal name="realize" handler="on_line1_realize"/>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="homogeneous">True</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkRadioToolButton" id="line2">
+                                        <property name="group">line0</property>
+                                        <signal name="realize" handler="on_line2_realize"/>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="homogeneous">True</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkRadioToolButton" id="line3">
+                                        <property name="group">line0</property>
+                                        <signal name="realize" handler="on_line3_realize"/>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="homogeneous">True</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkRadioToolButton" id="line4">
+                                        <property name="group">line0</property>
+                                        <signal name="realize" handler="on_line4_realize"/>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="homogeneous">True</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child type="tab">
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child type="tab">
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child type="tab">
                               <placeholder/>
                             </child>
                           </object>

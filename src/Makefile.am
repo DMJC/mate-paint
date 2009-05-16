@@ -24,7 +24,12 @@ gnome_paint_SOURCES = \
 	color.h  \
 	main.c  \
 	toolbar.c  \
-	toolbar.h
+	toolbar.h  \
+	pixmaps/line_0.xpm  \
+	pixmaps/line_1.xpm  \
+	pixmaps/line_2.xpm  \
+	pixmaps/line_3.xpm  \
+	pixmaps/line_4.xpm
 
 gnome_paint_LDFLAGS = \
 	-Wl,--export-dynamic

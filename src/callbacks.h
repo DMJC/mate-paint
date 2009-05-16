@@ -58,6 +58,12 @@ void on_draw_curve_toggled				(GtkObject *object, gpointer user_data);
 void on_draw_polygon_toggled			(GtkObject *object, gpointer user_data);
 void on_draw_rounded_rectangle_toggled  (GtkObject *object, gpointer user_data);
 
+/*Linebar realize functions*/
+void on_line0_realize   (GtkObject *object, gpointer user_data);
+void on_line1_realize   (GtkObject *object, gpointer user_data);
+void on_line2_realize   (GtkObject *object, gpointer user_data);
+void on_line3_realize   (GtkObject *object, gpointer user_data);
+void on_line4_realize   (GtkObject *object, gpointer user_data);
 
 
 

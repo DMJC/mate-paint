@@ -24,4 +24,10 @@
 
 #include <gtk/gtk.h>
 
-void toolbar_set_active_tool	( GtkWidget *widget );
+void line0_init ( GtkWidget *widget );
+void line1_init ( GtkWidget *widget );
+void line2_init ( GtkWidget *widget );
+void line3_init ( GtkWidget *widget );
+void line4_init ( GtkWidget *widget );
+
+

@@ -271,5 +271,35 @@ on_draw_rounded_rectangle_toggled  (GtkObject *object, gpointer user_data)
 }
 
 
+void
+on_line0_realize   (GtkObject *object, gpointer user_data)
+{
+	line0_init ( GTK_WIDGET(object) );
+}
+
+void
+on_line1_realize   (GtkObject *object, gpointer user_data)
+{
+	line1_init ( GTK_WIDGET(object) );
+}
+
+void
+on_line2_realize   (GtkObject *object, gpointer user_data)
+{
+	line2_init ( GTK_WIDGET(object) );
+}
+
+void
+on_line3_realize   (GtkObject *object, gpointer user_data)
+{
+	line3_init ( GTK_WIDGET(object) );
+}
+
+void
+on_line4_realize   (GtkObject *object, gpointer user_data)
+{
+	line4_init ( GTK_WIDGET(object) );
+}
+
 
 
