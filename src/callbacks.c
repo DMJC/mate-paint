@@ -132,6 +132,8 @@ on_tool_free_select_toggled	(GtkObject *object, gpointer user_data)
 	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
 	{
 		g_print("on_tool_free_select_toggled\n");
+		set_free_select_tool();
+
 	}
 }
 
@@ -141,6 +143,7 @@ on_tool_eraser_toggled	(GtkObject *object, gpointer user_data)
 	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
 	{
 		g_print("on_tool_eraser_toggled\n");
+		set_eraser_tool();
 	}
 }
 
@@ -150,6 +153,7 @@ on_tool_color_picker_toggled (GtkObject *object, gpointer user_data)
 	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
 	{
 		g_print("on_tool_color_picker_toggled\n");
+		set_color_picker_tool();
 	}
 }
 
@@ -159,6 +163,7 @@ on_tool_pencil_toggled	(GtkObject *object, gpointer user_data)
 	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
 	{
 		g_print("on_tool_pencil_toggled\n");
+		set_pencil_tool();
 	}
 }
 
@@ -168,6 +173,7 @@ on_tool_airbrush_toggled (GtkObject *object, gpointer user_data)
 	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
 	{
 		g_print("on_tool_airbrush_toggled\n");
+		set_airbrush_tool();
 	}
 }
 
@@ -177,6 +183,7 @@ on_draw_line_toggled (GtkObject *object, gpointer user_data)
 	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
 	{
 		g_print("on_draw_line_toggled\n");
+		set_draw_line_tool();
 	}
 }
 
@@ -186,6 +193,7 @@ on_draw_rectangle_toggled (GtkObject *object, gpointer user_data)
 	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
 	{
 		g_print("on_draw_rectangle_toggled\n");
+		set_draw_rectangle_tool();
 	}
 }
 
@@ -195,6 +203,7 @@ on_draw_ellipse_toggled	(GtkObject *object, gpointer user_data)
 	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
 	{
 		g_print("on_draw_ellipse_toggled\n");
+		set_draw_ellipse_tool();
 	}
 }
 
@@ -204,6 +213,7 @@ on_tool_rect_select_toggled	(GtkObject *object, gpointer user_data)
 	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
 	{
 		g_print("on_tool_rect-select_toggled\n");
+		set_rect_select_tool();
 	}
 }
 
@@ -213,6 +223,7 @@ on_tool_bucket_fill_toggled	(GtkObject *object, gpointer user_data)
 	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
 	{
 		g_print("on_tool_bucket_fill_toggled\n");
+		set_bucket_fill_tool();
 	}
 }
 
@@ -222,6 +233,7 @@ on_tool_zoom_toggled (GtkObject *object, gpointer user_data)
 	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
 	{
 		g_print("on_tool_zoom_toggled\n");
+		set_zoom_tool();
 	}
 }
 
@@ -231,6 +243,7 @@ on_tool_paintbrush_toggled	(GtkObject *object, gpointer user_data)
 	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
 	{
 		g_print("on_tool_paintbrush_toggled\n");
+		set_paintbrush_tool();
 	}
 }
 
@@ -240,6 +253,7 @@ on_tool_text_toggled (GtkObject *object, gpointer user_data)
 	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
 	{
 		g_print("on_tool_text_toggled\n");
+		set_text_tool();
 	}
 }
 
@@ -249,6 +263,7 @@ on_draw_curve_toggled (GtkObject *object, gpointer user_data)
 	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
 	{
 		g_print("on_draw_curve_toggled\n");
+		set_draw_curve_tool();
 	}
 }
 
@@ -258,6 +273,7 @@ on_draw_polygon_toggled	(GtkObject *object, gpointer user_data)
 	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
 	{
 		g_print("on_draw_polygon_toggled\n");
+		set_draw_polygon_tool();
 	}
 }
 
@@ -267,9 +283,16 @@ on_draw_rounded_rectangle_toggled  (GtkObject *object, gpointer user_data)
 	if ( gtk_toggle_tool_button_get_active ( GTK_TOGGLE_TOOL_BUTTON(object) ) )
 	{
 		g_print("on_draw_rounded_rectangle_toggled\n");
+		set_draw_rounded_rectangle_tool();
 	}
 }
 
+
+void 
+on_notebook_realize   (GtkObject *object, gpointer user_data)
+{
+	notebook_set_widget ( GTK_WIDGET(object) );
+}
 
 void
 on_line0_realize   (GtkObject *object, gpointer user_data)
@@ -299,6 +322,19 @@ void
 on_line4_realize   (GtkObject *object, gpointer user_data)
 {
 	line4_init ( GTK_WIDGET(object) );
+}
+
+
+void 
+on_sel1_realize   (GtkObject *object, gpointer user_data)
+{
+	sel1_init ( GTK_WIDGET(object) );
+}
+
+void 
+on_sel2_realize   (GtkObject *object, gpointer user_data)
+{
+	sel2_init ( GTK_WIDGET(object) );
 }
 
 

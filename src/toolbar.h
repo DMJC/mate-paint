@@ -24,10 +24,38 @@
 
 #include <gtk/gtk.h>
 
+
+void set_free_select_tool				( void );
+void set_eraser_tool					( void );
+void set_color_picker_tool				( void );
+void set_pencil_tool					( void );
+void set_airbrush_tool					( void );
+void set_draw_line_tool					( void );
+void set_draw_rectangle_tool			( void );
+void set_draw_ellipse_tool				( void );
+void set_rect_select_tool				( void );
+void set_bucket_fill_tool				( void );
+void set_zoom_tool						( void );
+void set_paintbrush_tool				( void );
+void set_text_tool						( void );
+void set_draw_curve_tool				( void );
+void set_draw_polygon_tool				( void );
+void set_draw_rounded_rectangle_tool	( void );
+
+
+
+void notebook_set_widget ( GtkWidget *widget );
+
+/*Line Bar*/
 void line0_init ( GtkWidget *widget );
 void line1_init ( GtkWidget *widget );
 void line2_init ( GtkWidget *widget );
 void line3_init ( GtkWidget *widget );
 void line4_init ( GtkWidget *widget );
+
+
+/*Select Bar*/
+void sel1_init ( GtkWidget *widget );
+void sel2_init ( GtkWidget *widget );
 
 
