@@ -444,8 +444,12 @@
                         <property name="tab_vborder">0</property>
                         <signal name="realize" handler="on_notebook_realize"/>
                         <child>
-                          <object class="GtkDrawingArea" id="drawingarea1">
+                          <object class="GtkVBox" id="tab0">
                             <property name="visible">True</property>
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <placeholder/>
+                            </child>
                           </object>
                         </child>
                         <child type="tab">
@@ -511,11 +515,11 @@
                             <property name="visible">True</property>
                             <property name="orientation">vertical</property>
                             <child>
-                              <object class="GtkFrame" id="frame3">
-                                <property name="visible">True</property>
+                              <object class="GtkFrame" id="frame_rect">
                                 <property name="border_width">2</property>
                                 <property name="label_xalign">0</property>
                                 <property name="shadow_type">in</property>
+                                <signal name="realize" handler="on_frame_rect_realize"/>
                                 <child>
                                   <object class="GtkToolbar" id="toolbar4">
                                     <property name="visible">True</property>
@@ -526,6 +530,7 @@
                                     <child>
                                       <object class="GtkRadioToolButton" id="rect0">
                                         <property name="active">True</property>
+                                        <signal name="realize" handler="on_rect0_realize"/>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -535,6 +540,7 @@
                                     <child>
                                       <object class="GtkRadioToolButton" id="rect1">
                                         <property name="group">rect0</property>
+                                        <signal name="realize" handler="on_rect1_realize"/>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -544,6 +550,7 @@
                                     <child>
                                       <object class="GtkRadioToolButton" id="rect2">
                                         <property name="group">rect0</property>
+                                        <signal name="realize" handler="on_rect2_realize"/>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>

@@ -59,19 +59,25 @@ void on_draw_polygon_toggled			(GtkObject *object, gpointer user_data);
 void on_draw_rounded_rectangle_toggled  (GtkObject *object, gpointer user_data);
 
 /*Option toolbar realize funcitons*/
-void on_notebook_realize   (GtkObject *object, gpointer user_data);
+void on_notebook_realize	(GtkObject *object, gpointer user_data);
+void on_frame_rect_realize  (GtkObject *object, gpointer user_data);
 
 
-/*Linebar realize functions*/
+/*Line toolbar realize functions*/
 void on_line0_realize   (GtkObject *object, gpointer user_data);
 void on_line1_realize   (GtkObject *object, gpointer user_data);
 void on_line2_realize   (GtkObject *object, gpointer user_data);
 void on_line3_realize   (GtkObject *object, gpointer user_data);
 void on_line4_realize   (GtkObject *object, gpointer user_data);
 
-/*Selbar realize functions*/
+/*Selection toolbar realize functions*/
 void on_sel1_realize   (GtkObject *object, gpointer user_data);
 void on_sel2_realize   (GtkObject *object, gpointer user_data);
+
+/*rect toolbar realize functions*/
+void on_rect0_realize   (GtkObject *object, gpointer user_data);
+void on_rect1_realize   (GtkObject *object, gpointer user_data);
+void on_rect2_realize   (GtkObject *object, gpointer user_data);
 
 
 

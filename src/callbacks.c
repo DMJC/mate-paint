@@ -291,12 +291,22 @@ on_draw_rounded_rectangle_toggled  (GtkObject *object, gpointer user_data)
 void 
 on_notebook_realize   (GtkObject *object, gpointer user_data)
 {
+	//g_print("on_notebook_realize\n");
 	notebook_set_widget ( GTK_WIDGET(object) );
 }
+
+void 
+on_frame_rect_realize  (GtkObject *object, gpointer user_data)
+{
+	//g_print("on_frame_rect_realize\n");
+	frame_rect_set_widget ( GTK_WIDGET(object) );
+}
+
 
 void
 on_line0_realize   (GtkObject *object, gpointer user_data)
 {
+	//g_print("on_line0_realize\n");
 	line0_init ( GTK_WIDGET(object) );
 }
 
@@ -335,6 +345,24 @@ void
 on_sel2_realize   (GtkObject *object, gpointer user_data)
 {
 	sel2_init ( GTK_WIDGET(object) );
+}
+
+void 
+on_rect0_realize   (GtkObject *object, gpointer user_data)
+{
+	rect0_init ( GTK_WIDGET(object) );
+}
+
+void 
+on_rect1_realize   (GtkObject *object, gpointer user_data)
+{
+	rect1_init ( GTK_WIDGET(object) );
+}
+
+void 
+on_rect2_realize   (GtkObject *object, gpointer user_data)
+{
+	rect2_init ( GTK_WIDGET(object) );
 }
 
 

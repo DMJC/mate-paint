@@ -44,7 +44,8 @@ void set_draw_rounded_rectangle_tool	( void );
 
 
 
-void notebook_set_widget ( GtkWidget *widget );
+void notebook_set_widget 	( GtkWidget *widget );
+void frame_rect_set_widget	( GtkWidget *widget );
 
 /*Line Bar*/
 void line0_init ( GtkWidget *widget );
@@ -58,4 +59,7 @@ void line4_init ( GtkWidget *widget );
 void sel1_init ( GtkWidget *widget );
 void sel2_init ( GtkWidget *widget );
 
-
+/*Rect Bar*/
+void rect0_init ( GtkWidget *widget );
+void rect1_init ( GtkWidget *widget );
+void rect2_init ( GtkWidget *widget );

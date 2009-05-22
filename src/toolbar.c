@@ -37,133 +37,161 @@
 #include "./pixmaps/sel1.xpm"
 #include "./pixmaps/sel2.xpm"
 
+#include "./pixmaps/rect0.xpm"
+#include "./pixmaps/rect1.xpm"
+#include "./pixmaps/rect2.xpm"
+
+
+typedef enum {
+	NONE,
+	SELECTION,
+	RECT_LINE,
+	ERASE,
+	
+} TypeBar;
 
 /*private vars*/
-static GtkNotebook *notebook = NULL;
+static GtkNotebook	*notebook			= NULL;
+static GtkFrame		*frame_rect			= NULL;
+static gboolean		frame_rect_show		= FALSE;	
 
 /*private functions*/
-static GtkWidget * get_gtk_image( GtkWidget *widget, gchar** xpm );
+static GtkWidget *	get_gtk_image( GtkWidget *widget, gchar** xpm );
+static void			show_frame_rect	( gboolean show );
 
 void 
 set_free_select_tool( void )
 {
 	g_return_if_fail( notebook != NULL );
-	gtk_notebook_set_current_page ( notebook, 0 );
+	gtk_notebook_set_current_page ( notebook, SELECTION );
 }
 
 void 
 set_eraser_tool( void )
 {
 	g_return_if_fail( notebook != NULL );
-	gtk_notebook_set_current_page ( notebook, 1 );
+	gtk_notebook_set_current_page ( notebook, NONE );
 }
 
 void 
 set_color_picker_tool( void )
 {
 	g_return_if_fail( notebook != NULL );
-	gtk_notebook_set_current_page ( notebook, 2 );
+	gtk_notebook_set_current_page ( notebook, NONE );
 }
 
 void 
 set_pencil_tool( void )
 {
 	g_return_if_fail( notebook != NULL );
-	gtk_notebook_set_current_page ( notebook, 3 );
+	gtk_notebook_set_current_page ( notebook, NONE );
 }
 
 void 
 set_airbrush_tool( void )
 {
 	g_return_if_fail( notebook != NULL );
-	gtk_notebook_set_current_page ( notebook, 4 );
+	gtk_notebook_set_current_page ( notebook, NONE );
 }
 
 void 
 set_draw_line_tool( void )
 {
 	g_return_if_fail( notebook != NULL );
-	gtk_notebook_set_current_page ( notebook, 5 );
+	show_frame_rect ( FALSE );
+	gtk_notebook_set_current_page ( notebook, RECT_LINE );
 }
 
 void 
 set_draw_rectangle_tool( void )
 {
 	g_return_if_fail( notebook != NULL );
-	gtk_notebook_set_current_page ( notebook, 6 );
+	show_frame_rect ( TRUE );
+	gtk_notebook_set_current_page ( notebook, RECT_LINE );
 }
 
 void 
 set_draw_ellipse_tool( void )
 {
 	g_return_if_fail( notebook != NULL );
-	gtk_notebook_set_current_page ( notebook, 0 );
+	show_frame_rect ( TRUE );
+	gtk_notebook_set_current_page ( notebook, RECT_LINE );
 }
 
 void 
 set_rect_select_tool( void )
 {
 	g_return_if_fail( notebook != NULL );
-	gtk_notebook_set_current_page ( notebook, 0 );
+	gtk_notebook_set_current_page ( notebook, SELECTION );
 }
 
 void 
 set_bucket_fill_tool( void )
 {
 	g_return_if_fail( notebook != NULL );
-	gtk_notebook_set_current_page ( notebook, 0 );
+	gtk_notebook_set_current_page ( notebook, NONE );
 }
 
 void 
 set_zoom_tool( void )
 {
 	g_return_if_fail( notebook != NULL );
-	gtk_notebook_set_current_page ( notebook, 0 );
+	gtk_notebook_set_current_page ( notebook, NONE );
 }
 
 void 
 set_paintbrush_tool( void )
 {
 	g_return_if_fail( notebook != NULL );
-	gtk_notebook_set_current_page ( notebook, 0 );
+	gtk_notebook_set_current_page ( notebook, NONE );
 }
 
 void 
 set_text_tool( void )
 {
 	g_return_if_fail( notebook != NULL );
-	gtk_notebook_set_current_page ( notebook, 0 );
+	gtk_notebook_set_current_page ( notebook, SELECTION );
 }
 
 void 
 set_draw_curve_tool( void )
 {
 	g_return_if_fail( notebook != NULL );
-	gtk_notebook_set_current_page ( notebook, 0 );
+	show_frame_rect ( FALSE );
+	gtk_notebook_set_current_page ( notebook, RECT_LINE );
 }
 
 void 
 set_draw_polygon_tool( void )
 {
 	g_return_if_fail( notebook != NULL );
-	gtk_notebook_set_current_page ( notebook, 0 );
+	show_frame_rect ( TRUE );
+	gtk_notebook_set_current_page ( notebook, RECT_LINE );
 }
 
 void 
 set_draw_rounded_rectangle_tool( void )
 {
 	g_return_if_fail( notebook != NULL );
-	gtk_notebook_set_current_page ( notebook, 0 );
+	show_frame_rect ( TRUE );
+	gtk_notebook_set_current_page ( notebook, RECT_LINE );
 }
 
 
 
 void
 notebook_set_widget ( GtkWidget *widget )
-{
+{	
 	notebook	=	GTK_NOTEBOOK( widget );
+	gtk_notebook_set_current_page ( notebook, SELECTION );
 }
 
+void 
+frame_rect_set_widget ( GtkWidget *widget )
+{
+	frame_rect	=	GTK_FRAME( widget );
+	show_frame_rect ( frame_rect_show );
+}
 
 void
 line0_init ( GtkWidget *widget )
@@ -216,6 +244,28 @@ sel2_init ( GtkWidget *widget )
 }
 
 
+void 
+rect0_init ( GtkWidget *widget )
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(widget), 
+	                                 	get_gtk_image( widget, (gchar**)rect0_xpm ) );
+}
+
+void 
+rect1_init ( GtkWidget *widget )
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(widget), 
+	                                 	get_gtk_image( widget, (gchar**)rect1_xpm ) );
+}
+
+void 
+rect2_init ( GtkWidget *widget )
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(widget), 
+	                                 	get_gtk_image( widget, (gchar**)rect2_xpm ) );
+}
+
+
 /*private*/
 
 GtkWidget * 
@@ -235,4 +285,23 @@ get_gtk_image ( GtkWidget *widget, gchar** xpm )
 	gtk_widget_show(gtkimage);
 
 	return gtkimage;
+}
+
+void	
+show_frame_rect	( gboolean show )
+{
+	frame_rect_show = show;
+	if( frame_rect != NULL )
+	{
+		if ( show )
+		{
+			gtk_widget_show( GTK_WIDGET(frame_rect) );
+			//g_print("show\n");
+		}
+		else
+		{
+			gtk_widget_hide( GTK_WIDGET(frame_rect) );
+			//g_print("hide\n");
+		}
+	}
 }
