@@ -46,7 +46,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_gnome_paint_OBJECTS = callbacks.$(OBJEXT) color.$(OBJEXT) \
-	main.$(OBJEXT) toolbar.$(OBJEXT)
+	main.$(OBJEXT) toolbar.$(OBJEXT) canvas.$(OBJEXT)
 gnome_paint_OBJECTS = $(am_gnome_paint_OBJECTS)
 am__DEPENDENCIES_1 =
 gnome_paint_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -225,7 +225,14 @@ gnome_paint_SOURCES = \
 	color.h  \
 	main.c  \
 	toolbar.c  \
-	toolbar.h
+	toolbar.h  \
+	pixmaps/line_0.xpm  \
+	pixmaps/line_1.xpm  \
+	pixmaps/line_2.xpm  \
+	pixmaps/line_3.xpm  \
+	pixmaps/line_4.xpm  \
+	canvas.c  \
+	canvas.h
 
 gnome_paint_LDFLAGS = \
 	-Wl,--export-dynamic
@@ -305,6 +312,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/callbacks.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canvas.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/color.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/toolbar.Po@am__quote@

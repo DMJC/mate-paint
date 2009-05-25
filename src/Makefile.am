@@ -29,7 +29,9 @@ gnome_paint_SOURCES = \
 	pixmaps/line_1.xpm  \
 	pixmaps/line_2.xpm  \
 	pixmaps/line_3.xpm  \
-	pixmaps/line_4.xpm
+	pixmaps/line_4.xpm  \
+	canvas.c  \
+	canvas.h
 
 gnome_paint_LDFLAGS = \
 	-Wl,--export-dynamic

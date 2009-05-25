@@ -26,6 +26,7 @@
 #include "callbacks.h"
 #include "color.h"
 #include "toolbar.h"
+#include "canvas.h"
 
 typedef enum
 {
@@ -364,6 +365,103 @@ on_rect2_realize   (GtkObject *object, gpointer user_data)
 {
 	rect2_init ( GTK_WIDGET(object) );
 }
+
+void 
+on_statusbar_realize   (GtkObject *object, gpointer user_data)
+{
+	//statusbar_set_widget ( GTK_WIDGET(object) );
+}
+
+void 
+on_canvas_realize   (GtkObject *object, gpointer user_data)
+{
+	canvas_set_widget ( GTK_WIDGET(object) );
+}
+
+void
+on_cv_right_realize (GtkObject *object, gpointer user_data)
+{
+	cv_right_set_widget ( GTK_WIDGET(object) );
+}
+
+void 
+on_cv_bottom_right_realize (GtkObject *object, gpointer user_data)
+{
+	cv_bottom_right_set_widget ( GTK_WIDGET(object) );
+}
+
+void
+on_cv_bottom_realize (GtkObject *object, gpointer user_data)
+{
+	cv_bottom_set_widget ( GTK_WIDGET(object) );
+}
+
+void
+on_cv_other_edge_realize (GtkObject *object, gpointer user_data)
+{
+	cv_other_edge_set_widget ( GTK_WIDGET(object) );
+}
+
+
+gboolean 
+on_cv_other_edge_expose_event	(   GtkWidget	   *widget, 
+									GdkEventButton *event,
+                                    gpointer       user_data )
+{
+	cv_other_edge_draw( widget );
+	return TRUE;
+}
+
+
+gboolean 
+on_canvas_expose_event	(   GtkWidget	   *widget, 
+							GdkEventButton *event,
+               				gpointer       user_data )
+{
+	g_print("canvas expose\n");
+	return TRUE;
+}
+
+gboolean 
+on_cv_bottom_right_button_press_event	(   GtkWidget	   *widget, 
+											GdkEventButton *event,
+                                            gpointer       user_data )
+{
+	if ( (event->type == GDK_BUTTON_PRESS) && (event->button == LEFT_BUTTON) )
+	{
+		g_print("init (%f,%f) \n", event->x, event->y);
+		cv_bottom_right_start();
+	}
+	return TRUE;
+}
+
+
+gboolean
+on_cv_bottom_right_motion_notify_event (	GtkWidget      *widget,
+                                     		GdkEventMotion *event,
+                                            gpointer        user_data)
+{
+	g_print("moving (%f,%f) \n", event->x, event->y);
+	cv_bottom_right_move( event->x, event->y );
+	return TRUE;
+}
+
+gboolean 
+on_cv_bottom_right_button_release_event (   GtkWidget	   *widget, 
+                                            GdkEventButton *event,
+                                            gpointer       user_data )
+{
+	if ( (event->type == GDK_BUTTON_RELEASE) && (event->button == LEFT_BUTTON) )
+	{
+		g_print("end (%f,%f) \n", event->x, event->y);
+		cv_bottom_right_stop ( event->x,  event->y );
+	}
+}
+
+
+
+
+
 
 
 

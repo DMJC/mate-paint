@@ -79,10 +79,37 @@ void on_rect0_realize   (GtkObject *object, gpointer user_data);
 void on_rect1_realize   (GtkObject *object, gpointer user_data);
 void on_rect2_realize   (GtkObject *object, gpointer user_data);
 
+/*statusbar realize function  */
+void on_statusbar_realize   (GtkObject *object, gpointer user_data);
+
+/*canvas functions */
+void on_canvas_realize			(GtkObject *object, gpointer user_data);
+void on_cv_right_realize		(GtkObject *object, gpointer user_data);
+void on_cv_bottom_right_realize (GtkObject *object, gpointer user_data);
+void on_cv_bottom_realize		(GtkObject *object, gpointer user_data);
+void on_cv_other_edge_realize	(GtkObject *object, gpointer user_data);
 
 
+/*canvas events*/
+gboolean on_cv_other_edge_expose_event			(GtkWidget	   *widget, 
+												 GdkEventButton *event,
+                                                 gpointer       user_data );
 
-		                         	
+gboolean on_canvas_expose_event					(GtkWidget	   *widget, 
+												 GdkEventButton *event,
+                                                 gpointer       user_data );
+
+gboolean on_cv_bottom_right_button_press_event  (GtkWidget	   *widget, 
+                                                 GdkEventButton *event,
+                                                 gpointer       user_data );
+
+gboolean on_cv_bottom_right_motion_notify_event (GtkWidget      *widget,
+		                                         GdkEventMotion *event,
+                                                 gpointer        user_data);
+	                         	
+gboolean on_cv_bottom_right_button_release_event (GtkWidget	   *widget, 
+                                                 GdkEventButton *event,
+                                                 gpointer       user_data );
 
 
 
