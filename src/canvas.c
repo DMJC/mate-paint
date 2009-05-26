@@ -133,13 +133,13 @@ cv_other_edge_draw ( GtkWidget *widget )
 }
 
 void
-cv_bottom_right_start ( void )
+cv_resize_start ( void )
 {
 	b_init	=	TRUE;
 }
 
 void
-cv_bottom_right_move ( gdouble x,  gdouble y)
+cv_resize_move ( gdouble x,  gdouble y)
 {
 	if( b_init )
 	{
@@ -151,7 +151,7 @@ cv_bottom_right_move ( gdouble x,  gdouble y)
 }
 
 void
-cv_bottom_right_stop ( gdouble x,  gdouble y)
+cv_resize_stop ( gdouble x,  gdouble y)
 {
 	if( b_resize )
 	{

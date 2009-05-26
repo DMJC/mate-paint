@@ -99,18 +99,39 @@ gboolean on_cv_other_edge_expose_event			(GtkWidget	   *widget,
 gboolean on_canvas_expose_event					(GtkWidget	   *widget, 
 												 GdkEventButton *event,
                                                  gpointer       user_data );
+gboolean on_cv_ev_box_expose_event				(GtkWidget	   *widget, 
+												 GdkEventButton *event,
+                                                 gpointer       user_data );
+
 gboolean on_cv_bottom_right_button_press_event  (GtkWidget	   *widget, 
                                                  GdkEventButton *event,
                                                  gpointer       user_data );
 gboolean on_cv_bottom_right_motion_notify_event (GtkWidget      *widget,
 		                                         GdkEventMotion *event,
                                                  gpointer        user_data);
-gboolean on_cv_bottom_right_button_release_event (GtkWidget	   *widget, 
+gboolean on_cv_bottom_right_button_release_event(GtkWidget	   *widget, 
                                                  GdkEventButton *event,
                                                  gpointer       user_data );
-gboolean on_cv_ev_box_expose_event				(GtkWidget	   *widget, 
-												 GdkEventButton *event,
+
+
+gboolean on_cv_bottom_button_press_event		(GtkWidget	   *widget, 
+                                                 GdkEventButton *event,
+                                                 gpointer       user_data );
+gboolean on_cv_bottom_motion_notify_event		(GtkWidget      *widget,
+		                                         GdkEventMotion *event,
+                                                 gpointer        user_data);
+gboolean on_cv_bottom_button_release_event		(GtkWidget	   *widget, 
+                                                 GdkEventButton *event,
                                                  gpointer       user_data );
 
 
 
+gboolean on_cv_right_button_press_event			(GtkWidget	   *widget, 
+                                                 GdkEventButton *event,
+                                                 gpointer       user_data );
+gboolean on_cv_right_motion_notify_event		(GtkWidget      *widget,
+		                                         GdkEventMotion *event,
+                                                 gpointer        user_data);
+gboolean on_cv_right_button_release_event		(GtkWidget	   *widget, 
+                                                 GdkEventButton *event,
+                                                 gpointer       user_data );

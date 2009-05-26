@@ -424,8 +424,18 @@ on_canvas_expose_event	(   GtkWidget	   *widget,
 							GdkEventButton *event,
                				gpointer       user_data )
 {
-	g_print("canvas expose\n");
+//	g_print("canvas expose\n");
 	cv_canvas_draw ();
+	return TRUE;
+}
+
+gboolean 
+on_cv_ev_box_expose_event				(GtkWidget	   *widget, 
+												 GdkEventButton *event,
+                                                 gpointer       user_data )
+{
+	//g_print("cv_ev_box_expose\n");
+	cv_ev_box_draw	();
 	return TRUE;
 }
 
@@ -436,8 +446,8 @@ on_cv_bottom_right_button_press_event	(   GtkWidget	   *widget,
 {
 	if ( (event->type == GDK_BUTTON_PRESS) && (event->button == LEFT_BUTTON) )
 	{
-		g_print("init (%f,%f) \n", event->x, event->y);
-		cv_bottom_right_start();
+		//g_print("init (%f,%f) \n", event->x, event->y);
+		cv_resize_start();
 	}
 	return TRUE;
 }
@@ -448,8 +458,8 @@ on_cv_bottom_right_motion_notify_event (	GtkWidget      *widget,
                                      		GdkEventMotion *event,
                                             gpointer        user_data)
 {
-	g_print("moving (%f,%f) \n", event->x, event->y);
-	cv_bottom_right_move( event->x, event->y );
+	//g_print("moving (%f,%f) \n", event->x, event->y);
+	cv_resize_move( event->x, event->y );
 	return TRUE;
 }
 
@@ -460,27 +470,80 @@ on_cv_bottom_right_button_release_event (   GtkWidget	   *widget,
 {
 	if ( (event->type == GDK_BUTTON_RELEASE) && (event->button == LEFT_BUTTON) )
 	{
-		g_print("end (%f,%f) \n", event->x, event->y);
-		cv_bottom_right_stop ( event->x,  event->y );
+		//g_print("end (%f,%f) \n", event->x, event->y);
+		cv_resize_stop ( event->x,  event->y );
 	}
-}
-
-
-gboolean on_cv_ev_box_expose_event				(GtkWidget	   *widget, 
-												 GdkEventButton *event,
-                                                 gpointer       user_data )
-{
-	g_print("cv_ev_box_expose\n");
-	cv_ev_box_draw	();
 	return TRUE;
 }
 
 
+gboolean 
+on_cv_bottom_button_press_event (   GtkWidget	   *widget, 
+                                    GdkEventButton *event,
+                                    gpointer       user_data )
+{
+	if ( (event->type == GDK_BUTTON_PRESS) && (event->button == LEFT_BUTTON) )
+	{
+		//g_print("init (%f,%f) \n", event->x, event->y);
+		cv_resize_start();
+	}
+	return TRUE;
+}
 
+gboolean 
+on_cv_bottom_motion_notify_event (  GtkWidget      *widget,
+		                            GdkEventMotion *event,
+                                    gpointer        user_data)
+{
+	cv_resize_move( 0.0, event->y );
+	return TRUE;
+}
 
+gboolean
+on_cv_bottom_button_release_event ( GtkWidget	   *widget, 
+                                    GdkEventButton *event,
+                                    gpointer       user_data )
+{
+	if ( (event->type == GDK_BUTTON_RELEASE) && (event->button == LEFT_BUTTON) )
+	{
+		//g_print("end (%f,%f) \n", event->x, event->y);
+		cv_resize_stop ( 0.0,  event->y );
+	}
+	return TRUE;
+}
 
+gboolean
+on_cv_right_button_press_event (	GtkWidget	   *widget, 
+                                    GdkEventButton *event,
+                                    gpointer       user_data )
+{
+	if ( (event->type == GDK_BUTTON_PRESS) && (event->button == LEFT_BUTTON) )
+	{
+		//g_print("init (%f,%f) \n", event->x, event->y);
+		cv_resize_start();
+	}
+	return TRUE;
+}
 
+gboolean
+on_cv_right_motion_notify_event (   GtkWidget      *widget,
+		                            GdkEventMotion *event,
+                                    gpointer        user_data)
+{
+	cv_resize_move( event->x, 0.0 );
+	return TRUE;
+}
 
-
-
+gboolean
+on_cv_right_button_release_event (  GtkWidget	   *widget, 
+                                    GdkEventButton *event,
+                                    gpointer       user_data )
+{
+	if ( (event->type == GDK_BUTTON_RELEASE) && (event->button == LEFT_BUTTON) )
+	{
+		//g_print("end (%f,%f) \n", event->x, event->y);
+		cv_resize_stop ( event->x,  0.0 );
+	}
+	return TRUE;
+}
 

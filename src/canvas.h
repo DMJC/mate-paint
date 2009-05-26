@@ -22,13 +22,11 @@ void cv_ev_box_draw				( void );
 
 
 void cv_right_set_widget		( GtkWidget *widget );
-
 void cv_bottom_right_set_widget	( GtkWidget *widget );
-void cv_bottom_right_start		( void );
-void cv_bottom_right_move		( gdouble x,  gdouble y);
-void cv_bottom_right_stop		( gdouble x,  gdouble y);
-
 void cv_bottom_set_widget		( GtkWidget *widget );
-
 void cv_other_edge_set_widget	( GtkWidget *widget );
 void cv_other_edge_draw 		( GtkWidget *widget );
+
+void cv_resize_start			( void );
+void cv_resize_move				( gdouble x,  gdouble y);
+void cv_resize_stop				( gdouble x,  gdouble y);
