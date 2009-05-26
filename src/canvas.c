@@ -17,12 +17,16 @@
 #include <gtk/gtk.h>
 
 static GtkWidget	*canvas		=	NULL;
+static GtkWidget	*cv_ev_box	=	NULL;
 static GdkColor 	edge_color	=	{ 0, 0xa700, 0xc700, 0xf700  };
 static GdkColor 	white_color	=	{ 0, 0xffff, 0xffff, 0xffff  };
 
-/*Control de resize*/
+/*resize parameters*/
+static 	GdkGC 		*gc_resize	=	NULL;
 static gboolean		b_resize	=	FALSE;
 static gboolean		b_init		=	FALSE;
+static gint			x_res		=	0;
+static gint			y_res		=	0;
 
 
 void 
@@ -30,6 +34,47 @@ canvas_set_widget 	( GtkWidget *widget )
 {
 	canvas = widget;
 	gtk_widget_modify_bg ( canvas, GTK_STATE_NORMAL , &white_color );
+}
+
+void cv_ev_box_set_widget ( GtkWidget *widget )
+{
+	gint8 dash_list[]	=	{ 1, 1 };
+	GdkColor 	color	=	{ 0, 0, 0, 0 };
+	cv_ev_box	=	widget;	
+	gtk_widget_modify_fg ( widget, GTK_STATE_NORMAL , &color );
+	gc_resize = cv_ev_box->style->fg_gc[GTK_WIDGET_STATE (cv_ev_box)];
+	gdk_gc_set_dashes ( gc_resize, 0, dash_list, 2 );
+	gdk_gc_set_line_attributes ( gc_resize, 1, GDK_LINE_ON_OFF_DASH, 
+	                             GDK_CAP_NOT_LAST, GDK_JOIN_ROUND );
+}
+
+void cv_ev_box_draw	( void )
+{
+	gboolean paint = FALSE;
+	if (b_resize)
+	{
+		gint x_offset = canvas->allocation.x - cv_ev_box->allocation.x;
+		gint y_offset = canvas->allocation.y - cv_ev_box->allocation.y;
+		gint x = x_res + x_offset;
+		gint y = y_res + y_offset;
+		gdk_draw_line ( cv_ev_box->window, gc_resize, x_offset, y_offset, x, y_offset );
+		gdk_draw_line ( cv_ev_box->window, gc_resize, x_offset, y, x, y );
+		gdk_draw_line ( cv_ev_box->window, gc_resize, x, y_offset, x, y );
+		gdk_draw_line ( cv_ev_box->window, gc_resize, x_offset, y_offset, x_offset, y );
+		paint = TRUE;
+	}
+	gtk_widget_set_app_paintable ( cv_ev_box, paint );
+}
+
+void cv_canvas_draw ( void )
+{
+	if (b_resize)
+	{
+		gdk_draw_line ( canvas->window, gc_resize, 0, 0, x_res, 0 );
+		gdk_draw_line ( canvas->window, gc_resize, 0, y_res, x_res, y_res );
+		gdk_draw_line ( canvas->window, gc_resize, x_res, 0, x_res, y_res );
+		gdk_draw_line ( canvas->window, gc_resize, 0, 0, 0, y_res );
+	}
 }
 
 void 
@@ -99,6 +144,9 @@ cv_bottom_right_move ( gdouble x,  gdouble y)
 	if( b_init )
 	{
 		b_resize = TRUE;
+		x_res = canvas->allocation.width + (gint)x;
+		y_res = canvas->allocation.height + (gint)y;
+		gtk_widget_queue_draw (cv_ev_box);
 	}
 }
 
@@ -117,4 +165,5 @@ cv_bottom_right_stop ( gdouble x,  gdouble y)
 	b_init		= FALSE;
 	b_resize 	= FALSE;
 }
+
 

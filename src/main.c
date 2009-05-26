@@ -78,7 +78,6 @@ create_window (void)
 	/* and call realize event */
 	gtk_widget_show_all(window);
 
-
 	return window;
 }
 

@@ -15,6 +15,10 @@
  */
  
 void canvas_set_widget		 	( GtkWidget *widget );
+void cv_canvas_draw				( void );
+
+void cv_ev_box_set_widget	 	( GtkWidget *widget );
+void cv_ev_box_draw				( void );
 
 
 void cv_right_set_widget		( GtkWidget *widget );

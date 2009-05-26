@@ -378,6 +378,12 @@ on_canvas_realize   (GtkObject *object, gpointer user_data)
 	canvas_set_widget ( GTK_WIDGET(object) );
 }
 
+void on_cv_ev_box_realize	(GtkObject *object, gpointer user_data)
+{
+	cv_ev_box_set_widget ( GTK_WIDGET(object) );
+}
+
+
 void
 on_cv_right_realize (GtkObject *object, gpointer user_data)
 {
@@ -419,6 +425,7 @@ on_canvas_expose_event	(   GtkWidget	   *widget,
                				gpointer       user_data )
 {
 	g_print("canvas expose\n");
+	cv_canvas_draw ();
 	return TRUE;
 }
 
@@ -457,6 +464,18 @@ on_cv_bottom_right_button_release_event (   GtkWidget	   *widget,
 		cv_bottom_right_stop ( event->x,  event->y );
 	}
 }
+
+
+gboolean on_cv_ev_box_expose_event				(GtkWidget	   *widget, 
+												 GdkEventButton *event,
+                                                 gpointer       user_data )
+{
+	g_print("cv_ev_box_expose\n");
+	cv_ev_box_draw	();
+	return TRUE;
+}
+
+
 
 
 
