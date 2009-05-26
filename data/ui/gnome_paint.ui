@@ -1859,8 +1859,8 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="label2">
-                    <property name="visible">True</property>
+                  <object class="GtkLabel" id="lb_size">
+                    <signal name="realize" handler="on_lb_size_realize"/>
                   </object>
                   <packing>
                     <property name="position">3</property>

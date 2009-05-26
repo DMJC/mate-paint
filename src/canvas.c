@@ -18,6 +18,7 @@
 
 static GtkWidget	*canvas		=	NULL;
 static GtkWidget	*cv_ev_box	=	NULL;
+static GtkWidget	*lb_size	=	NULL;
 static GdkColor 	edge_color	=	{ 0, 0xa700, 0xc700, 0xf700  };
 static GdkColor 	white_color	=	{ 0, 0xffff, 0xffff, 0xffff  };
 
@@ -48,6 +49,14 @@ void cv_ev_box_set_widget ( GtkWidget *widget )
 	                             GDK_CAP_NOT_LAST, GDK_JOIN_ROUND );
 }
 
+
+void
+lb_size_set_widget ( GtkWidget *widget )
+{
+	lb_size	=	widget;
+}
+
+
 void cv_ev_box_draw	( void )
 {
 	gboolean paint = FALSE;
@@ -68,13 +77,25 @@ void cv_ev_box_draw	( void )
 
 void cv_canvas_draw ( void )
 {
+	GString *str = g_string_new("");
+	gint x,y;
 	if (b_resize)
 	{
 		gdk_draw_line ( canvas->window, gc_resize, 0, 0, x_res, 0 );
 		gdk_draw_line ( canvas->window, gc_resize, 0, y_res, x_res, y_res );
 		gdk_draw_line ( canvas->window, gc_resize, x_res, 0, x_res, y_res );
 		gdk_draw_line ( canvas->window, gc_resize, 0, 0, 0, y_res );
+		x = x_res;
+		y = y_res;
 	}
+	else
+	{
+		x = canvas->allocation.width;
+		y = canvas->allocation.height;
+	}
+	g_string_printf (str, "%dx%d", x, y );
+	gtk_label_set_text( GTK_LABEL(lb_size), g_string_free( str, FALSE) );
+	
 }
 
 void 
@@ -146,6 +167,8 @@ cv_resize_move ( gdouble x,  gdouble y)
 		b_resize = TRUE;
 		x_res = canvas->allocation.width + (gint)x;
 		y_res = canvas->allocation.height + (gint)y;
+		x_res	= (x_res<1)?1:x_res;
+		y_res	= (y_res<1)?1:y_res;
 		gtk_widget_queue_draw (cv_ev_box);
 	}
 }

@@ -88,8 +88,9 @@ void on_cv_right_realize		(GtkObject *object, gpointer user_data);
 void on_cv_bottom_right_realize (GtkObject *object, gpointer user_data);
 void on_cv_bottom_realize		(GtkObject *object, gpointer user_data);
 void on_cv_other_edge_realize	(GtkObject *object, gpointer user_data);
+void on_cv_ev_box_realize		(GtkObject *object, gpointer user_data);
+void on_lb_size_realize			(GtkObject *object, gpointer user_data);
 
-void on_cv_ev_box_realize	(GtkObject *object, gpointer user_data);
 
 
 /*canvas events*/
