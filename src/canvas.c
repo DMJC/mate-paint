@@ -94,7 +94,8 @@ void cv_canvas_draw ( void )
 		y = canvas->allocation.height;
 	}
 	g_string_printf (str, "%dx%d", x, y );
-	gtk_label_set_text( GTK_LABEL(lb_size), g_string_free( str, FALSE) );
+	gtk_label_set_text( GTK_LABEL(lb_size), str->str );
+	g_string_free( str, TRUE);
 	
 }
 
