@@ -14,20 +14,59 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
  
-void canvas_set_widget		 	( GtkWidget *widget );
-void cv_canvas_draw				( void );
 
-void cv_ev_box_set_widget	 	( GtkWidget *widget );
-void cv_ev_box_draw				( void );
+/* GUI CallBacks */
 
-void lb_size_set_widget		 	( GtkWidget *widget );
+void on_canvas_realize			(GtkWidget *widget, gpointer user_data);
+void on_cv_right_realize		(GtkWidget *widget, gpointer user_data);
+void on_cv_bottom_right_realize (GtkWidget *widget, gpointer user_data);
+void on_cv_bottom_realize		(GtkWidget *widget, gpointer user_data);
+void on_cv_other_edge_realize	(GtkWidget *widget, gpointer user_data);
+void on_cv_ev_box_realize		(GtkWidget *widget, gpointer user_data);
+void on_lb_size_realize			(GtkWidget *widget, gpointer user_data);
 
-void cv_right_set_widget		( GtkWidget *widget );
-void cv_bottom_right_set_widget	( GtkWidget *widget );
-void cv_bottom_set_widget		( GtkWidget *widget );
-void cv_other_edge_set_widget	( GtkWidget *widget );
-void cv_other_edge_draw 		( GtkWidget *widget );
 
-void cv_resize_start			( void );
-void cv_resize_move				( gdouble x,  gdouble y);
-void cv_resize_stop				( gdouble x,  gdouble y);
+
+/* GUI events */
+gboolean on_cv_other_edge_expose_event			(GtkWidget	   *widget, 
+												 GdkEventButton *event,
+                                                 gpointer       user_data );
+gboolean on_canvas_expose_event					(GtkWidget	   *widget, 
+												 GdkEventButton *event,
+                                                 gpointer       user_data );
+gboolean on_cv_ev_box_expose_event				(GtkWidget	   *widget, 
+												 GdkEventButton *event,
+                                                 gpointer       user_data );
+
+gboolean on_cv_bottom_right_button_press_event  (GtkWidget	   *widget, 
+                                                 GdkEventButton *event,
+                                                 gpointer       user_data );
+gboolean on_cv_bottom_right_motion_notify_event (GtkWidget      *widget,
+		                                         GdkEventMotion *event,
+                                                 gpointer        user_data);
+gboolean on_cv_bottom_right_button_release_event(GtkWidget	   *widget, 
+                                                 GdkEventButton *event,
+                                                 gpointer       user_data );
+
+
+gboolean on_cv_bottom_button_press_event		(GtkWidget	   *widget, 
+                                                 GdkEventButton *event,
+                                                 gpointer       user_data );
+gboolean on_cv_bottom_motion_notify_event		(GtkWidget      *widget,
+		                                         GdkEventMotion *event,
+                                                 gpointer        user_data);
+gboolean on_cv_bottom_button_release_event		(GtkWidget	   *widget, 
+                                                 GdkEventButton *event,
+                                                 gpointer       user_data );
+
+
+
+gboolean on_cv_right_button_press_event			(GtkWidget	   *widget, 
+                                                 GdkEventButton *event,
+                                                 gpointer       user_data );
+gboolean on_cv_right_motion_notify_event		(GtkWidget      *widget,
+		                                         GdkEventMotion *event,
+                                                 gpointer        user_data);
+gboolean on_cv_right_button_release_event		(GtkWidget	   *widget, 
+                                                 GdkEventButton *event,
+                                                 gpointer       user_data );

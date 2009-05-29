@@ -17,70 +17,19 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-
-#include <config.h>
 
 #include <gtk/gtk.h>
 
-
-
-/*
- * Standard gettext macros.
- */
-#ifdef ENABLE_NLS
-#  include <libintl.h>
-#  undef _
-#  define _(String) dgettext (PACKAGE, String)
-#  ifdef gettext_noop
-#    define N_(String) gettext_noop (String)
-#  else
-#    define N_(String) (String)
-#  endif
-#else
-#  define textdomain(String) (String)
-#  define gettext(String) (String)
-#  define dgettext(Domain,Message) (Message)
-#  define dcgettext(Domain,Message,Type) (Message)
-#  define bindtextdomain(Domain,Directory) (Domain)
-#  define _(String) (String)
-#  define N_(String) (String)
-#endif
-
-
-
-#include "callbacks.h"
+#include "color.h"
+#include "toolbar.h"
+#include "canvas.h"
+#include "common.h"
 
 #define UI_FILE PACKAGE_DATA_DIR"/gnome-paint/ui/gnome_paint.ui"
-//#define UI_FILE "../data/ui/gnome_paint.ui"
 
-GtkWidget*
-create_window (void)
-{
-	GtkWidget		*window;
-	GtkBuilder		*builder;
-
-	/* Add application specific icons to search path */
-	gtk_icon_theme_append_search_path (gtk_icon_theme_get_default (),
-                                           PACKAGE_DATA_DIR"/gnome-paint/icons");
-
-	builder = gtk_builder_new ();
-    gtk_builder_add_from_file (builder, UI_FILE, NULL);
-    window = GTK_WIDGET (gtk_builder_get_object (builder, "window"));
-    gtk_builder_connect_signals (builder, NULL);          
-    g_object_unref (G_OBJECT (builder));	
-	
-	/* To show all widget that is set invisible on Glade */
-	/* and call realize event */
-	gtk_widget_show_all(window);
-
-	return window;
-}
-
+GtkWidget	*create_window		(   void	);
+void		on_window_destroy   (   GtkObject   *object, 
+									gpointer	user_data   );
 
 int
 main (int argc, char *argv[])
@@ -103,4 +52,35 @@ main (int argc, char *argv[])
 
 	gtk_main ();
 	return 0;	
+}
+
+
+void 
+on_window_destroy ( GtkObject   *object, 
+				    gpointer	user_data )
+{
+	gtk_main_quit();
+}
+
+GtkWidget*
+create_window (void)
+{
+	GtkWidget		*window;
+	GtkBuilder		*builder;
+
+	/* Add application specific icons to search path */
+	gtk_icon_theme_append_search_path (gtk_icon_theme_get_default (),
+                                           PACKAGE_DATA_DIR"/gnome-paint/icons");
+
+	builder = gtk_builder_new ();
+    gtk_builder_add_from_file (builder, UI_FILE, NULL);
+    window = GTK_WIDGET (gtk_builder_get_object (builder, "window"));
+    gtk_builder_connect_signals (builder, NULL);          
+    g_object_unref (G_OBJECT (builder));	
+	
+	/* To show all widget that is set invisible on Glade */
+	/* and call realize event */
+	gtk_widget_show_all(window);
+
+	return window;
 }

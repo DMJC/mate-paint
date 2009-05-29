@@ -20,18 +20,20 @@
 #include <gtk/gtk.h>
 
 
-
-void background_set_widget				( GtkWidget *widget );
-void background_color_picker			( void );
-void background_set_color_from_palette  ( guint palette );
-
-void foreground_set_widget				( GtkWidget *widget );
-void foreground_color_picker			( void );
-void foreground_set_color_from_palette  ( guint palette );
-
-void palette_set_widget					( guint palette, GtkWidget *widget );
-void palette_color_picker				( guint palette );
+/* GUI CallBack */
+void on_color_palette_entry_realize     (GtkWidget *widget, gpointer user_data);
+void on_background_color_picker_realize	(GtkWidget *widget, gpointer user_data);
+void on_foreground_color_picker_realize	(GtkWidget *widget, gpointer user_data);
 
 
-
+/* GUI Events*/
+gboolean on_background_color_picker_button_release_event	(   GtkWidget	   *widget, 
+																GdkEventButton *event,
+																gpointer       user_data );
+gboolean on_foreground_color_picker_button_release_event	(   GtkWidget	   *widget, 
+																GdkEventButton *event,
+																gpointer       user_data );
+gboolean on_color_palette_entry_button_press_event			(   GtkWidget	   *widget, 
+																GdkEventButton *event,
+			                                                   gpointer       user_data );
 

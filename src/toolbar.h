@@ -2,8 +2,8 @@
  *            toolbar.h
  *
  *  Sat May  9 15:13:23 2009
- *  Copyright  2009  rogerio
- *  <rogerio@<host>>
+ *  Copyright (C) Rogério Ferro do Nascimento 2009 
+ *  <rogerioferro@gmail.com>
  ****************************************************************************/
 
 /*
@@ -25,41 +25,39 @@
 #include <gtk/gtk.h>
 
 
-void set_free_select_tool				( void );
-void set_eraser_tool					( void );
-void set_color_picker_tool				( void );
-void set_pencil_tool					( void );
-void set_airbrush_tool					( void );
-void set_draw_line_tool					( void );
-void set_draw_rectangle_tool			( void );
-void set_draw_ellipse_tool				( void );
-void set_rect_select_tool				( void );
-void set_bucket_fill_tool				( void );
-void set_zoom_tool						( void );
-void set_paintbrush_tool				( void );
-void set_text_tool						( void );
-void set_draw_curve_tool				( void );
-void set_draw_polygon_tool				( void );
-void set_draw_rounded_rectangle_tool	( void );
 
+/* GUI CallBack */
 
-
-void notebook_set_widget 	( GtkWidget *widget );
-void frame_rect_set_widget	( GtkWidget *widget );
-
-/*Line Bar*/
-void line0_init ( GtkWidget *widget );
-void line1_init ( GtkWidget *widget );
-void line2_init ( GtkWidget *widget );
-void line3_init ( GtkWidget *widget );
-void line4_init ( GtkWidget *widget );
-
-
-/*Select Bar*/
-void sel1_init ( GtkWidget *widget );
-void sel2_init ( GtkWidget *widget );
-
-/*Rect Bar*/
-void rect0_init ( GtkWidget *widget );
-void rect1_init ( GtkWidget *widget );
-void rect2_init ( GtkWidget *widget );
+/*Toolbar toggled functions*/
+void on_tool_free_select_toggled		(GtkObject *object, gpointer user_data);
+void on_tool_eraser_toggled				(GtkObject *object, gpointer user_data);
+void on_tool_color_picker_toggled		(GtkObject *object, gpointer user_data);
+void on_tool_pencil_toggled				(GtkObject *object, gpointer user_data);
+void on_tool_airbrush_toggled			(GtkObject *object, gpointer user_data);
+void on_draw_line_toggled				(GtkObject *object, gpointer user_data);
+void on_draw_rectangle_toggled			(GtkObject *object, gpointer user_data);
+void on_draw_ellipse_toggled			(GtkObject *object, gpointer user_data);
+void on_tool_rect_select_toggled		(GtkObject *object, gpointer user_data);
+void on_tool_bucket_fill_toggled		(GtkObject *object, gpointer user_data);
+void on_tool_zoom_toggled				(GtkObject *object, gpointer user_data);
+void on_tool_paintbrush_toggled			(GtkObject *object, gpointer user_data);
+void on_tool_text_toggled				(GtkObject *object, gpointer user_data);
+void on_draw_curve_toggled				(GtkObject *object, gpointer user_data);
+void on_draw_polygon_toggled			(GtkObject *object, gpointer user_data);
+void on_draw_rounded_rectangle_toggled  (GtkObject *object, gpointer user_data);
+/*Option toolbar realize funcitons*/
+void on_notebook_realize				(GtkObject *object, gpointer user_data);
+void on_frame_rect_realize  			(GtkObject *object, gpointer user_data);
+/*Selection toolbar realize functions*/
+void on_sel1_realize   					(GtkObject *object, gpointer user_data);
+void on_sel2_realize   					(GtkObject *object, gpointer user_data);
+/*rect toolbar realize functions*/
+void on_rect0_realize   				(GtkObject *object, gpointer user_data);
+void on_rect1_realize   				(GtkObject *object, gpointer user_data);
+void on_rect2_realize  					(GtkObject *object, gpointer user_data);
+/*Line toolbar realize functions*/
+void on_line0_realize   				(GtkObject *object, gpointer user_data);
+void on_line1_realize   				(GtkObject *object, gpointer user_data);
+void on_line2_realize   				(GtkObject *object, gpointer user_data);
+void on_line3_realize   				(GtkObject *object, gpointer user_data);
+void on_line4_realize   				(GtkObject *object, gpointer user_data);

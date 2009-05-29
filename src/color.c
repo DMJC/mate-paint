@@ -18,6 +18,7 @@
  */
 
 #include "color.h"
+#include "common.h"
 
 static  GtkWidget	*background_widget = NULL;
 static  GdkColor	background_color;
@@ -52,13 +53,17 @@ static  GtkWidget   *pallete_widgets[NUM_PALETTES] =
 
 static  GdkColor	pallete_colors[NUM_PALETTES];
 
-static void color_dialog	( GdkColor *color, gchar * title );
-static void background_show ( void );
-static void foreground_show ( void );
-static void pallete_show	( guint palette );
+static void background_set_color_from_palette  ( guint palette );
+static void foreground_set_color_from_palette  ( guint palette );
+static void palette_color_picker				( guint palette );
+static void color_dialog						( GdkColor *color, gchar * title );
+static void background_show					( void );
+static void foreground_show					( void );
+static void pallete_show						( guint palette );
 
-void 
-background_set_widget ( GtkWidget *widget )
+
+void
+on_background_color_picker_realize (GtkWidget *widget, gpointer user_data)
 {
 	background_widget		=   widget;
 	background_color.red	=   0xFFFF;
@@ -67,25 +72,8 @@ background_set_widget ( GtkWidget *widget )
 	background_show ();
 }
 
-void 
-background_color_picker( void )
-{
-	color_dialog( &background_color, "Background Color" );
-	background_show ();
-}
-
-
-void background_set_color_from_palette  ( guint palette )
-{
-	g_return_if_fail( palette < NUM_PALETTES );
-	background_color.red	=   pallete_colors[palette].red;
-	background_color.green  =   pallete_colors[palette].green;
-	background_color.blue   =   pallete_colors[palette].blue;
-	background_show ();	
-}
-
-void 
-foreground_set_widget ( GtkWidget *widget )
+void
+on_foreground_color_picker_realize (GtkWidget *widget, gpointer user_data)
 {
 	foreground_widget		=   widget;
 	foreground_color.red	=   0x0000;
@@ -94,15 +82,91 @@ foreground_set_widget ( GtkWidget *widget )
 	foreground_show ();
 }
 
-void 
-foreground_color_picker( void )
+/*
+ * Initialize the colors on the color palette tool bar.
+ */
+void
+on_color_palette_entry_realize (GtkWidget *widget, gpointer user_data) 
 {
-	color_dialog( &foreground_color, "Foreground Color" );
-	foreground_show ();
+	const gchar *name;
+	guint palette;
+	name = gtk_widget_get_name ( widget );
+	palette = ( (guint)(name[0] - '0') * 10 ) + (guint)(name[1] - '0');
+	g_return_if_fail( palette < NUM_PALETTES );
+	pallete_widgets[palette]		= widget;
+	pallete_colors[palette].red		= init_palette_values[palette][0];
+	pallete_colors[palette].green   = init_palette_values[palette][1];
+	pallete_colors[palette].blue	= init_palette_values[palette][2];
+	pallete_show (palette);
 }
 
 
-void foreground_set_color_from_palette  ( guint palette )
+gboolean 
+on_background_color_picker_button_release_event ( GtkWidget			*widget, 
+												  GdkEventButton	*event,
+												  gpointer			user_data )
+{
+	if ( event->button == LEFT_BUTTON )
+	{
+		color_dialog( &background_color, _("Background Color") );
+		background_show ();
+	}
+	return TRUE;
+}
+
+gboolean 
+on_foreground_color_picker_button_release_event	(   GtkWidget	   *widget, 
+													GdkEventButton *event,
+													gpointer       user_data )
+{
+	if ( event->button == LEFT_BUTTON )
+	{
+		color_dialog( &foreground_color, _("Foreground Color") );
+		foreground_show ();
+	}
+	return TRUE;
+}
+
+gboolean 
+on_color_palette_entry_button_press_event ( GtkWidget	   *widget, 
+											GdkEventButton *event,
+											gpointer       user_data )
+{
+	const gchar *name;
+	guint i;
+	name = gtk_widget_get_name ( widget );
+	i = ( (guint)(name[0] - '0') * 10 ) + (guint)(name[1] - '0');
+	
+	if ( event->type == GDK_2BUTTON_PRESS )
+	{
+		palette_color_picker ( i );
+	}
+	if ( event->button == LEFT_BUTTON )
+	{
+		foreground_set_color_from_palette ( i );
+	}
+	else if ( event->button == RIGHT_BUTTON )
+	{
+		background_set_color_from_palette ( i );
+	}
+
+	
+	return TRUE;
+}
+
+
+/* Private functions */
+
+static void background_set_color_from_palette  ( guint palette )
+{
+	g_return_if_fail( palette < NUM_PALETTES );
+	background_color.red	=   pallete_colors[palette].red;
+	background_color.green  =   pallete_colors[palette].green;
+	background_color.blue   =   pallete_colors[palette].blue;
+	background_show ();	
+}
+
+static void foreground_set_color_from_palette  ( guint palette )
 {
 	g_return_if_fail( palette < NUM_PALETTES );
 	foreground_color.red	=   pallete_colors[palette].red;
@@ -111,28 +175,15 @@ void foreground_set_color_from_palette  ( guint palette )
 	foreground_show ();	
 }
 
-void 
-palette_set_widget ( guint palette, GtkWidget *widget )
-{
-	g_return_if_fail( palette < NUM_PALETTES );
-	pallete_widgets[palette]		= widget;
-	pallete_colors[palette].red		= init_palette_values[palette][0];
-	pallete_colors[palette].green   = init_palette_values[palette][1];
-	pallete_colors[palette].blue	= init_palette_values[palette][2];
-	pallete_show (palette);
-	
-}
 
-void palette_color_picker ( guint palette )
+static void palette_color_picker ( guint palette )
 {
 	g_return_if_fail( palette < NUM_PALETTES );
-	color_dialog( &pallete_colors[palette], "Select Color" );
+	color_dialog( &pallete_colors[palette], _("Select Color") );
 	pallete_show (palette);
 }	
 
-/* Private functions */
-
-void 
+static void 
 color_dialog( GdkColor *color, gchar * title )
 {
 	GtkResponseType result;
@@ -157,14 +208,14 @@ background_show ( void )
 	gtk_widget_modify_bg ( background_widget, GTK_STATE_NORMAL , &background_color );
 }
 
-void 
+static void 
 foreground_show ( void )
 {
 	g_return_if_fail( foreground_widget != NULL );
 	gtk_widget_modify_bg ( foreground_widget, GTK_STATE_NORMAL , &foreground_color );
 }
 
-void 
+static void 
 pallete_show ( guint palette )
 {
 	g_return_if_fail( pallete_widgets[palette] != NULL );
