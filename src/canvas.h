@@ -18,9 +18,11 @@
 /* GUI CallBacks */
 
 void on_canvas_realize			(GtkWidget *widget, gpointer user_data);
+void on_cv_top_realize			(GtkWidget *widget, gpointer user_data);
 void on_cv_right_realize		(GtkWidget *widget, gpointer user_data);
 void on_cv_bottom_right_realize (GtkWidget *widget, gpointer user_data);
 void on_cv_bottom_realize		(GtkWidget *widget, gpointer user_data);
+void on_cv_left_realize			(GtkWidget *widget, gpointer user_data);
 void on_cv_other_edge_realize	(GtkWidget *widget, gpointer user_data);
 void on_cv_ev_box_realize		(GtkWidget *widget, gpointer user_data);
 void on_lb_size_realize			(GtkWidget *widget, gpointer user_data);
@@ -28,6 +30,17 @@ void on_lb_size_realize			(GtkWidget *widget, gpointer user_data);
 
 
 /* GUI events */
+
+gboolean on_canvas_button_press_event  			(GtkWidget	   *widget, 
+                                                 GdkEventButton *event,
+                                                 gpointer       user_data );
+gboolean on_canvas_button_release_event			(GtkWidget	   *widget, 
+                                                 GdkEventButton *event,
+                                                 gpointer       user_data );
+gboolean on_canvas_motion_notify_event 			(GtkWidget      *widget,
+		                                         GdkEventMotion *event,
+                                                 gpointer        user_data);
+
 gboolean on_cv_other_edge_expose_event			(GtkWidget	   *widget, 
 												 GdkEventButton *event,
                                                  gpointer       user_data );

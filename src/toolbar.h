@@ -29,22 +29,22 @@
 /* GUI CallBack */
 
 /*Toolbar toggled functions*/
-void on_tool_free_select_toggled		(GtkObject *object, gpointer user_data);
-void on_tool_eraser_toggled				(GtkObject *object, gpointer user_data);
-void on_tool_color_picker_toggled		(GtkObject *object, gpointer user_data);
-void on_tool_pencil_toggled				(GtkObject *object, gpointer user_data);
-void on_tool_airbrush_toggled			(GtkObject *object, gpointer user_data);
-void on_draw_line_toggled				(GtkObject *object, gpointer user_data);
-void on_draw_rectangle_toggled			(GtkObject *object, gpointer user_data);
-void on_draw_ellipse_toggled			(GtkObject *object, gpointer user_data);
-void on_tool_rect_select_toggled		(GtkObject *object, gpointer user_data);
-void on_tool_bucket_fill_toggled		(GtkObject *object, gpointer user_data);
-void on_tool_zoom_toggled				(GtkObject *object, gpointer user_data);
-void on_tool_paintbrush_toggled			(GtkObject *object, gpointer user_data);
-void on_tool_text_toggled				(GtkObject *object, gpointer user_data);
-void on_draw_curve_toggled				(GtkObject *object, gpointer user_data);
-void on_draw_polygon_toggled			(GtkObject *object, gpointer user_data);
-void on_draw_rounded_rectangle_toggled  (GtkObject *object, gpointer user_data);
+void on_tool_free_select_toggled		(GtkToggleToolButton *button, gpointer user_data);
+void on_tool_eraser_toggled				(GtkToggleToolButton *button, gpointer user_data);
+void on_tool_color_picker_toggled		(GtkToggleToolButton *button, gpointer user_data);
+void on_tool_pencil_toggled				(GtkToggleToolButton *button, gpointer user_data);
+void on_tool_airbrush_toggled			(GtkToggleToolButton *button, gpointer user_data);
+void on_draw_line_toggled				(GtkToggleToolButton *button, gpointer user_data);
+void on_draw_rectangle_toggled			(GtkToggleToolButton *button, gpointer user_data);
+void on_draw_ellipse_toggled			(GtkToggleToolButton *button, gpointer user_data);
+void on_tool_rect_select_toggled		(GtkToggleToolButton *button, gpointer user_data);
+void on_tool_bucket_fill_toggled		(GtkToggleToolButton *button, gpointer user_data);
+void on_tool_zoom_toggled				(GtkToggleToolButton *button, gpointer user_data);
+void on_tool_paintbrush_toggled			(GtkToggleToolButton *button, gpointer user_data);
+void on_tool_text_toggled				(GtkToggleToolButton *button, gpointer user_data);
+void on_draw_curve_toggled				(GtkToggleToolButton *button, gpointer user_data);
+void on_draw_polygon_toggled			(GtkToggleToolButton *button, gpointer user_data);
+void on_draw_rounded_rectangle_toggled  (GtkToggleToolButton *button, gpointer user_data);
 /*Option toolbar realize funcitons*/
 void on_notebook_realize				(GtkObject *object, gpointer user_data);
 void on_frame_rect_realize  			(GtkObject *object, gpointer user_data);

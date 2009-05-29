@@ -53,13 +53,19 @@ static  GtkWidget   *pallete_widgets[NUM_PALETTES] =
 
 static  GdkColor	pallete_colors[NUM_PALETTES];
 
-static void background_set_color_from_palette  ( guint palette );
-static void foreground_set_color_from_palette  ( guint palette );
+/* private functions */
+static void background_set_color_from_palette   ( guint palette );
+static void foreground_set_color_from_palette   ( guint palette );
 static void palette_color_picker				( guint palette );
 static void color_dialog						( GdkColor *color, gchar * title );
-static void background_show					( void );
-static void foreground_show					( void );
+static void background_show						( void );
+static void foreground_show						( void );
 static void pallete_show						( guint palette );
+
+
+/*
+ *   CODE
+ */
 
 
 void

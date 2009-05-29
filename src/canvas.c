@@ -16,24 +16,35 @@
 
 #include <gtk/gtk.h>
 
+#include "canvas.h"
 #include "common.h"
+#include "tool_line.h"
 
 /* private functions */
-static void cv_resize_start	( void );
-static void cv_resize_move	( gdouble x,  gdouble y);
-static void cv_resize_stop	( gdouble x,  gdouble y);
+static void cv_resize_start		( void );
+static void cv_resize_move		( gdouble x,  gdouble y);
+static void cv_resize_stop		( gdouble x,  gdouble y);
+static void cv_resize_cancel	( void );
 
 /* private data  */
-static GtkWidget	*canvas		=	NULL;
-static GtkWidget	*cv_ev_box	=	NULL;
-static GtkWidget	*lb_size	=	NULL;
-static GdkGC 		*gc_resize	=	NULL;
-static GdkColor 	edge_color	=	{ 0, 0xa700, 0xc700, 0xf700  };
-static GdkColor 	white_color	=	{ 0, 0xffff, 0xffff, 0xffff  };
-static gboolean		b_resize	=	FALSE;
-static gboolean		b_init		=	FALSE;
-static gint			x_res		=	0;
-static gint			y_res		=	0;
+static gnome_paint_tool	*tool		=	NULL;
+static GtkWidget	*canvas			=	NULL;
+static GtkWidget	*cv_ev_box		=	NULL;
+static GtkWidget	*cv_top_edge	=	NULL;
+static GtkWidget	*cv_bottom_edge	=	NULL;
+static GtkWidget	*cv_left_edge	=	NULL;
+static GtkWidget	*cv_right_edge	=	NULL;
+static GtkWidget	*lb_size		=	NULL;
+static GdkGC 		*gc_resize		=	NULL;
+static GdkGC 		*cv_gc			=	NULL;
+static GdkColor 	edge_color		=	{ 0, 0x2f00, 0x3600, 0x9800  };
+static GdkColor 	white_color		=	{ 0, 0xffff, 0xffff, 0xffff  };
+static GdkColor 	black_color		=	{ 0, 0x0000, 0x0000, 0x0000  };
+static gboolean		b_resize		=	FALSE;
+static gboolean		b_init			=	FALSE;
+static gint			x_res			=	0;
+static gint			y_res			=	0;
+
 
 /*
  *   CODE
@@ -46,15 +57,21 @@ on_canvas_realize   (GtkWidget *widget, gpointer user_data)
 {
 	canvas = widget;
 	gtk_widget_modify_bg ( canvas, GTK_STATE_NORMAL , &white_color );
+
+	cv_gc	=	gdk_gc_new ( canvas->window );
+	gdk_gc_set_rgb_fg_color ( cv_gc, &black_color );
+	gdk_gc_set_rgb_bg_color ( cv_gc, &white_color );
+	gdk_gc_set_line_attributes ( cv_gc, 1, GDK_LINE_SOLID, 
+	                             GDK_CAP_NOT_LAST, GDK_JOIN_ROUND );
+	tool = tool_line_init ( canvas, cv_gc );
 }
 
 void
 on_cv_ev_box_realize (GtkWidget *widget, gpointer user_data)
 {
 	gint8 dash_list[]	=	{ 1, 1 };
-	GdkColor 	color	=	{ 0, 0, 0, 0 };
 	cv_ev_box	=	widget;	
-	gtk_widget_modify_fg ( cv_ev_box, GTK_STATE_NORMAL , &color );
+	gtk_widget_modify_fg ( cv_ev_box, GTK_STATE_NORMAL , &black_color );
 	gc_resize = cv_ev_box->style->fg_gc[GTK_WIDGET_STATE (cv_ev_box)];
 	gdk_gc_set_dashes ( gc_resize, 0, dash_list, 2 );
 	gdk_gc_set_line_attributes ( gc_resize, 1, GDK_LINE_ON_OFF_DASH, 
@@ -72,6 +89,7 @@ void
 on_cv_right_realize (GtkWidget *widget, gpointer user_data)
 {
 	static GdkCursor * cursor = NULL;
+	cv_right_edge = widget;
 	if ( cursor == NULL )
 	{
 		cursor = gdk_cursor_new ( GDK_SB_H_DOUBLE_ARROW );
@@ -96,6 +114,7 @@ void
 on_cv_bottom_realize (GtkWidget *widget, gpointer user_data)
 {
 	static GdkCursor * cursor = NULL;
+	cv_bottom_edge = widget;
 	if ( cursor == NULL )
 	{
 		cursor = gdk_cursor_new ( GDK_SB_V_DOUBLE_ARROW );
@@ -103,6 +122,21 @@ on_cv_bottom_realize (GtkWidget *widget, gpointer user_data)
 		gdk_window_set_cursor ( widget->window, cursor );
 	}
 }
+
+void
+on_cv_top_realize (GtkWidget *widget, gpointer user_data)
+{
+	cv_top_edge = widget;
+	on_cv_other_edge_realize( widget, user_data );
+}
+
+void
+on_cv_left_realize (GtkWidget *widget, gpointer user_data)
+{
+	cv_left_edge = widget;
+	on_cv_other_edge_realize( widget, user_data );
+}
+
 
 void
 on_cv_other_edge_realize (GtkWidget *widget, gpointer user_data)
@@ -113,6 +147,30 @@ on_cv_other_edge_realize (GtkWidget *widget, gpointer user_data)
 }
 
 /* events */
+gboolean
+on_canvas_button_press_event (	GtkWidget	   *widget, 
+                                GdkEventButton *event,
+                                gpointer       user_data )
+{
+
+	return tool->button_press( event );
+}
+
+gboolean
+on_canvas_button_release_event (	GtkWidget	   *widget, 
+                                    GdkEventButton *event,
+                                    gpointer       user_data )
+{
+	return tool->button_release( event );
+}
+									
+gboolean
+on_canvas_motion_notify_event (	GtkWidget      *widget,
+		                        GdkEventMotion *event,
+                                gpointer        user_data)
+{
+	return tool->button_motion( event );
+}
 
 gboolean 
 on_canvas_expose_event	(   GtkWidget	   *widget, 
@@ -121,6 +179,9 @@ on_canvas_expose_event	(   GtkWidget	   *widget,
 {
 	GString *str = g_string_new("");
 	gint x,y;
+
+	tool->draw();
+
 	if (b_resize)
 	{
 		gdk_draw_line ( canvas->window, gc_resize, 0, 0, x_res, 0 );
@@ -138,7 +199,6 @@ on_canvas_expose_event	(   GtkWidget	   *widget,
 	g_string_printf (str, "%dx%d", x, y );
 	gtk_label_set_text( GTK_LABEL(lb_size), str->str );
 	g_string_free( str, TRUE);
-
 	return TRUE;
 }
 
@@ -187,9 +247,16 @@ on_cv_bottom_right_button_press_event	(   GtkWidget	   *widget,
 											GdkEventButton *event,
                                             gpointer       user_data )
 {
-	if ( (event->type == GDK_BUTTON_PRESS) && (event->button == LEFT_BUTTON) )
+	if ( event->type == GDK_BUTTON_PRESS )
 	{
-		cv_resize_start();
+		if ( event->button == LEFT_BUTTON )
+		{
+			cv_resize_start();
+		}
+		else if ( event->button == RIGHT_BUTTON )
+		{
+			cv_resize_cancel();
+		}
 	}
 	return TRUE;
 }
@@ -222,11 +289,7 @@ on_cv_bottom_button_press_event (   GtkWidget	   *widget,
                                     GdkEventButton *event,
                                     gpointer       user_data )
 {
-	if ( (event->type == GDK_BUTTON_PRESS) && (event->button == LEFT_BUTTON) )
-	{
-		cv_resize_start();
-	}
-	return TRUE;
+	return on_cv_bottom_right_button_press_event( widget, event, user_data );
 }
 
 gboolean 
@@ -255,11 +318,7 @@ on_cv_right_button_press_event (	GtkWidget	   *widget,
                                     GdkEventButton *event,
                                     gpointer       user_data )
 {
-	if ( (event->type == GDK_BUTTON_PRESS) && (event->button == LEFT_BUTTON) )
-	{
-		cv_resize_start();
-	}
-	return TRUE;
+	return on_cv_bottom_right_button_press_event( widget, event, user_data );
 }
 
 gboolean
@@ -310,15 +369,26 @@ cv_resize_stop ( gdouble x,  gdouble y)
 {
 	if( b_resize )
 	{
-		gint width, height;
+		gint w, h, width, height;
 		width	= canvas->allocation.width + (gint)x;
-		width	= (width<0)?0:width;
+		width	= (width<1)?1:width;
 		height	= canvas->allocation.height + (gint)y;
-		height	= (height<0)?0:height;
+		height	= (height<1)?1:height;
 		gtk_widget_set_size_request ( canvas, width, height );
+		w = ( width  < 3 )?width :3;
+		h = ( height < 3 )?height:3;
+		gtk_widget_set_size_request ( cv_top_edge		, w, 3 );
+		gtk_widget_set_size_request ( cv_bottom_edge	, w, 3 );
+		gtk_widget_set_size_request ( cv_left_edge		, 3, h );
+		gtk_widget_set_size_request ( cv_right_edge		, 3, h );
 	}
-	b_init		= FALSE;
-	b_resize 	= FALSE;
+	cv_resize_cancel();
 }
 
-
+static void
+cv_resize_cancel ( void )
+{
+	b_init		= FALSE;
+	b_resize 	= FALSE;
+	gtk_widget_queue_draw (cv_ev_box);
+}

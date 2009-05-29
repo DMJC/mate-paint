@@ -18,8 +18,6 @@ bin_PROGRAMS = \
 EXTRA_DIST = $(glade_DATA)
 
 gnome_paint_SOURCES = \
-	callbacks.c  \
-	callbacks.h  \
 	color.c  \
 	color.h  \
 	main.c  \
@@ -32,7 +30,9 @@ gnome_paint_SOURCES = \
 	pixmaps/line_4.xpm  \
 	canvas.c  \
 	canvas.h  \
-	common.h
+	common.h  \
+	tool_line.c  \
+	tool_line.h
 
 gnome_paint_LDFLAGS = \
 	-Wl,--export-dynamic
