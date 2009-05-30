@@ -13,7 +13,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
- 
+
+#include "common.h"
+
+void cv_set_color_bg	( GdkColor *color );
+void cv_set_color_fg	( GdkColor *color );
+void cv_set_line_width	( gint width );
+
+void cv_sel_none_tool	( void );
+void cv_sel_line_tool	( void );
 
 /* GUI CallBacks */
 

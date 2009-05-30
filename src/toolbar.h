@@ -45,19 +45,28 @@ void on_tool_text_toggled				(GtkToggleToolButton *button, gpointer user_data);
 void on_draw_curve_toggled				(GtkToggleToolButton *button, gpointer user_data);
 void on_draw_polygon_toggled			(GtkToggleToolButton *button, gpointer user_data);
 void on_draw_rounded_rectangle_toggled  (GtkToggleToolButton *button, gpointer user_data);
-/*Option toolbar realize funcitons*/
+/*Option Bar realize funcitons*/
 void on_notebook_realize				(GtkObject *object, gpointer user_data);
 void on_frame_rect_realize  			(GtkObject *object, gpointer user_data);
-/*Selection toolbar realize functions*/
+/*Selection Bar realize functions*/
 void on_sel1_realize   					(GtkObject *object, gpointer user_data);
 void on_sel2_realize   					(GtkObject *object, gpointer user_data);
-/*rect toolbar realize functions*/
+/*Rect Bar realize functions*/
 void on_rect0_realize   				(GtkObject *object, gpointer user_data);
 void on_rect1_realize   				(GtkObject *object, gpointer user_data);
 void on_rect2_realize  					(GtkObject *object, gpointer user_data);
-/*Line toolbar realize functions*/
+/*Line Bar realize functions*/
 void on_line0_realize   				(GtkObject *object, gpointer user_data);
 void on_line1_realize   				(GtkObject *object, gpointer user_data);
 void on_line2_realize   				(GtkObject *object, gpointer user_data);
 void on_line3_realize   				(GtkObject *object, gpointer user_data);
 void on_line4_realize   				(GtkObject *object, gpointer user_data);
+/*Line toolbar toggled functions*/
+void on_line0_toggled					(GtkToggleToolButton *button, gpointer user_data);
+void on_line1_toggled					(GtkToggleToolButton *button, gpointer user_data);
+void on_line2_toggled					(GtkToggleToolButton *button, gpointer user_data);
+void on_line3_toggled					(GtkToggleToolButton *button, gpointer user_data);
+void on_line4_toggled					(GtkToggleToolButton *button, gpointer user_data);
+
+
+

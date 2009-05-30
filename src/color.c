@@ -19,6 +19,7 @@
 
 #include "color.h"
 #include "common.h"
+#include "canvas.h"
 
 static  GtkWidget	*background_widget = NULL;
 static  GdkColor	background_color;
@@ -212,6 +213,7 @@ background_show ( void )
 {
 	g_return_if_fail( background_widget != NULL );
 	gtk_widget_modify_bg ( background_widget, GTK_STATE_NORMAL , &background_color );
+	cv_set_color_bg ( &background_color );
 }
 
 static void 
@@ -219,6 +221,7 @@ foreground_show ( void )
 {
 	g_return_if_fail( foreground_widget != NULL );
 	gtk_widget_modify_bg ( foreground_widget, GTK_STATE_NORMAL , &foreground_color );
+	cv_set_color_fg ( &foreground_color );
 }
 
 static void 

@@ -65,8 +65,11 @@ on_tool_free_select_toggled	(GtkToggleToolButton *button, gpointer user_data)
 {
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
+		/*show tool options */
 		g_return_if_fail( notebook != NULL );
 		gtk_notebook_set_current_page ( notebook, SELECTION );
+		/*select tool*/
+		cv_sel_none_tool ();
 	}
 }
 
@@ -75,8 +78,11 @@ on_tool_eraser_toggled	(GtkToggleToolButton *button, gpointer user_data)
 {
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
+		/*show tool options */
 		g_return_if_fail( notebook != NULL );
 		gtk_notebook_set_current_page ( notebook, NONE );
+		/*select tool*/
+		cv_sel_none_tool ();
 	}
 }
 
@@ -85,8 +91,11 @@ on_tool_color_picker_toggled (GtkToggleToolButton *button, gpointer user_data)
 {
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
+		/*show tool options */
 		g_return_if_fail( notebook != NULL );
 		gtk_notebook_set_current_page ( notebook, NONE );
+		/*select tool*/
+		cv_sel_none_tool ();
 	}
 }
 
@@ -95,8 +104,11 @@ on_tool_pencil_toggled	(GtkToggleToolButton *button, gpointer user_data)
 {
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
+		/*show tool options */
 		g_return_if_fail( notebook != NULL );
 		gtk_notebook_set_current_page ( notebook, NONE );
+		/*select tool*/
+		cv_sel_none_tool ();
 	}
 }
 
@@ -105,8 +117,11 @@ on_tool_airbrush_toggled (GtkToggleToolButton *button, gpointer user_data)
 {
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
+		/*show tool options */
 		g_return_if_fail( notebook != NULL );
 		gtk_notebook_set_current_page ( notebook, NONE );
+		/*select tool*/
+		cv_sel_none_tool ();
 	}
 }
 
@@ -115,9 +130,12 @@ on_draw_line_toggled (GtkToggleToolButton *button, gpointer user_data)
 {
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
+		/*show tool options */
 		g_return_if_fail( notebook != NULL );
 		show_frame_rect ( FALSE );
 		gtk_notebook_set_current_page ( notebook, RECT_LINE );
+		/*select tool*/
+		cv_sel_line_tool ();
 	}
 }
 
@@ -126,9 +144,12 @@ on_draw_rectangle_toggled (GtkToggleToolButton *button, gpointer user_data)
 {
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
+		/*show tool options */
 		g_return_if_fail( notebook != NULL );
 		show_frame_rect ( TRUE );
 		gtk_notebook_set_current_page ( notebook, RECT_LINE );
+		/*select tool*/
+		cv_sel_none_tool ();
 	}
 }
 
@@ -137,8 +158,11 @@ on_draw_ellipse_toggled	(GtkToggleToolButton *button, gpointer user_data)
 {
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
+		/*show tool options */
 		show_frame_rect ( TRUE );
 		gtk_notebook_set_current_page ( notebook, RECT_LINE );
+		/*select tool*/
+		cv_sel_none_tool ();
 	}
 }
 
@@ -147,8 +171,11 @@ on_tool_rect_select_toggled	(GtkToggleToolButton *button, gpointer user_data)
 {
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
+		/*show tool options */
 		g_return_if_fail( notebook != NULL );
 		gtk_notebook_set_current_page ( notebook, SELECTION );
+		/*select tool*/
+		cv_sel_none_tool ();
 	}
 }
 
@@ -157,8 +184,11 @@ on_tool_bucket_fill_toggled	(GtkToggleToolButton *button, gpointer user_data)
 {
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
+		/*show tool options */
 		g_return_if_fail( notebook != NULL );
 		gtk_notebook_set_current_page ( notebook, NONE );
+		/*select tool*/
+		cv_sel_none_tool ();
 	}
 }
 
@@ -167,8 +197,11 @@ on_tool_zoom_toggled (GtkToggleToolButton *button, gpointer user_data)
 {
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
+		/*show tool options */
 		g_return_if_fail( notebook != NULL );
 		gtk_notebook_set_current_page ( notebook, NONE );
+		/*select tool*/
+		cv_sel_none_tool ();
 	}
 }
 
@@ -177,8 +210,11 @@ on_tool_paintbrush_toggled	(GtkToggleToolButton *button, gpointer user_data)
 {
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
+		/*show tool options */
 		g_return_if_fail( notebook != NULL );
 		gtk_notebook_set_current_page ( notebook, NONE );
+		/*select tool*/
+		cv_sel_none_tool ();
 	}
 }
 
@@ -187,8 +223,11 @@ on_tool_text_toggled (GtkToggleToolButton *button, gpointer user_data)
 {
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
+		/*show tool options */
 		g_return_if_fail( notebook != NULL );
 		gtk_notebook_set_current_page ( notebook, SELECTION );
+		/*select tool*/
+		cv_sel_none_tool ();
 	}
 }
 
@@ -197,9 +236,12 @@ on_draw_curve_toggled (GtkToggleToolButton *button, gpointer user_data)
 {
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
+		/*show tool options */
 		g_return_if_fail( notebook != NULL );
 		show_frame_rect ( FALSE );
 		gtk_notebook_set_current_page ( notebook, RECT_LINE );
+		/*select tool*/
+		cv_sel_none_tool ();
 	}
 }
 
@@ -208,9 +250,12 @@ on_draw_polygon_toggled	(GtkToggleToolButton *button, gpointer user_data)
 {
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
+		/*show tool options */
 		g_return_if_fail( notebook != NULL );
 		show_frame_rect ( TRUE );
 		gtk_notebook_set_current_page ( notebook, RECT_LINE );
+		/*select tool*/
+		cv_sel_none_tool ();
 	}
 }
 
@@ -219,9 +264,57 @@ on_draw_rounded_rectangle_toggled  (GtkToggleToolButton *button, gpointer user_d
 {
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
+		/*show tool options */
 		g_return_if_fail( notebook != NULL );
 		show_frame_rect ( TRUE );
 		gtk_notebook_set_current_page ( notebook, RECT_LINE );
+		/*select tool*/
+		cv_sel_none_tool ();
+	}
+}
+
+void
+on_line0_toggled (GtkToggleToolButton *button, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( button ) )
+	{
+		cv_set_line_width ( 1 );
+	}
+}
+
+void
+on_line1_toggled (GtkToggleToolButton *button, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( button ) )
+	{
+		cv_set_line_width ( 2 );
+	}
+}
+
+void
+on_line2_toggled (GtkToggleToolButton *button, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( button ) )
+	{
+		cv_set_line_width ( 3 );
+	}
+}
+
+void
+on_line3_toggled (GtkToggleToolButton *button, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( button ) )
+	{
+		cv_set_line_width ( 4 );
+	}
+}
+
+void
+on_line4_toggled (GtkToggleToolButton *button, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( button ) )
+	{
+		cv_set_line_width ( 5 );
 	}
 }
 
