@@ -402,7 +402,6 @@ on_rect2_realize   (GtkObject *object, gpointer user_data)
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)rect2_xpm ) );
 }
 
-
 /*private*/
 
 static GtkWidget * 
@@ -412,11 +411,11 @@ get_gtk_image ( GtkWidget *widget, gchar** xpm )
     GdkBitmap *mask 		= NULL;
     GtkWidget *gtkimage 	= NULL;
 	gdkpixmap = gdk_pixmap_create_from_xpm_d(widget->window, &mask, NULL, xpm);
-	g_assert(gdkpixmap);
+	g_assert ( gdkpixmap );
 	gtkimage = gtk_image_new_from_pixmap(gdkpixmap, mask);
-    g_assert(gtkimage);
-	gdk_pixmap_unref(gdkpixmap);
-    gdk_pixmap_unref(mask); 
+    g_assert ( gtkimage );
+	g_object_unref ( G_OBJECT(gdkpixmap) );
+    g_object_unref ( G_OBJECT(mask) ); 
 	gtk_widget_show(gtkimage);
 	return gtkimage;
 }

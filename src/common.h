@@ -65,6 +65,7 @@ typedef struct
 	gboolean	(*button_motion)	( GdkEventMotion *event );
 	void		(*draw)				( void );
 	void		(*reset)			( void );
+	void		(*destroy)			( gpointer data );
 } gnome_paint_tool;
 
 

@@ -28,24 +28,23 @@ static void cv_resize_draw		( void );
 
 
 /* private data  */
-
 static gnome_paint_tool	*cv_tool		=	NULL;
-static GtkWidget	*canvas			=	NULL;
-static GtkWidget	*cv_ev_box		=	NULL;
-static GtkWidget	*cv_top_edge	=	NULL;
-static GtkWidget	*cv_bottom_edge	=	NULL;
-static GtkWidget	*cv_left_edge	=	NULL;
-static GtkWidget	*cv_right_edge	=	NULL;
-static GtkWidget	*lb_size		=	NULL;
-static GdkGC 		*gc_resize		=	NULL;
-static GdkGC 		*cv_gc			=	NULL;
-static GdkColor 	edge_color		=	{ 0, 0x2f00, 0x3600, 0x9800  };
-static GdkColor 	white_color		=	{ 0, 0xffff, 0xffff, 0xffff  };
-static GdkColor 	black_color		=	{ 0, 0x0000, 0x0000, 0x0000  };
-static gboolean		b_resize		=	FALSE;
-static gboolean		b_init			=	FALSE;
-static gint			x_res			=	0;
-static gint			y_res			=	0;
+static GtkWidget		*canvas			=	NULL;
+static GtkWidget		*cv_ev_box		=	NULL;
+static GdkGC 			*cv_gc			=	NULL;
+static GtkWidget		*cv_top_edge	=	NULL;
+static GtkWidget		*cv_bottom_edge	=	NULL;
+static GtkWidget		*cv_left_edge	=	NULL;
+static GtkWidget		*cv_right_edge	=	NULL;
+static GtkWidget		*lb_size		=	NULL;
+static GdkGC 			*gc_resize		=	NULL;
+static GdkColor 		edge_color		=	{ 0, 0x2f00, 0x3600, 0x9800  };
+static GdkColor 		white_color		=	{ 0, 0xffff, 0xffff, 0xffff  };
+static GdkColor 		black_color		=	{ 0, 0x0000, 0x0000, 0x0000  };
+static gboolean			b_resize		=	FALSE;
+static gboolean			b_init			=	FALSE;
+static gint				x_res			=	0;
+static gint				y_res			=	0;
 
 
 /*
@@ -73,32 +72,39 @@ cv_set_line_width	( gint width )
 
 void cv_sel_none_tool	( void )
 {
-	static GdkCursor * cursor = NULL;
-	if ( cursor == NULL )
-	{
-		cursor = gdk_cursor_new ( GDK_LEFT_PTR );
-	}
-	gdk_window_set_cursor ( canvas->window, cursor );
+	gdk_window_set_cursor ( canvas->window, NULL);
 	cv_tool = NULL;
 }
 
 void cv_sel_line_tool	( void )
 {
-	static gnome_paint_tool * line_tool = NULL;
-	if ( line_tool == NULL ) line_tool = tool_line_init ( canvas, cv_gc );
+	static gnome_paint_tool	*line_tool	=	NULL;
+	if ( line_tool == NULL )
+	{
+		line_tool = tool_line_init ( canvas, cv_gc );
+	}
 	cv_tool = line_tool;
 	cv_tool->reset ();
 }
 
 
 /* GUI CallBacks */
-void 
-on_canvas_realize   (GtkWidget *widget, gpointer user_data)
+
+void
+on_canvas_realize (GtkWidget *widget, gpointer user_data)
 {
 	canvas = widget;
 	gtk_widget_modify_bg ( canvas, GTK_STATE_NORMAL , &white_color );
 
-	cv_gc	=	gdk_gc_new ( canvas->window );
+	if ( cv_gc == NULL )
+	{
+		cv_gc	=	gdk_gc_new ( canvas->window );
+		g_assert(cv_gc);
+		/*set data to be destroyed*/
+		g_object_set_data_full (	G_OBJECT(canvas), "cv_gc", 
+		                       		(gpointer)cv_gc , 
+		                        	(GDestroyNotify)g_object_unref );
+	}
 	cv_set_color_fg ( &black_color );
 	cv_set_color_bg ( &white_color );
 	cv_set_line_width ( 1 );
@@ -126,39 +132,36 @@ on_lb_size_realize (GtkWidget *widget, gpointer user_data)
 void
 on_cv_right_realize (GtkWidget *widget, gpointer user_data)
 {
-	static GdkCursor * cursor = NULL;
+	GdkCursor *cursor;
 	cv_right_edge = widget;
-	if ( cursor == NULL )
-	{
-		cursor = gdk_cursor_new ( GDK_SB_H_DOUBLE_ARROW );
-		gtk_widget_modify_bg ( widget, GTK_STATE_NORMAL , &edge_color );
-		gdk_window_set_cursor ( widget->window, cursor );
-	}
+	gtk_widget_modify_bg ( widget, GTK_STATE_NORMAL , &edge_color );
+	cursor = gdk_cursor_new_for_display ( gtk_widget_get_display(widget) , GDK_SB_H_DOUBLE_ARROW );
+	g_assert (cursor);
+	gdk_window_set_cursor ( widget->window, cursor );
+	gdk_cursor_unref ( cursor );
 }
 
 void 
 on_cv_bottom_right_realize (GtkWidget *widget, gpointer user_data)
 {
-	static GdkCursor * cursor = NULL;
-	if ( cursor == NULL )
-	{
-		cursor = gdk_cursor_new ( GDK_BOTTOM_RIGHT_CORNER );
-		gtk_widget_modify_bg ( widget, GTK_STATE_NORMAL , &edge_color );
-		gdk_window_set_cursor ( widget->window, cursor );
-	}
+	GdkCursor *cursor;
+	gtk_widget_modify_bg ( widget, GTK_STATE_NORMAL , &edge_color );
+	cursor = gdk_cursor_new_for_display ( gtk_widget_get_display(widget) , GDK_BOTTOM_RIGHT_CORNER );
+	g_assert (cursor);
+	gdk_window_set_cursor ( widget->window, cursor );
+	gdk_cursor_unref ( cursor );
 }
 
 void
 on_cv_bottom_realize (GtkWidget *widget, gpointer user_data)
 {
-	static GdkCursor * cursor = NULL;
+	GdkCursor *cursor;
 	cv_bottom_edge = widget;
-	if ( cursor == NULL )
-	{
-		cursor = gdk_cursor_new ( GDK_SB_V_DOUBLE_ARROW );
-		gtk_widget_modify_bg ( widget, GTK_STATE_NORMAL , &edge_color );
-		gdk_window_set_cursor ( widget->window, cursor );
-	}
+	gtk_widget_modify_bg ( widget, GTK_STATE_NORMAL , &edge_color );
+	cursor = gdk_cursor_new_for_display ( gtk_widget_get_display(widget) , GDK_SB_V_DOUBLE_ARROW );
+	g_assert (cursor);
+	gdk_window_set_cursor ( widget->window, cursor );
+	gdk_cursor_unref ( cursor );
 }
 
 void

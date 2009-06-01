@@ -26,33 +26,36 @@
 
 #include "tool_line.h"
 
-
-
-static GtkWidget 	*cv		=	NULL;
-static GdkGC 		*cv_gc	=	NULL;
-static gint x0,y0,x1,y1;
-static gboolean is_draw = FALSE;
-
-
-gnome_paint_tool	tool;
-
+/*Member functions*/
 gboolean	button_press	( GdkEventButton *event );
 gboolean	button_release	( GdkEventButton *event );
 gboolean	button_motion	( GdkEventMotion *event );
 void		draw			( void );
 void		reset			( void );
+void		destroy			( gpointer data  );
 
+/*private data*/
+static gint 		x0,y0,x1,y1;
+static GtkWidget 	*cv		=	NULL;
+static GdkGC 		*cv_gc	=	NULL;
+static gboolean 	is_draw = FALSE;
+gnome_paint_tool	tool;
 
 gnome_paint_tool * 
 tool_line_init ( GtkWidget *canvas, GdkGC * gc )
 {
-	cv		=	canvas;
-	cv_gc	=	gc;
+	cv					=	canvas;
+	cv_gc				=	gc;
 	tool.button_press	= button_press;
 	tool.button_release	= button_release;
 	tool.button_motion	= button_motion;
 	tool.draw			= draw;
 	tool.reset			= reset;
+	tool.destroy		= destroy;
+	/*set data to be destroyed*/
+	g_object_set_data_full (	G_OBJECT(canvas), "line_tool", 
+	                        	(gpointer)&tool, 
+	                        	(GDestroyNotify)(tool.destroy) );	
 	return &tool;
 }
 
@@ -99,11 +102,14 @@ draw ( void )
 
 void reset ( void )
 {
-	static GdkCursor * cursor = NULL;
-	if ( cursor == NULL )
-	{
-		cursor = gdk_cursor_new ( GDK_CROSSHAIR );
-	}
+	GdkCursor *cursor = gdk_cursor_new ( GDK_CROSSHAIR );
+	g_assert(cursor);
 	gdk_window_set_cursor ( cv->window, cursor );
+	gdk_cursor_unref( cursor );
 	is_draw = FALSE;
+}
+
+void destroy ( gpointer data  )
+{
+	g_print("line tool destroy\n");
 }
