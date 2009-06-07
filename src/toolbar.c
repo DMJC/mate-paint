@@ -24,6 +24,7 @@
 
 #include "toolbar.h"
 #include "common.h"
+#include "cv_drawing.h"
 
 #ifdef HAVE_CONFIG_H
 #  include <config.h>

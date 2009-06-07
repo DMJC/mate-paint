@@ -19,7 +19,7 @@
 
 #include "color.h"
 #include "common.h"
-#include "canvas.h"
+#include "cv_drawing.h"
 
 static  GtkWidget	*background_widget = NULL;
 static  GdkColor	background_color;

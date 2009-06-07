@@ -46,7 +46,8 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_gnome_paint_OBJECTS = color.$(OBJEXT) main.$(OBJEXT) \
-	toolbar.$(OBJEXT) canvas.$(OBJEXT) tool_line.$(OBJEXT)
+	toolbar.$(OBJEXT) tool_line.$(OBJEXT) cv_resize.$(OBJEXT) \
+	cv_drawing.$(OBJEXT)
 gnome_paint_OBJECTS = $(am_gnome_paint_OBJECTS)
 am__DEPENDENCIES_1 =
 gnome_paint_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -229,11 +230,13 @@ gnome_paint_SOURCES = \
 	pixmaps/line_2.xpm  \
 	pixmaps/line_3.xpm  \
 	pixmaps/line_4.xpm  \
-	canvas.c  \
-	canvas.h  \
 	common.h  \
 	tool_line.c  \
-	tool_line.h
+	tool_line.h  \
+	cv_resize.c  \
+	cv_resize.h  \
+	cv_drawing.c  \
+	cv_drawing.h
 
 gnome_paint_LDFLAGS = \
 	-Wl,--export-dynamic
@@ -312,8 +315,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canvas.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/color.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cv_drawing.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cv_resize.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tool_line.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/toolbar.Po@am__quote@

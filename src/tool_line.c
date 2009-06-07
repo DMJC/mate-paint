@@ -35,17 +35,17 @@ void		reset			( void );
 void		destroy			( gpointer data  );
 
 /*private data*/
-static gint 		x0,y0,x1,y1;
-static GtkWidget 	*cv		=	NULL;
-static GdkGC 		*cv_gc	=	NULL;
-static gboolean 	is_draw = FALSE;
-gnome_paint_tool	tool;
+static gnome_paint_tool			tool;
+static gnome_paint_canvas *		cv		= NULL;
+static GdkGC *					gc		= NULL;
+static gint 					x0,y0,x1,y1;
+static guint					button	= 0;
+static gboolean 				is_draw = FALSE;
 
 gnome_paint_tool * 
-tool_line_init ( GtkWidget *canvas, GdkGC * gc )
+tool_line_init ( gnome_paint_canvas * canvas )
 {
 	cv					=	canvas;
-	cv_gc				=	gc;
 	tool.button_press	= button_press;
 	tool.button_release	= button_release;
 	tool.button_motion	= button_motion;
@@ -53,7 +53,7 @@ tool_line_init ( GtkWidget *canvas, GdkGC * gc )
 	tool.reset			= reset;
 	tool.destroy		= destroy;
 	/*set data to be destroyed*/
-	g_object_set_data_full (	G_OBJECT(canvas), "line_tool", 
+	g_object_set_data_full (	G_OBJECT(cv->widget), "line_tool", 
 	                        	(gpointer)&tool, 
 	                        	(GDestroyNotify)(tool.destroy) );	
 	return &tool;
@@ -64,9 +64,19 @@ button_press ( GdkEventButton *event )
 {
 	if ( event->type == GDK_BUTTON_PRESS )
 	{
-		is_draw = TRUE;
+		if ( event->button == LEFT_BUTTON )
+		{
+			gc = cv->gc_fg;
+		}
+		else if ( event->button == RIGHT_BUTTON )
+		{
+			gc = cv->gc_bg;
+		}
+		is_draw = !is_draw;
+		if( is_draw ) button = event->button;
 		x0 = x1 = (gint)event->x;
 		y0 = y1 = (gint)event->y;
+		if( !is_draw ) gtk_widget_queue_draw ( cv->widget );
 	}
 	return TRUE;
 }
@@ -76,8 +86,15 @@ button_release ( GdkEventButton *event )
 {
 	if ( event->type == GDK_BUTTON_RELEASE )
 	{
-		is_draw = FALSE;
-		gtk_widget_queue_draw (cv);
+		if( button == event->button )
+		{
+			if( is_draw )
+			{
+				gdk_draw_line ( cv->pixmap, gc, x0, y0, x1, y1 );
+			}
+			gtk_widget_queue_draw ( cv->widget );
+			is_draw = FALSE;
+		}
 	}
 	return TRUE;
 }
@@ -85,9 +102,12 @@ button_release ( GdkEventButton *event )
 gboolean
 button_motion ( GdkEventMotion *event )
 {
-	x1 = (gint)event->x;
-	y1 = (gint)event->y;
-	gtk_widget_queue_draw (cv);
+	if( is_draw )
+	{
+		x1 = (gint)event->x;
+		y1 = (gint)event->y;
+		gtk_widget_queue_draw ( cv->widget );
+	}
 	return TRUE;
 }
 
@@ -96,7 +116,7 @@ draw ( void )
 {
 	if ( is_draw )
 	{
-		gdk_draw_line ( cv->window, cv_gc, x0, y0, x1, y1 );
+		gdk_draw_line ( cv->drawing, gc, x0, y0, x1, y1 );
 	}
 }
 
@@ -104,7 +124,7 @@ void reset ( void )
 {
 	GdkCursor *cursor = gdk_cursor_new ( GDK_CROSSHAIR );
 	g_assert(cursor);
-	gdk_window_set_cursor ( cv->window, cursor );
+	gdk_window_set_cursor ( cv->drawing, cursor );
 	gdk_cursor_unref( cursor );
 	is_draw = FALSE;
 }

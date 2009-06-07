@@ -25,7 +25,7 @@
 #include "common.h"
 
 
-gnome_paint_tool * tool_line_init ( GtkWidget *canvas, GdkGC * gc );
+gnome_paint_tool * tool_line_init ( gnome_paint_canvas * canvas );
 
 
 

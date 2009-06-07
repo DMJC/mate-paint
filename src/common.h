@@ -57,6 +57,16 @@ typedef enum
 	RIGHT_BUTTON	=   3
 } gnome_paint_button;
 
+/* Canvas Type */
+typedef struct
+{
+	GtkWidget *		widget;
+	GdkPixmap *		drawing;
+	GdkGC *			gc_fg;
+	GdkGC *			gc_bg;
+	GdkPixmap *		pixmap;
+} gnome_paint_canvas;
+
 /* Tool Type*/
 typedef struct
 {
