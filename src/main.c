@@ -22,7 +22,7 @@
 
 #include "color.h"
 #include "toolbar.h"
-#include "canvas.h"
+#include "cv_drawing.h"
 #include "common.h"
 
 #define UI_FILE PACKAGE_DATA_DIR"/gnome-paint/ui/gnome_paint.ui"
