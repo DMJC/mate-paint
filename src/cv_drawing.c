@@ -26,7 +26,8 @@
 #include <gtk/gtk.h>
 
 #include "cv_drawing.h"
-#include "tool_line.h"
+//#include "file.h"
+#include "cv_line_tool.h"
 
 
 /*Member functions*/
@@ -35,7 +36,7 @@ GdkGC * 	cv_create_new_gc ( char * name );
 
 /* private data  */
 static gnome_paint_canvas	cv;
-static gnome_paint_tool		*cv_tool		=	NULL;
+static const gnome_paint_tool		*cv_tool		=	NULL;
 static GdkColor 			white_color		=	{ 0, 0xffff, 0xffff, 0xffff  };
 static GdkColor 			black_color		=	{ 0, 0x0000, 0x0000, 0x0000  };
 
@@ -75,7 +76,7 @@ void cv_sel_none_tool	( void )
 
 void cv_sel_line_tool	( void )
 {
-	static gnome_paint_tool	*line_tool	=	NULL;
+	static const gnome_paint_tool	*line_tool	=	NULL;
 	if ( line_tool == NULL )
 	{
 		line_tool = tool_line_init ( &cv );
@@ -119,12 +120,58 @@ cv_create_pixmap ( gint width, gint height )
 	cv.pixmap	=	px;
 }
 
+
+void 
+cv_save_file ( const gchar *filename, const gchar *type )
+{
+	if ( cv.pixmap != NULL )
+	{
+		GError **error = NULL;
+		GdkPixbuf * pixbuf;
+		gint w,h;
+	
+		gdk_drawable_get_size ( cv.pixmap, &w, &h );
+		pixbuf = gdk_pixbuf_get_from_drawable ( NULL, 
+		                                       cv.pixmap,
+		                                       gdk_drawable_get_colormap (cv.pixmap),
+		                                       0,0,
+		                                       0,0,
+		                                       w,h);
+		if ( !gdk_pixbuf_save ( pixbuf, filename, type, error, NULL) )
+		{
+			gchar *message = "";
+			gchar *basename = g_path_get_basename (filename);
+			GtkWidget *dlg;
+			if (error !=  NULL )
+			{
+				message = (*error)->message;
+			}
+			g_warning ("Could not save image %s: %s\n", filename, message);
+			dlg = gtk_message_dialog_new (cv.toplevel,
+			                              GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
+                                  		  GTK_MESSAGE_ERROR,
+                                  		  GTK_BUTTONS_CLOSE,
+                                          _("Error saving file \"%s\":\n%s"),
+                                          basename, message);
+ 			gtk_dialog_run (GTK_DIALOG (dlg));
+ 			gtk_widget_destroy (dlg);
+			g_free (basename);
+			if (error !=  NULL )
+			{
+				g_error_free (*error);
+			}
+		}
+		g_object_unref (pixbuf);
+	}
+}
+
 /* GUI CallBacks */
 
 void
 on_cv_drawing_realize (GtkWidget *widget, gpointer user_data)
 {
 	cv.widget	=	widget;
+	cv.toplevel	=	gtk_widget_get_toplevel( widget );
 	cv.drawing	=	cv.widget->window;
 	cv.gc_fg	=	cv_create_new_gc( "cv_gc_fg" );
 	cv.gc_bg	=	cv_create_new_gc( "cv_gc_bg" );

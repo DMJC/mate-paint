@@ -1,7 +1,7 @@
 /***************************************************************************
- *            tool_line.h
+ *            file.h
  *
- *  Fri May 29 16:36:16 2009
+ *  Thu Jun 11 13:19:47 2009
  *  Copyright  2009  rogerio
  *  <rogerio@<host>>
  ****************************************************************************/
@@ -21,14 +21,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
-
-#include "common.h"
-
-
-gnome_paint_tool * tool_line_init ( gnome_paint_canvas * canvas );
-
-
-
-
-
  
+
+void file_set_parent_window	( GtkWindow * wnd );
+void file_set_file_name		( const gchar *name );
+
+
+
+/* GUI CallBacks */
+
+void on_menu_save_activate	( GtkMenuItem *menuitem, gpointer user_data);

@@ -22,7 +22,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
  
- #include "common.h"
+#include "common.h"
 #include "cv_resize.h"
 
 void cv_set_color_bg	( GdkColor *color );
@@ -31,6 +31,8 @@ void cv_set_line_width	( gint width );
 void cv_sel_none_tool	( void );
 void cv_sel_line_tool	( void );
 void cv_create_pixmap	( gint width, gint height );
+
+void cv_save_file		( const gchar *filename, const gchar *type );
 
 /* GUI CallBacks */
 void on_cv_drawing_realize			(GtkWidget *widget, gpointer user_data);

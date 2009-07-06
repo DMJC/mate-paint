@@ -1,7 +1,7 @@
 /***************************************************************************
- *            tool_line.c
+ *            cv_line_tool.c
  *
- *  Fri May 29 16:36:16 2009
+ *  Wed Jun 10 21:22:13 2009
  *  Copyright  2009  rogerio
  *  <rogerio@<host>>
  ****************************************************************************/
@@ -21,10 +21,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
+ 
+ #include <gtk/gtk.h>
 
-#include <gtk/gtk.h>
-
-#include "tool_line.h"
+#include "cv_line_tool.h"
 
 /*Member functions*/
 gboolean	button_press	( GdkEventButton *event );
@@ -42,7 +42,7 @@ static gint 					x0,y0,x1,y1;
 static guint					button	= 0;
 static gboolean 				is_draw = FALSE;
 
-gnome_paint_tool * 
+const gnome_paint_tool * 
 tool_line_init ( gnome_paint_canvas * canvas )
 {
 	cv					=	canvas;

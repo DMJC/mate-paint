@@ -26,7 +26,7 @@
 
 #include "common.h"
 #include "cv_resize.h"
-//#include "cv_drawing.h"
+#include "cv_drawing.h"
 
 
 #define BOX_EDGE_SIZE	4

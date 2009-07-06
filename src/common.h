@@ -25,6 +25,7 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
+#include <gtk/gtk.h>
 
 /*
  * Standard gettext macros.
@@ -60,6 +61,7 @@ typedef enum
 /* Canvas Type */
 typedef struct
 {
+	GtkWidget *		toplevel;
 	GtkWidget *		widget;
 	GdkPixmap *		drawing;
 	GdkGC *			gc_fg;
@@ -77,6 +79,5 @@ typedef struct
 	void		(*reset)			( void );
 	void		(*destroy)			( gpointer data );
 } gnome_paint_tool;
-
 
 #endif /*__COMMON_H__*/

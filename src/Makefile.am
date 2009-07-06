@@ -23,18 +23,17 @@ gnome_paint_SOURCES = \
 	main.c  \
 	toolbar.c  \
 	toolbar.h  \
-	pixmaps/line_0.xpm  \
-	pixmaps/line_1.xpm  \
-	pixmaps/line_2.xpm  \
-	pixmaps/line_3.xpm  \
-	pixmaps/line_4.xpm  \
 	common.h  \
-	tool_line.c  \
-	tool_line.h  \
 	cv_resize.c  \
 	cv_resize.h  \
 	cv_drawing.c  \
-	cv_drawing.h
+	cv_drawing.h  \
+	cv_line_tool.c  \
+	cv_line_tool.h  \
+	file.c  \
+	file.h  \
+	pixbuf-file-chooser.c  \
+	pixbuf-file-chooser.h
 
 gnome_paint_LDFLAGS = \
 	-Wl,--export-dynamic

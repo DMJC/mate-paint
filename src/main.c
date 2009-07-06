@@ -18,12 +18,12 @@
  */
 
 
-#include <gtk/gtk.h>
 
+#include "common.h"
 #include "color.h"
 #include "toolbar.h"
 #include "cv_drawing.h"
-#include "common.h"
+
 
 #define UI_FILE PACKAGE_DATA_DIR"/gnome-paint/ui/gnome_paint.ui"
 
@@ -75,6 +75,8 @@ create_window (void)
 	builder = gtk_builder_new ();
     gtk_builder_add_from_file (builder, UI_FILE, NULL);
     window = GTK_WIDGET (gtk_builder_get_object (builder, "window"));
+	g_assert ( window );
+	file_set_parent_window ( GTK_WINDOW(window) );
     gtk_builder_connect_signals (builder, NULL);          
     g_object_unref (G_OBJECT (builder));	
 	
