@@ -23,6 +23,7 @@
 #include "color.h"
 #include "toolbar.h"
 #include "cv_drawing.h"
+#include "file.h"
 
 
 #define UI_FILE PACKAGE_DATA_DIR"/gnome-paint/ui/gnome_paint.ui"
@@ -54,6 +55,15 @@ main (int argc, char *argv[])
 	return 0;	
 }
 
+
+
+gboolean
+on_window_delete_event (GtkWidget       *widget,
+                        GdkEvent        *event,
+                        gpointer         user_data)
+{
+	return file_save_dialog ();
+}
 
 void 
 on_window_destroy ( GtkObject   *object, 

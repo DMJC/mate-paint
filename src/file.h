@@ -23,11 +23,14 @@
  */
  
 
-void file_set_parent_window	( GtkWindow * wnd );
-void file_set_file_name		( const gchar *name );
+void		file_set_parent_window	( GtkWindow * wnd );
+gboolean	file_save_dialog		( void );
+void		file_set_unsave			( void );
 
 
 
 /* GUI CallBacks */
+void on_menu_open_activate		( GtkMenuItem *menuitem, gpointer user_data);
+void on_menu_save_activate		( GtkMenuItem *menuitem, gpointer user_data);
+void on_menu_save_as_activate	( GtkMenuItem *menuitem, gpointer user_data);
 
-void on_menu_save_activate	( GtkMenuItem *menuitem, gpointer user_data);

@@ -1,3 +1,8 @@
 # List of source files containing translatable strings.
 
+[type: gettext/glade]data/ui/gnome_paint.ui
+src/color.c
+src/cv_drawing.c
+src/file.c
 src/main.c
+src/pixbuf-file-chooser.c

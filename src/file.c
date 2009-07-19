@@ -28,13 +28,23 @@
 
 #include "pixbuf-file-chooser.h"
 
+#include "cv_drawing.h"
+
 
 /*private functions*/
-void file_name_free	(gpointer data);
+static void		file_print_title	(void);
+static void		file_set_name		(const char *name);
+static void		file_set_type		(const char *type);
+static void		file_set_title		(const char *title);
+static void		file_set_untitle	(void);
 
 /*private data*/
 GtkWindow 	*parent_window	=	NULL;
-GString 	*file_name		=	NULL;
+gchar 		*file_name		=	NULL;
+gchar 		*file_title		=	NULL;
+gchar 		*file_type		=	NULL;
+gboolean	b_saved			=	FALSE;
+gboolean	b_untitle		=	TRUE;
 
 
 /*
@@ -45,68 +55,213 @@ void
 file_set_parent_window	( GtkWindow * wnd )
 {
 	parent_window	=	wnd;
-	file_name		=	g_string_new("");	
-	g_assert( file_name );
-	g_object_set_data_full (	G_OBJECT(parent_window), "file_name",
-			               		(gpointer)file_name , 
-			                	(GDestroyNotify)file_name_free );
-	file_set_file_name( NULL );
+	file_set_untitle ();
+	b_saved	=	TRUE;
+	file_print_title ();
 }
 
-void 
-file_set_file_name	( const gchar *name )
+void		
+file_set_unsave ( void )
 {
-	GString *title	= g_string_new("");
-	g_string_assign ( file_name, (name == NULL)?_("Untitled document"):name );
-	g_string_printf ( title, _("%s - gnome-paint"), file_name->str );
-	gtk_window_set_title ( parent_window, title->str);
-	g_string_free( title, TRUE );
+	b_saved	=	FALSE;
+	file_print_title ();
 }
 
+gboolean
+file_save_dialog ( void )
+{
+	gboolean cancel = FALSE;
+	if (!b_saved)
+	{
+		gint result;
+		GtkWidget *dlg;
+        dlg = gtk_message_dialog_new(
+               parent_window, 
+               GTK_DIALOG_MODAL, 
+               GTK_MESSAGE_QUESTION, 
+               GTK_BUTTONS_NONE, 
+               _("Do you want to save the changes you made to \"%s\"?\nYour changes will be lost if you don't save them."),
+               file_title);
+		gtk_dialog_add_button (GTK_DIALOG(dlg), GTK_STOCK_DISCARD, GTK_RESPONSE_NO);
+        gtk_dialog_add_button (GTK_DIALOG(dlg), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+        gtk_dialog_add_button (GTK_DIALOG(dlg), GTK_STOCK_SAVE, GTK_RESPONSE_YES);
+		gtk_dialog_set_default_response (GTK_DIALOG(dlg), GTK_RESPONSE_YES);
 
+		result = gtk_dialog_run (GTK_DIALOG (dlg));
+		gtk_widget_destroy (dlg);
+		switch (result)
+        {
+            case GTK_RESPONSE_YES:
+				on_menu_save_activate (NULL, NULL);
+                if ( b_saved )
+                {
+                    cancel = FALSE;
+                }
+                else
+                {
+                    cancel = TRUE;
+                }
+                break;
+            case GTK_RESPONSE_CANCEL:
+                cancel = TRUE;
+                break;
+         }
+	}
+	return cancel;
+}
+
+/* GUI CallBacks */
+
+void
+on_menu_open_activate	( GtkMenuItem *menuitem, gpointer user_data)
+{
+	if (!file_save_dialog () )
+	{
+		GtkWidget *dialog;
+		gint response;
+
+		dialog = pixbuf_file_chooser_new (GTK_FILE_CHOOSER_ACTION_OPEN);
+
+		response = gtk_dialog_run (GTK_DIALOG (dialog));
+		gtk_widget_hide (dialog);
+
+		if (response == GTK_RESPONSE_OK) 
+		{
+			gchar * name				= gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
+			gchar * title				= pixbuf_file_chooser_get_name (PIXBUF_FILE_CHOOSER(dialog));
+			GdkPixbufFormat * format;
+			gchar * type;
+
+			format = cv_load_file (name);
+			if( format != NULL )
+			{
+				if (gdk_pixbuf_format_is_writable (format))
+				{
+					type = gdk_pixbuf_format_get_name (format);
+					b_untitle	=	FALSE;
+					b_saved		=	TRUE;
+					file_set_type	(type);
+					file_set_name	(name);
+					file_set_title	(title);
+				}
+				else
+				{
+					file_set_untitle ();
+				}
+			}
+
+			g_free (name);
+			g_free (title);
+			g_free (type);
+		}
+		gtk_widget_destroy (dialog);
+	}
+}
 
 void 
 on_menu_save_activate	( GtkMenuItem *menuitem, gpointer user_data)
 {
+	if (b_untitle)
+	{
+		on_menu_save_as_activate (menuitem, user_data);
+	}
+	else
+	{
+		if (cv_save_file (file_name, file_type))
+		{
+			b_saved		=	TRUE;
+			file_print_title ();
+		}
+	}
+}
+
+void
+on_menu_save_as_activate	( GtkMenuItem *menuitem, gpointer user_data)
+{
 	GtkWidget *dialog;
-	GFile *save_file = NULL;
 	gint response;
 
 	dialog = pixbuf_file_chooser_new (GTK_FILE_CHOOSER_ACTION_SAVE);
 	pixbuf_file_chooser_set_current_filter( PIXBUF_FILE_CHOOSER (dialog), "png");
-	gtk_file_chooser_set_current_name ( GTK_FILE_CHOOSER (dialog), file_name->str);
+	gtk_file_chooser_set_current_name ( GTK_FILE_CHOOSER (dialog), file_title);
 
 	response = gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_hide (dialog);
-
+	
 	if (response == GTK_RESPONSE_OK) 
 	{
-		gchar * name				= pixbuf_file_chooser_get_name (PIXBUF_FILE_CHOOSER(dialog));
+		gchar * name				= gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
+		gchar * title				= pixbuf_file_chooser_get_name (PIXBUF_FILE_CHOOSER(dialog));
 		GdkPixbufFormat * format	= pixbuf_file_chooser_get_format (PIXBUF_FILE_CHOOSER(dialog));
 		gchar * type				= gdk_pixbuf_format_get_name (format);
-		gchar * filename			= gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
-		g_print("%s\n",name);
 
-		file_set_file_name( name );
-		g_free (name);
 
-		cv_save_file (filename, type);
+		if (cv_save_file (name, type))
+		{
+			b_untitle	=	FALSE;
+			b_saved		=	TRUE;
+
+			file_set_name	(name);
+			file_set_type	(type);
+			file_set_title	(title);
+		}
 		
-		g_print("%s\n",filename);
-		g_free (filename);
+		g_free (name);
+		g_free (title);
 		g_free (type);
 	}
-	gtk_widget_destroy (dialog);
+	gtk_widget_destroy (dialog);	
 }
 
 
-/*private function*/
-void  
-file_name_free(gpointer data)
+/*Private*/
+
+static void
+file_print_title (void)
 {
-	g_string_free( ( GString * )data, TRUE );
+	gchar *str;
+
+	str = g_strdup_printf (_("%s - gnome-paint"), file_title);
+	
+	if (!b_saved)
+	{
+		gchar *copy;
+		copy = g_strdup_printf ("%c%s", '*', str);
+		g_free (str);
+		str = copy;
+	}
+
+	gtk_window_set_title ( parent_window, str);
+
+	g_free (str);
 }
 
+static void
+file_set_name (const char *name)
+{
+	g_free (file_name);
+	file_name = g_strdup (name);
+}
 
+static void
+file_set_type (const char *type)
+{
+	g_free (file_type);
+	file_type = g_strdup (type);
+}
 
+static void 
+file_set_title	(const char *title)
+{
+	g_free( file_title );
+	file_title	= g_strdup (title);	
+	file_print_title ();
+}
 
+static void
+file_set_untitle (void)
+{
+	b_saved			=	FALSE;
+	b_untitle		=	TRUE;
+	file_set_title (_("untitled"));
+}

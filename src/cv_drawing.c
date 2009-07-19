@@ -24,14 +24,17 @@
  
  
 #include <gtk/gtk.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
 
 #include "cv_drawing.h"
-//#include "file.h"
+#include "cv_resize.h"
 #include "cv_line_tool.h"
 
 
 /*Member functions*/
-GdkGC * 	cv_create_new_gc ( char * name );
+static GdkGC * 	cv_create_new_gc	( char * name );
+static void		cv_create_pixmap	(gint width, gint height, gboolean b_resize);
+
 
 
 /* private data  */
@@ -92,38 +95,49 @@ void  my_g_object_unref(gpointer data)
 	g_object_unref( G_OBJECT(data) );
 }
 
+
 void
-cv_create_pixmap ( gint width, gint height )
+cv_resize_pixmap ( gint width, gint height )
 {
-	GdkPixmap *		px;
-	px = gdk_pixmap_new ( cv.drawing, width, height, -1);
-	g_assert( px );
-	/* initial drawing is filled with background color */ 
-	gdk_draw_rectangle( px, cv.gc_bg, TRUE, 0, 0, width, height );
-	if ( cv.pixmap != NULL )
-	{
-		gint w,h;
-		gdk_drawable_get_size ( cv.pixmap, &w, &h );
-		if ( width < w ) w = width;
-		if ( height < h ) h = height;
-		gdk_draw_drawable (	px,
-		                	cv.gc_fg,
-			                cv.pixmap,
-			                0, 0,
-			                0, 0,
-			                w, h );
-	}
-	/*set new data to be destroyed and destroy old data*/
-	g_object_set_data_full (	G_OBJECT(cv.widget), "cv_pixmap", 
-	                       		(gpointer)px, 
-	                        	(GDestroyNotify)g_object_unref );
-	cv.pixmap	=	px;
+	cv_create_pixmap (width, height, TRUE); 
 }
 
-
-void 
-cv_save_file ( const gchar *filename, const gchar *type )
+GdkPixbufFormat *
+cv_load_file (const gchar *filename)
 {
+	gint width, height;
+	GdkPixbufFormat *format;
+	format = gdk_pixbuf_get_file_info (filename, &width, &height);
+	if (format != NULL )
+	{
+		GError 		**error	= NULL;
+		GdkPixbuf 	*pixbuf	= NULL;
+		pixbuf = gdk_pixbuf_new_from_file (filename, error);
+		if (pixbuf != NULL)
+		{
+			cv_create_pixmap (width, height, FALSE);
+			gdk_draw_pixbuf	(cv.pixmap,
+					         cv.gc_fg,
+							 pixbuf,
+							 0, 0,
+							 0, 0,
+							 width, height,
+					         GDK_RGB_DITHER_NORMAL, 0, 0);
+			gtk_widget_queue_draw (cv.widget);
+		}
+		else
+		{
+			format = NULL;
+		}
+		g_object_unref (pixbuf);
+	}
+	return format;
+}
+
+gboolean
+cv_save_file (const gchar *filename, const gchar *type)
+{
+	gboolean	ret		= FALSE;
 	if ( cv.pixmap != NULL )
 	{
 		GError **error = NULL;
@@ -161,8 +175,13 @@ cv_save_file ( const gchar *filename, const gchar *type )
 				g_error_free (*error);
 			}
 		}
+		else
+		{
+			ret	=	TRUE;
+		}
 		g_object_unref (pixbuf);
 	}
+	return ret;
 }
 
 /* GUI CallBacks */
@@ -179,8 +198,8 @@ on_cv_drawing_realize (GtkWidget *widget, gpointer user_data)
 	cv_set_color_fg ( &black_color );
 	cv_set_color_bg ( &white_color );
 	cv_set_line_width ( 1 );
-	cv_create_pixmap ( 300, 300);
 	cv_resize_set_canvas ( &cv );
+	cv_create_pixmap ( 300, 300, TRUE);
 }
 
 
@@ -255,7 +274,7 @@ on_cv_drawing_expose_event	(   GtkWidget	   *widget,
 
 /*private functions*/
 
-GdkGC *
+static GdkGC *
 cv_create_new_gc ( char * name )
 {
 	GdkGC  * gc;
@@ -268,4 +287,37 @@ cv_create_new_gc ( char * name )
 	return gc;
 }
 
+static void
+cv_create_pixmap ( gint width, gint height, gboolean b_resize )
+{
+	GdkPixmap *		px;
+	px = gdk_pixmap_new ( cv.drawing, width, height, -1);
+	g_assert( px );
+	if (b_resize)
+	{
+		/* initial drawing is filled with background color */ 
+		gdk_draw_rectangle( px, cv.gc_bg, TRUE, 0, 0, width, height );
+		if ( cv.pixmap != NULL )
+		{
+			gint w,h;
+			gdk_drawable_get_size ( cv.pixmap, &w, &h );
+			if ( width < w ) w = width;
+			if ( height < h ) h = height;
+			gdk_draw_drawable (	px,
+				            	cv.gc_fg,
+					            cv.pixmap,
+					            0, 0,
+					            0, 0,
+					            w, h );
+		}
+	}
+	/*set new data to be destroyed and destroy old data*/
+	g_object_set_data_full (	G_OBJECT(cv.widget), "cv_pixmap", 
+	                       		(gpointer)px, 
+	                        	(GDestroyNotify)g_object_unref );
+	cv.pixmap	=	px;
+
+	gtk_widget_set_size_request ( cv.widget, width, height );
+	cv_resize_adjust_box_size (width, height);
+}
 

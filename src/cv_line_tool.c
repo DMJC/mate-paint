@@ -25,6 +25,7 @@
  #include <gtk/gtk.h>
 
 #include "cv_line_tool.h"
+#include "file.h"
 
 /*Member functions*/
 gboolean	button_press	( GdkEventButton *event );
@@ -91,6 +92,7 @@ button_release ( GdkEventButton *event )
 			if( is_draw )
 			{
 				gdk_draw_line ( cv->pixmap, gc, x0, y0, x1, y1 );
+				file_set_unsave ();
 			}
 			gtk_widget_queue_draw ( cv->widget );
 			is_draw = FALSE;
@@ -131,5 +133,5 @@ void reset ( void )
 
 void destroy ( gpointer data  )
 {
-	g_print("line tool destroy\n");
+	//g_print("line tool destroy\n");
 }

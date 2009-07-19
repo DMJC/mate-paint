@@ -27,6 +27,7 @@
 #include "common.h"
 #include "cv_resize.h"
 #include "cv_drawing.h"
+#include "file.h"
 
 
 #define BOX_EDGE_SIZE	4
@@ -87,6 +88,18 @@ cv_resize_draw ( void )
 	g_string_printf (str, "%dx%d", x, y );
 	gtk_label_set_text( GTK_LABEL(lb_size), str->str );
 	g_string_free( str, TRUE);
+}
+
+void
+cv_resize_adjust_box_size (gint width, gint height)
+{
+	gint w, h;
+	w = ( width  < BOX_EDGE_SIZE )?width :BOX_EDGE_SIZE;
+    h = ( height < BOX_EDGE_SIZE )?height:BOX_EDGE_SIZE;
+	gtk_widget_set_size_request ( cv_top_edge		, w, BOX_EDGE_SIZE );
+	gtk_widget_set_size_request ( cv_bottom_edge	, w, BOX_EDGE_SIZE );
+	gtk_widget_set_size_request ( cv_left_edge		, BOX_EDGE_SIZE, h );
+	gtk_widget_set_size_request ( cv_right_edge		, BOX_EDGE_SIZE, h );
 }
 
 /* GUI CallBacks */
@@ -341,14 +354,9 @@ cv_resize_stop ( gdouble x,  gdouble y)
 		width	= (width<1)?1:width;
 		height	= cv->widget->allocation.height + (gint)y;
 		height	= (height<1)?1:height;
-		gtk_widget_set_size_request ( cv->widget, width, height );
-        w = ( width  < BOX_EDGE_SIZE )?width :BOX_EDGE_SIZE;
-        h = ( height < BOX_EDGE_SIZE )?height:BOX_EDGE_SIZE;
-		gtk_widget_set_size_request ( cv_top_edge		, w, BOX_EDGE_SIZE );
-		gtk_widget_set_size_request ( cv_bottom_edge	, w, BOX_EDGE_SIZE );
-		gtk_widget_set_size_request ( cv_left_edge		, BOX_EDGE_SIZE, h );
-		gtk_widget_set_size_request ( cv_right_edge		, BOX_EDGE_SIZE, h );
-		cv_create_pixmap ( width, height );
+
+		cv_resize_pixmap ( width, height );
+		file_set_unsave ();
 	}
 	cv_resize_cancel();
 }
