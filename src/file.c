@@ -182,8 +182,8 @@ on_menu_save_as_activate	( GtkMenuItem *menuitem, gpointer user_data)
 	gint response;
 
 	dialog = pixbuf_file_chooser_new (GTK_FILE_CHOOSER_ACTION_SAVE);
-	pixbuf_file_chooser_set_current_filter( PIXBUF_FILE_CHOOSER (dialog), "png");
 	gtk_file_chooser_set_current_name ( GTK_FILE_CHOOSER (dialog), file_title);
+	pixbuf_file_chooser_set_current_filter( PIXBUF_FILE_CHOOSER (dialog), "png");
 
 	response = gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_hide (dialog);
