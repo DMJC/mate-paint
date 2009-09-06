@@ -194,7 +194,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = \
 	ui\
-	icons
+	icons\
+	desktop
 
 all: all-recursive
 

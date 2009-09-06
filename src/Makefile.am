@@ -33,7 +33,17 @@ gnome_paint_SOURCES = \
 	file.c  \
 	file.h  \
 	pixbuf-file-chooser.c  \
-	pixbuf-file-chooser.h
+	pixbuf-file-chooser.h  \
+	pixmaps/line_0.xpm  \
+	pixmaps/line_1.xpm  \
+	pixmaps/line_2.xpm  \
+	pixmaps/line_3.xpm  \
+	pixmaps/line_4.xpm  \
+	pixmaps/rect0.xpm  \
+	pixmaps/rect1.xpm  \
+	pixmaps/rect2.xpm  \
+	pixmaps/sel1.xpm  \
+	pixmaps/sel2.xpm
 
 gnome_paint_LDFLAGS = \
 	-Wl,--export-dynamic

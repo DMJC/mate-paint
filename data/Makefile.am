@@ -1,7 +1,8 @@
 
 SUBDIRS = \
 	ui\
-	icons
+	icons\
+	desktop
 
 
 ## File created by the gnome-build tools

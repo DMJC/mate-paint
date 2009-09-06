@@ -31,6 +31,7 @@
 GtkWidget	*create_window		(   void	);
 void		on_window_destroy   (   GtkObject   *object, 
 									gpointer	user_data   );
+void		gnome_paint_init	( int argc, char *argv[] );
 
 int
 main (int argc, char *argv[])
@@ -48,14 +49,26 @@ main (int argc, char *argv[])
 	gtk_set_locale ();
 	gtk_init (&argc, &argv);
 
+
 	window = create_window ();
+	gnome_paint_init (argc, argv);
 	gtk_widget_show (window);
+
 
 	gtk_main ();
 	return 0;	
 }
 
 
+void
+gnome_paint_init	( int argc, char *argv[] )
+{
+	if (argc > 1)
+	{
+		/* only open the first one for now; open additonal ones TO DO */
+		file_open (argv[1]);
+	}
+}
 
 gboolean
 on_window_delete_event (GtkWidget       *widget,

@@ -43,7 +43,7 @@ GtkWindow 	*parent_window	=	NULL;
 gchar 		*file_name		=	NULL;
 gchar 		*file_title		=	NULL;
 gchar 		*file_type		=	NULL;
-gboolean	b_saved			=	FALSE;
+gboolean	b_saved			=	TRUE;
 gboolean	b_untitle		=	TRUE;
 
 
@@ -55,9 +55,8 @@ void
 file_set_parent_window	( GtkWindow * wnd )
 {
 	parent_window	=	wnd;
-	file_set_untitle ();
 	b_saved	=	TRUE;
-	file_print_title ();
+	file_set_untitle ();
 }
 
 void		
@@ -110,6 +109,39 @@ file_save_dialog ( void )
 	return cancel;
 }
 
+gboolean	
+file_open ( const gchar * filename )
+{
+	gboolean		ret		=	FALSE;
+	gchar 			*title	=	g_filename_display_basename (filename);
+	GdkPixbufFormat	*format;
+
+	format = cv_load_file (filename);
+	if( format != NULL )
+	{
+		ret	=	TRUE;
+		if (gdk_pixbuf_format_is_writable (format))
+		{
+			gchar	*type;
+			type 		=	gdk_pixbuf_format_get_name (format);
+			b_untitle	=	FALSE;
+			b_saved		=	TRUE;
+			file_set_type	(type);
+			file_set_name	(filename);
+			file_set_title	(title);
+			g_free (type);
+		}
+		else
+		{
+			b_saved	=	FALSE;
+			file_set_untitle ();
+		}
+	}
+	g_free (title);
+
+	return ret;
+}
+
 /* GUI CallBacks */
 
 void
@@ -127,32 +159,9 @@ on_menu_open_activate	( GtkMenuItem *menuitem, gpointer user_data)
 
 		if (response == GTK_RESPONSE_OK) 
 		{
-			gchar * name				= gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
-			gchar * title				= pixbuf_file_chooser_get_name (PIXBUF_FILE_CHOOSER(dialog));
-			GdkPixbufFormat * format;
-			gchar * type;
-
-			format = cv_load_file (name);
-			if( format != NULL )
-			{
-				if (gdk_pixbuf_format_is_writable (format))
-				{
-					type = gdk_pixbuf_format_get_name (format);
-					b_untitle	=	FALSE;
-					b_saved		=	TRUE;
-					file_set_type	(type);
-					file_set_name	(name);
-					file_set_title	(title);
-				}
-				else
-				{
-					file_set_untitle ();
-				}
-			}
-
+			gchar * name	= gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
+			file_open (name);
 			g_free (name);
-			g_free (title);
-			g_free (type);
 		}
 		gtk_widget_destroy (dialog);
 	}
@@ -261,7 +270,6 @@ file_set_title	(const char *title)
 static void
 file_set_untitle (void)
 {
-	b_saved			=	FALSE;
 	b_untitle		=	TRUE;
 	file_set_title (_("untitled"));
 }
