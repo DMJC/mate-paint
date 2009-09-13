@@ -150,7 +150,7 @@ on_draw_rectangle_toggled (GtkToggleToolButton *button, gpointer user_data)
 		show_frame_rect ( TRUE );
 		gtk_notebook_set_current_page ( notebook, RECT_LINE );
 		/*select tool*/
-		cv_sel_none_tool ();
+		cv_sel_rectangle_tool ();
 	}
 }
 
@@ -316,6 +316,33 @@ on_line4_toggled (GtkToggleToolButton *button, gpointer user_data)
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
 		cv_set_line_width ( 5 );
+	}
+}
+
+void 
+on_rect0_toggled (GtkToggleToolButton *button, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( button ) )
+	{
+		cv_set_filled ( FILLED_NONE );
+	}
+}
+
+void 
+on_rect1_toggled (GtkToggleToolButton *button, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( button ) )
+	{
+		cv_set_filled ( FILLED_BACK );
+	}
+}
+
+void 
+on_rect2_toggled (GtkToggleToolButton *button, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( button ) )
+	{
+		cv_set_filled ( FILLED_FORE );
 	}
 }
 

@@ -43,7 +43,9 @@ gnome_paint_SOURCES = \
 	pixmaps/rect1.xpm  \
 	pixmaps/rect2.xpm  \
 	pixmaps/sel1.xpm  \
-	pixmaps/sel2.xpm
+	pixmaps/sel2.xpm  \
+	cv_rectangle_tool.c  \
+	cv_rectangle_tool.h
 
 gnome_paint_LDFLAGS = \
 	-Wl,--export-dynamic

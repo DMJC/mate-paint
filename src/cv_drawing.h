@@ -25,19 +25,20 @@
 #include "common.h"
 #include "cv_resize.h"
 
-void				cv_set_color_bg		( GdkColor *color );
-void				cv_set_color_fg		( GdkColor *color );
-void				cv_set_line_width	( gint width );
-void				cv_sel_none_tool	( void );
-void				cv_sel_line_tool	( void );
-void				cv_resize_pixmap	(gint width, gint height);
-gboolean			cv_save_file		(const gchar *filename, const gchar *type);
-GdkPixbufFormat *	cv_load_file		(const gchar *filename);
+void				cv_set_color_bg			( GdkColor *color );
+void				cv_set_color_fg			( GdkColor *color );
+void				cv_set_line_width		( gint width );
+void				cv_set_filled			( gp_filled filled );
+void				cv_sel_none_tool		( void );
+void				cv_sel_line_tool		( void );
+void				cv_sel_rectangle_tool	( void );
+void				cv_resize_pixmap		(gint width, gint height);
+gboolean			cv_save_file			(const gchar *filename, const gchar *type);
+GdkPixbufFormat *	cv_load_file			(const gchar *filename);
+
 
 /* GUI CallBacks */
 void on_cv_drawing_realize			(GtkWidget *widget, gpointer user_data);
-
-
 
 /* GUI events */
 gboolean on_cv_drawing_button_press_event  			(GtkWidget	   *widget, 

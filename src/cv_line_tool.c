@@ -28,23 +28,23 @@
 #include "file.h"
 
 /*Member functions*/
-gboolean	button_press	( GdkEventButton *event );
-gboolean	button_release	( GdkEventButton *event );
-gboolean	button_motion	( GdkEventMotion *event );
-void		draw			( void );
-void		reset			( void );
-void		destroy			( gpointer data  );
+static gboolean	button_press	( GdkEventButton *event );
+static gboolean	button_release	( GdkEventButton *event );
+static gboolean	button_motion	( GdkEventMotion *event );
+static void		draw			( void );
+static void		reset			( void );
+static void		destroy			( gpointer data  );
 
 /*private data*/
-static gnome_paint_tool			tool;
-static gnome_paint_canvas *		cv		= NULL;
-static GdkGC *					gc		= NULL;
-static gint 					x0,y0,x1,y1;
-static guint					button	= 0;
-static gboolean 				is_draw = FALSE;
+static gp_tool			tool;
+static gp_canvas *		cv		= NULL;
+static GdkGC *			gc		= NULL;
+static gint 			x0,y0,x1,y1;
+static guint			button	= 0;
+static gboolean 		is_draw = FALSE;
 
-const gnome_paint_tool * 
-tool_line_init ( gnome_paint_canvas * canvas )
+const gp_tool * 
+tool_line_init ( gp_canvas * canvas )
 {
 	cv					=	canvas;
 	tool.button_press	= button_press;

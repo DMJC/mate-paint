@@ -40,26 +40,26 @@ static void cv_resize_stop		( gdouble x,  gdouble y);
 static void cv_resize_cancel	( void );
 
 /* private data  */
-static gnome_paint_canvas	*cv				=	NULL;
-static GtkWidget			*cv_ev_box		=	NULL;
-static GtkWidget			*cv_top_edge	=	NULL;
-static GtkWidget			*cv_bottom_edge	=	NULL;
-static GtkWidget			*cv_left_edge	=	NULL;
-static GtkWidget			*cv_right_edge	=	NULL;
-static GtkWidget			*lb_size		=	NULL;
-static GdkGC 				*gc_resize		=	NULL;
-static GdkColor 			edge_color		=	{ 0, 0x2f00, 0x3600, 0x9800  };
-static gboolean				b_resize		=	FALSE;
-static gboolean				b_rz_init		=	FALSE;
-static gint					x_res			=	0;
-static gint					y_res			=	0;
+static gp_canvas	*cv				=	NULL;
+static GtkWidget	*cv_ev_box		=	NULL;
+static GtkWidget	*cv_top_edge	=	NULL;
+static GtkWidget	*cv_bottom_edge	=	NULL;
+static GtkWidget	*cv_left_edge	=	NULL;
+static GtkWidget	*cv_right_edge	=	NULL;
+static GtkWidget	*lb_size		=	NULL;
+static GdkGC 		*gc_resize		=	NULL;
+static GdkColor 	edge_color		=	{ 0, 0x2f00, 0x3600, 0x9800  };
+static gboolean		b_resize		=	FALSE;
+static gboolean		b_rz_init		=	FALSE;
+static gint			x_res			=	0;
+static gint			y_res			=	0;
 
 /*
  *   CODE
  */
 
 void
-cv_resize_set_canvas ( gnome_paint_canvas * canvas )
+cv_resize_set_canvas ( gp_canvas * canvas )
 {
 	cv = canvas;
 }

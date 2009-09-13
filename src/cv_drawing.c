@@ -29,7 +29,7 @@
 #include "cv_drawing.h"
 #include "cv_resize.h"
 #include "cv_line_tool.h"
-
+#include "cv_rectangle_tool.h"
 
 /*Member functions*/
 static GdkGC * 	cv_create_new_gc	( char * name );
@@ -38,8 +38,8 @@ static void		cv_create_pixmap	(gint width, gint height, gboolean b_resize);
 
 
 /* private data  */
-static gnome_paint_canvas	cv;
-static const gnome_paint_tool		*cv_tool		=	NULL;
+static gp_canvas	cv;
+static const gp_tool		*cv_tool		=	NULL;
 static GdkColor 			white_color		=	{ 0, 0xffff, 0xffff, 0xffff  };
 static GdkColor 			black_color		=	{ 0, 0x0000, 0x0000, 0x0000  };
 
@@ -71,6 +71,12 @@ cv_set_line_width	( gint width )
 	                             GDK_CAP_NOT_LAST, GDK_JOIN_ROUND );
 }
 
+void
+cv_set_filled ( gp_filled filled )
+{
+	cv.filled	=	filled;
+}
+
 void cv_sel_none_tool	( void )
 {
 	gdk_window_set_cursor ( cv.drawing, NULL);
@@ -79,12 +85,24 @@ void cv_sel_none_tool	( void )
 
 void cv_sel_line_tool	( void )
 {
-	static const gnome_paint_tool	*line_tool	=	NULL;
+	static const gp_tool	*line_tool	=	NULL;
 	if ( line_tool == NULL )
 	{
 		line_tool = tool_line_init ( &cv );
 	}
 	cv_tool = line_tool;
+	cv_tool->reset ();
+}
+
+
+void cv_sel_rectangle_tool	( void )
+{
+	static const gp_tool	*rectangle_tool	=	NULL;
+	if ( rectangle_tool == NULL )
+	{
+		rectangle_tool = tool_rectangle_init ( &cv );
+	}
+	cv_tool = rectangle_tool;
 	cv_tool->reset ();
 }
 
@@ -198,6 +216,7 @@ on_cv_drawing_realize (GtkWidget *widget, gpointer user_data)
 	cv_set_color_fg ( &black_color );
 	cv_set_color_bg ( &white_color );
 	cv_set_line_width ( 1 );
+	cv_set_filled ( FILLED_NONE );
 	cv_resize_set_canvas ( &cv );
 	cv_create_pixmap ( 300, 300, TRUE);
 }

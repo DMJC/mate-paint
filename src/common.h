@@ -56,7 +56,15 @@ typedef enum
     LEFT_BUTTON		=   1,
     MIDDLE_BUTTON	=   2,
 	RIGHT_BUTTON	=   3
-} gnome_paint_button;
+} gp_button;
+
+/* Filled enum */
+typedef enum
+{
+	FILLED_NONE,
+	FILLED_BACK,
+	FILLED_FORE
+} gp_filled;
 
 /* Canvas Type */
 typedef struct
@@ -67,7 +75,8 @@ typedef struct
 	GdkGC *			gc_fg;
 	GdkGC *			gc_bg;
 	GdkPixmap *		pixmap;
-} gnome_paint_canvas;
+	gp_filled		filled;
+} gp_canvas;
 
 /* Tool Type*/
 typedef struct
@@ -78,6 +87,6 @@ typedef struct
 	void		(*draw)				( void );
 	void		(*reset)			( void );
 	void		(*destroy)			( gpointer data );
-} gnome_paint_tool;
+} gp_tool;
 
 #endif /*__COMMON_H__*/

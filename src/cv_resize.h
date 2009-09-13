@@ -24,7 +24,7 @@
 
 #include "common.h"
 
-void cv_resize_set_canvas		( gnome_paint_canvas * canvas );
+void cv_resize_set_canvas		( gp_canvas * canvas );
 void cv_resize_draw				( void );
 void cv_resize_adjust_box_size	(gint width, gint height);
 

@@ -25,6 +25,5 @@
  #include "common.h"
 
 
-const gnome_paint_tool * tool_line_init ( gnome_paint_canvas * canvas );
-
+const gp_tool * tool_line_init ( gp_canvas * canvas );
 

@@ -1,4 +1,4 @@
-/***************************************************************************
+ /***************************************************************************
  *            toolbar.h
  *
  *  Sat May  9 15:13:23 2009
@@ -67,6 +67,9 @@ void on_line1_toggled					(GtkToggleToolButton *button, gpointer user_data);
 void on_line2_toggled					(GtkToggleToolButton *button, gpointer user_data);
 void on_line3_toggled					(GtkToggleToolButton *button, gpointer user_data);
 void on_line4_toggled					(GtkToggleToolButton *button, gpointer user_data);
-
+/*Rectangle toolbar toggled functions*/
+void on_rect0_toggled					(GtkToggleToolButton *button, gpointer user_data);
+void on_rect1_toggled					(GtkToggleToolButton *button, gpointer user_data);
+void on_rect2_toggled					(GtkToggleToolButton *button, gpointer user_data);
 
 
