@@ -29,6 +29,7 @@
 #include "cv_drawing.h"
 #include "cv_resize.h"
 #include "cv_line_tool.h"
+#include "cv_pencil_tool.h"
 #include "cv_rectangle_tool.h"
 
 /*Member functions*/
@@ -53,13 +54,17 @@ cv_set_color_bg	( GdkColor *color )
 {
 	gdk_gc_set_rgb_bg_color ( cv.gc_fg, color );		
 	gdk_gc_set_rgb_fg_color ( cv.gc_bg, color );		
+	gdk_gc_set_rgb_bg_color ( cv.gc_fg_pencil, color );		
+	gdk_gc_set_rgb_fg_color ( cv.gc_bg_pencil, color );		
 }
 
 void
 cv_set_color_fg	( GdkColor *color )
 {
-	gdk_gc_set_rgb_fg_color ( cv.gc_fg, color );	
-	gdk_gc_set_rgb_bg_color ( cv.gc_bg, color );	
+	gdk_gc_set_rgb_fg_color ( cv.gc_fg, color );
+	gdk_gc_set_rgb_bg_color ( cv.gc_bg, color );
+	gdk_gc_set_rgb_fg_color ( cv.gc_fg_pencil, color );
+	gdk_gc_set_rgb_bg_color ( cv.gc_bg_pencil, color );
 }
 
 void
@@ -82,6 +87,18 @@ void cv_sel_none_tool	( void )
 	gdk_window_set_cursor ( cv.drawing, NULL);
 	cv_tool = NULL;
 }
+
+void cv_sel_pencil_tool	( void )
+{
+	static const gp_tool	*pencil_tool	=	NULL;
+	if ( pencil_tool == NULL )
+	{
+		pencil_tool = tool_pencil_init ( &cv );
+	}
+	cv_tool = pencil_tool;
+	cv_tool->reset ();
+}
+
 
 void cv_sel_line_tool	( void )
 {
@@ -207,12 +224,14 @@ cv_save_file (const gchar *filename, const gchar *type)
 void
 on_cv_drawing_realize (GtkWidget *widget, gpointer user_data)
 {
-	cv.widget	=	widget;
-	cv.toplevel	=	gtk_widget_get_toplevel( widget );
-	cv.drawing	=	cv.widget->window;
-	cv.gc_fg	=	cv_create_new_gc( "cv_gc_fg" );
-	cv.gc_bg	=	cv_create_new_gc( "cv_gc_bg" );
-	cv.pixmap	=	NULL;
+	cv.widget		=	widget;
+	cv.toplevel		=	gtk_widget_get_toplevel( widget );
+	cv.drawing		=	cv.widget->window;
+	cv.gc_fg		=	cv_create_new_gc( "cv_gc_fg" );
+	cv.gc_bg		=	cv_create_new_gc( "cv_gc_bg" );
+	cv.gc_fg_pencil	=	cv_create_new_gc( "cv_gc_fg_pencil" );
+	cv.gc_bg_pencil	=	cv_create_new_gc( "cv_gc_bg_pencil" );
+	cv.pixmap		=	NULL;
 	cv_set_color_fg ( &black_color );
 	cv_set_color_bg ( &white_color );
 	cv_set_line_width ( 1 );

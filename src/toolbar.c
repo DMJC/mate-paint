@@ -109,7 +109,7 @@ on_tool_pencil_toggled	(GtkToggleToolButton *button, gpointer user_data)
 		g_return_if_fail( notebook != NULL );
 		gtk_notebook_set_current_page ( notebook, NONE );
 		/*select tool*/
-		cv_sel_none_tool ();
+		cv_sel_pencil_tool ();
 	}
 }
 

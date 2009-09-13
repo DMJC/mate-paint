@@ -74,6 +74,8 @@ typedef struct
 	GdkPixmap *		drawing;
 	GdkGC *			gc_fg;
 	GdkGC *			gc_bg;
+	GdkGC *			gc_fg_pencil;
+	GdkGC *			gc_bg_pencil;
 	GdkPixmap *		pixmap;
 	gp_filled		filled;
 } gp_canvas;

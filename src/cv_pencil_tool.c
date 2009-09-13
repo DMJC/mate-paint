@@ -24,7 +24,7 @@
  
  #include <gtk/gtk.h>
 
-#include "cv_rectangle_tool.h"
+#include "cv_pencil_tool.h"
 #include "file.h"
 
 /*Member functions*/
@@ -40,24 +40,23 @@ static void		draw_in_pixmap	( GdkDrawable *drawable );
 /*private data*/
 static gp_tool			tool;
 static gp_canvas *		cv		= NULL;
-static GdkGC *			gcf		= NULL;
-static GdkGC *			gcb		= NULL;
+static GdkGC *			gc		= NULL;
 static gint 			x0,y0,x1,y1;
 static guint			button	= 0;
 static gboolean 		is_draw = FALSE;
 
 const gp_tool * 
-tool_rectangle_init ( gp_canvas * canvas )
+tool_pencil_init ( gp_canvas * canvas )
 {
 	cv					=	canvas;
-	tool.button_press	= button_press;
-	tool.button_release	= button_release;
-	tool.button_motion	= button_motion;
-	tool.draw			= draw;
-	tool.reset			= reset;
-	tool.destroy		= destroy;
+	tool.button_press	= 	button_press;
+	tool.button_release	= 	button_release;
+	tool.button_motion	= 	button_motion;
+	tool.draw			= 	draw;
+	tool.reset			= 	reset;
+	tool.destroy		= 	destroy;
 	/*set data to be destroyed*/
-	g_object_set_data_full (	G_OBJECT(cv->widget), "rectangle_tool", 
+	g_object_set_data_full (	G_OBJECT(cv->widget), "pencil_tool", 
 	                        	(gpointer)&tool, 
 	                        	(GDestroyNotify)(tool.destroy) );	
 	return &tool;
@@ -70,13 +69,11 @@ button_press ( GdkEventButton *event )
 	{
 		if ( event->button == LEFT_BUTTON )
 		{
-			gcf = cv->gc_fg;
-			gcb = cv->gc_bg;
+			gc = cv->gc_fg_pencil;
 		}
 		else if ( event->button == RIGHT_BUTTON )
 		{
-			gcf = cv->gc_bg;
-			gcb = cv->gc_fg;
+			gc = cv->gc_bg_pencil;
 		}
 		is_draw = !is_draw;
 		if( is_draw ) button = event->button;
@@ -123,14 +120,14 @@ draw ( void )
 {
 	if ( is_draw )
 	{
-		draw_in_pixmap (cv->drawing);
+		draw_in_pixmap ( cv->pixmap );
 	}
 }
 
 static void 
 reset ( void )
 {
-	GdkCursor *cursor = gdk_cursor_new ( GDK_CROSSHAIR );
+	GdkCursor *cursor = gdk_cursor_new ( GDK_PENCIL );
 	g_assert(cursor);
 	gdk_window_set_cursor ( cv->drawing, cursor );
 	gdk_cursor_unref( cursor );
@@ -146,23 +143,8 @@ destroy ( gpointer data  )
 static void
 draw_in_pixmap ( GdkDrawable *drawable )
 {
-	guint x = MIN(x0,x1);
-	guint y = MIN(y0,y1);
-	guint w = ABS(x1-x0);
-	guint h = ABS(y1-y0);
-	if ( cv->filled == FILLED_BACK )
-	{
-		gdk_draw_rectangle (drawable, gcb, TRUE, x, y, w, h);
-	}
-	else
-	if ( cv->filled == FILLED_FORE )
-	{
-		gdk_draw_rectangle (drawable, gcf, TRUE, x, y, w, h);
-	}
-
-	if ( cv->filled != FILLED_FORE )
-	{
-		gdk_draw_rectangle (drawable, gcf, FALSE, x, y, w, h);
-	}
+	gdk_draw_line (drawable, gc, x0, y0, x1, y1 );
+	x0 = x1;
+	y0 = y1;
 }
 
