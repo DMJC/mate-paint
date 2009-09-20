@@ -123,6 +123,17 @@ void cv_sel_rectangle_tool	( void )
 	cv_tool->reset ();
 }
 
+void cv_sel_ellipse_tool ( void )
+{
+	static const gp_tool	*ellipse_tool	=	NULL;
+	if ( ellipse_tool == NULL )
+	{
+		ellipse_tool = tool_ellipse_init ( &cv );
+	}
+	cv_tool = ellipse_tool;
+	cv_tool->reset ();
+}
+
 
 void  my_g_object_unref(gpointer data)
 {
@@ -237,7 +248,7 @@ on_cv_drawing_realize (GtkWidget *widget, gpointer user_data)
 	cv_set_line_width ( 1 );
 	cv_set_filled ( FILLED_NONE );
 	cv_resize_set_canvas ( &cv );
-	cv_create_pixmap ( 300, 300, TRUE);
+	cv_create_pixmap ( 320, 200, TRUE);
 }
 
 

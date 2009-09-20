@@ -47,7 +47,9 @@ gnome_paint_SOURCES = \
 	cv_rectangle_tool.c  \
 	cv_rectangle_tool.h  \
 	cv_pencil_tool.c  \
-	cv_pencil_tool.h
+	cv_pencil_tool.h  \
+	cv_ellipse_tool.c  \
+	cv_ellipse_tool.h
 
 gnome_paint_LDFLAGS = \
 	-Wl,--export-dynamic

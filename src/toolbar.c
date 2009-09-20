@@ -163,7 +163,7 @@ on_draw_ellipse_toggled	(GtkToggleToolButton *button, gpointer user_data)
 		show_frame_rect ( TRUE );
 		gtk_notebook_set_current_page ( notebook, RECT_LINE );
 		/*select tool*/
-		cv_sel_none_tool ();
+		cv_sel_ellipse_tool ();
 	}
 }
 

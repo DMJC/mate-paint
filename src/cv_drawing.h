@@ -33,6 +33,7 @@ void				cv_sel_none_tool		( void );
 void				cv_sel_pencil_tool		( void );
 void				cv_sel_line_tool		( void );
 void				cv_sel_rectangle_tool	( void );
+void				cv_sel_ellipse_tool		( void );
 void				cv_resize_pixmap		(gint width, gint height);
 gboolean			cv_save_file			(const gchar *filename, const gchar *type);
 GdkPixbufFormat *	cv_load_file			(const gchar *filename);

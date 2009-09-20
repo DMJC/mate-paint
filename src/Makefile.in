@@ -49,7 +49,7 @@ am_gnome_paint_OBJECTS = color.$(OBJEXT) main.$(OBJEXT) \
 	toolbar.$(OBJEXT) cv_resize.$(OBJEXT) cv_drawing.$(OBJEXT) \
 	cv_line_tool.$(OBJEXT) file.$(OBJEXT) \
 	pixbuf-file-chooser.$(OBJEXT) cv_rectangle_tool.$(OBJEXT) \
-	cv_pencil_tool.$(OBJEXT)
+	cv_pencil_tool.$(OBJEXT) cv_ellipse_tool.$(OBJEXT)
 gnome_paint_OBJECTS = $(am_gnome_paint_OBJECTS)
 am__DEPENDENCIES_1 =
 gnome_paint_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -251,7 +251,9 @@ gnome_paint_SOURCES = \
 	cv_rectangle_tool.c  \
 	cv_rectangle_tool.h  \
 	cv_pencil_tool.c  \
-	cv_pencil_tool.h
+	cv_pencil_tool.h  \
+	cv_ellipse_tool.c  \
+	cv_ellipse_tool.h
 
 gnome_paint_LDFLAGS = \
 	-Wl,--export-dynamic
@@ -332,6 +334,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/color.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cv_drawing.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cv_ellipse_tool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cv_line_tool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cv_pencil_tool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cv_rectangle_tool.Po@am__quote@
