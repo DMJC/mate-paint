@@ -31,6 +31,8 @@
 #include "cv_line_tool.h"
 #include "cv_pencil_tool.h"
 #include "cv_rectangle_tool.h"
+#include "cv_ellipse_tool.h"
+#include "cv_polygon_tool.h"
 
 /*Member functions*/
 static GdkGC * 	cv_create_new_gc	( char * name );
@@ -134,6 +136,16 @@ void cv_sel_ellipse_tool ( void )
 	cv_tool->reset ();
 }
 
+void cv_sel_polygon_tool ( void )
+{
+	static const gp_tool	*polygon_tool	=	NULL;
+	if ( polygon_tool == NULL )
+	{
+		polygon_tool = tool_polygon_init ( &cv );
+	}
+	cv_tool = polygon_tool;
+	cv_tool->reset ();
+}
 
 void  my_g_object_unref(gpointer data)
 {
