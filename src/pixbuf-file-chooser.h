@@ -48,11 +48,12 @@ struct _PixbufFileChooserClass
 };
 
 
-GType		 	pixbuf_file_chooser_get_type			(void) G_GNUC_CONST;
-GtkWidget		*pixbuf_file_chooser_new				(GtkFileChooserAction action);
-GdkPixbufFormat	*pixbuf_file_chooser_get_format			(PixbufFileChooser *chooser);
-void 			pixbuf_file_chooser_set_current_filter 	(PixbufFileChooser *chooser, const gchar *extension);
-gchar *         pixbuf_file_chooser_get_name			(PixbufFileChooser *chooser);
+GType		 		pixbuf_file_chooser_get_type			(void) G_GNUC_CONST;
+GtkWidget*			pixbuf_file_chooser_new					(GtkWindow *parent, GtkFileChooserAction action);
+GdkPixbufFormat*	pixbuf_file_chooser_get_format			(PixbufFileChooser *chooser);
+void 				pixbuf_file_chooser_set_current_filter 	(PixbufFileChooser *chooser, const gchar *extension);
+void				pixbuf_file_chooser_set_current_name			(PixbufFileChooser *chooser, const gchar *name);
+gchar*				pixbuf_file_chooser_get_name			(PixbufFileChooser *chooser);
 
 G_END_DECLS
 

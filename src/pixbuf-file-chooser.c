@@ -47,6 +47,7 @@ struct _PixbufFileChooserPrivate
 {
 	GtkWidget	*combo_filter;
 	GSList		*filters;
+	gchar		*name;
 };
 
 
@@ -67,6 +68,7 @@ pixbuf_file_chooser_finalize (GObject *object)
 		g_object_unref (filter);
     }
 	g_slist_free (priv->filters);
+	g_free (priv->name);
 	
 	(* G_OBJECT_CLASS (pixbuf_file_chooser_parent_class)->finalize) (object);
 }
@@ -87,6 +89,7 @@ pixbuf_file_chooser_init (PixbufFileChooser *chooser)
 	chooser->priv = PIXBUF_FILE_CHOOSER_GET_PRIVATE (chooser);
 	chooser->priv->combo_filter	= NULL;
 	chooser->priv->filters 		= NULL;
+	chooser->priv->name			= g_strdup ("untitled");
 }
 
 static void
@@ -107,7 +110,7 @@ response_cb (GtkDialog *dlg, gint id, gpointer data)
 		last_dir [action] = dir;
 	}
 }
-
+/*
 static void
 add_custom_button_to_dialog (GtkDialog   *dialog,
 			     			 const gchar *mnemonic_label,
@@ -124,44 +127,49 @@ add_custom_button_to_dialog (GtkDialog   *dialog,
 
   gtk_dialog_add_action_widget (GTK_DIALOG (dialog), button, response_id);
 }
-
+*/
 
 static gboolean
-pixbuf_file_chooser_add_ext (GtkFileChooser * chooser)
+pixbuf_file_chooser_add_ext (PixbufFileChooser * chooser)
 {
-	gboolean		changed = FALSE;
-	GFile 			*file;
-
-	file 		= gtk_file_chooser_get_file (chooser);
+	gboolean changed = FALSE;
+	GFile *file;
+	gchar *file_name, *suffix;
+	GdkPixbufFormat	*format, *my_format;
+	
+	file	= gtk_file_chooser_get_file (GTK_FILE_CHOOSER (chooser));
+	
 	if ( file != NULL )
 	{
-		gchar 			*file_name, *suffix;
-		GdkPixbufFormat	*format, *my_format;
 		file_name	= g_file_get_basename (file);
 		g_object_unref (file);
-
-		suffix		= get_suffix_from_basename (file_name);
-		format		= pixbuf_get_format_by_suffix (suffix);
-
-		my_format 	= pixbuf_file_chooser_get_format (PIXBUF_FILE_CHOOSER (chooser));
-	
-		if (format != my_format)
-		{
-			gchar *new_file_name, *extension;
-			if (format != NULL)
-			{
-				*--suffix = '\0';
-			}
-			extension		= gdk_pixbuf_format_get_name ( my_format );
-			new_file_name	= g_strdup_printf ("%s.%s", file_name, extension);
-			gtk_file_chooser_set_current_name ( chooser, new_file_name);
-			g_free (new_file_name);
-			g_free (extension);
-			changed = TRUE;
-		}
-		g_free (file_name);
+	}
+	else
+	{
+		file_name	= g_strdup (chooser->priv->name);
 	}
 
+	suffix		= get_suffix_from_basename (file_name);
+	format		= pixbuf_get_format_by_suffix (suffix);
+
+	my_format 	= pixbuf_file_chooser_get_format (chooser);
+
+	if (format != my_format)
+	{
+		gchar *new_file_name, *extension;
+		if (format != NULL)
+		{
+			*--suffix = '\0';
+		}
+		extension		= gdk_pixbuf_format_get_name ( my_format );
+		new_file_name	= g_strdup_printf ("%s.%s", file_name, extension);
+		pixbuf_file_chooser_set_current_name ( chooser, new_file_name);
+		g_free (new_file_name);
+		g_free (extension);
+		changed = TRUE;
+	}
+	g_free (file_name);
+	
 	return changed;
 }
 
@@ -172,8 +180,7 @@ save_response_cb (GtkDialog *dlg, gint id, gpointer data)
 
 	if (id != GTK_RESPONSE_OK)
 		return;
-
-	if (pixbuf_file_chooser_add_ext (GTK_FILE_CHOOSER (dlg)))
+	if (pixbuf_file_chooser_add_ext (PIXBUF_FILE_CHOOSER (dlg)))
 	{
 		/* We changed the file name, then
 		   we need to test if the file already exist*/
@@ -207,10 +214,10 @@ save_response_cb (GtkDialog *dlg, gint id, gpointer data)
 static GSList *
 pixbuf_get_filters ( gboolean savable )
 {
-	GtkFileFilter	*all_img_filter;
-	GSList *list;
-	GSList *write_list = NULL;
-	GSList *it;
+	GtkFileFilter	*all_img_filter = NULL;
+	GSList 			*list;
+	GSList 			*write_list = NULL;
+	GSList 			*it;
 
 	if (!savable)
 	{
@@ -300,14 +307,18 @@ chage_type_cb (GtkComboBox *combo, GtkFileChooser * chooser)
 		gtk_file_chooser_set_filter (chooser, filter);
 	}
 
-	action = gtk_file_chooser_get_action (GTK_FILE_CHOOSER (chooser));
+	action = gtk_file_chooser_get_action (chooser);
 	if (action == GTK_FILE_CHOOSER_ACTION_SAVE)
 	{
-		if ( pixbuf_file_chooser_add_ext (chooser) )
+		if ( pixbuf_file_chooser_add_ext ( PIXBUF_FILE_CHOOSER (chooser)) )
 		{
+			/*To select filename*/
 			gchar 			*dir;
 			dir = gtk_file_chooser_get_current_folder (chooser);
-			gtk_file_chooser_set_current_folder ( chooser, dir  );
+			if (dir != NULL )
+			{
+				gtk_file_chooser_set_current_folder ( chooser, dir  );
+			}
 			g_free (dir);
 		}
 	}
@@ -318,7 +329,7 @@ pixbuf_file_chooser_add_filter (PixbufFileChooser *chooser)
 {
 	GSList					*it;
 	GSList					*filters;
-	GtkWidget 				*combo;
+	GtkWidget 				*combo;	
 	GtkWidget 				*box;
 	GtkListStore 			*store;
 	GtkCellRenderer 		*renderer;
@@ -385,7 +396,7 @@ pixbuf_file_chooser_add_filter (PixbufFileChooser *chooser)
 
 
 GtkWidget *
-pixbuf_file_chooser_new (GtkFileChooserAction action)
+pixbuf_file_chooser_new (GtkWindow *parent, GtkFileChooserAction action)
 {
 	GtkWidget *chooser;
 	gchar *title = NULL;
@@ -395,6 +406,8 @@ pixbuf_file_chooser_new (GtkFileChooserAction action)
 				"select-multiple", (action == GTK_FILE_CHOOSER_ACTION_OPEN),
 				"local-only", FALSE,
 				NULL);
+
+	gtk_window_set_transient_for ( GTK_WINDOW( chooser), parent);
 
 	switch (action) 
 	{
@@ -452,7 +465,7 @@ pixbuf_file_chooser_new (GtkFileChooserAction action)
 	{
 		pixbuf_file_chooser_add_filter (PIXBUF_FILE_CHOOSER (chooser));
 	}
-	
+
 	return chooser;
 }
 
@@ -492,7 +505,7 @@ pixbuf_file_chooser_set_current_filter (PixbufFileChooser *chooser, const gchar 
 			GtkTreeModel 	*model;
 			GtkTreeIter 	iter;
 			gboolean		valid;
-			model = gtk_combo_box_get_model (combo);
+			model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
 			valid = gtk_tree_model_get_iter_first (model, &iter);
 			while (valid)
 		    {
@@ -514,6 +527,17 @@ pixbuf_file_chooser_set_current_filter (PixbufFileChooser *chooser, const gchar 
 			}
 		}
     }
+}
+
+void				
+pixbuf_file_chooser_set_current_name (PixbufFileChooser *chooser, const gchar *name)
+{
+	g_return_if_fail (name != NULL);
+	g_return_if_fail (PIXBUF_IS_FILE_CHOOSER (chooser));
+	
+	g_free ( chooser->priv->name );
+	chooser->priv->name = g_strdup ( name );
+	gtk_file_chooser_set_current_name ( GTK_FILE_CHOOSER (chooser), chooser->priv->name);
 }
 
 gchar *
