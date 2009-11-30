@@ -42,9 +42,9 @@ static void		cv_create_pixmap	(gint width, gint height, gboolean b_resize);
 
 /* private data  */
 static gp_canvas	cv;
-static const gp_tool		*cv_tool		=	NULL;
-static GdkColor 			white_color		=	{ 0, 0xffff, 0xffff, 0xffff  };
-static GdkColor 			black_color		=	{ 0, 0x0000, 0x0000, 0x0000  };
+static gp_tool		*cv_tool		=	NULL;
+static GdkColor 	white_color		=	{ 0, 0xffff, 0xffff, 0xffff  };
+static GdkColor 	black_color		=	{ 0, 0x0000, 0x0000, 0x0000  };
 
 
 /*
@@ -87,63 +87,44 @@ cv_set_filled ( gp_filled filled )
 void cv_sel_none_tool	( void )
 {
 	gdk_window_set_cursor ( cv.drawing, NULL);
+	if (cv_tool != NULL) cv_tool->destroy(NULL);
 	cv_tool = NULL;
 }
 
 void cv_sel_pencil_tool	( void )
 {
-	static const gp_tool	*pencil_tool	=	NULL;
-	if ( pencil_tool == NULL )
-	{
-		pencil_tool = tool_pencil_init ( &cv );
-	}
-	cv_tool = pencil_tool;
+	if (cv_tool != NULL) cv_tool->destroy(NULL);
+	cv_tool = tool_pencil_init ( &cv );
 	cv_tool->reset ();
 }
 
 
 void cv_sel_line_tool	( void )
 {
-	static const gp_tool	*line_tool	=	NULL;
-	if ( line_tool == NULL )
-	{
-		line_tool = tool_line_init ( &cv );
-	}
-	cv_tool = line_tool;
+	if (cv_tool != NULL) cv_tool->destroy(NULL);
+	cv_tool = tool_line_init ( &cv );
 	cv_tool->reset ();
 }
 
 
 void cv_sel_rectangle_tool	( void )
 {
-	static const gp_tool	*rectangle_tool	=	NULL;
-	if ( rectangle_tool == NULL )
-	{
-		rectangle_tool = tool_rectangle_init ( &cv );
-	}
-	cv_tool = rectangle_tool;
+	if (cv_tool != NULL) cv_tool->destroy(NULL);
+	cv_tool = tool_rectangle_init ( &cv );
 	cv_tool->reset ();
 }
 
 void cv_sel_ellipse_tool ( void )
 {
-	static const gp_tool	*ellipse_tool	=	NULL;
-	if ( ellipse_tool == NULL )
-	{
-		ellipse_tool = tool_ellipse_init ( &cv );
-	}
-	cv_tool = ellipse_tool;
+	if (cv_tool != NULL) cv_tool->destroy(NULL);
+	cv_tool = tool_ellipse_init ( &cv );
 	cv_tool->reset ();
 }
 
 void cv_sel_polygon_tool ( void )
 {
-	static const gp_tool	*polygon_tool	=	NULL;
-	if ( polygon_tool == NULL )
-	{
-		polygon_tool = tool_polygon_init ( &cv );
-	}
-	cv_tool = polygon_tool;
+	if (cv_tool != NULL) cv_tool->destroy(NULL);
+	cv_tool = tool_polygon_init ( &cv );
 	cv_tool->reset ();
 }
 
@@ -261,6 +242,14 @@ on_cv_drawing_realize (GtkWidget *widget, gpointer user_data)
 	cv_set_filled ( FILLED_NONE );
 	cv_resize_set_canvas ( &cv );
 	cv_create_pixmap ( 320, 200, TRUE);
+}
+
+void 
+on_cv_drawing_unrealize	(GtkWidget *widget, gpointer user_data)
+{
+	/*free all private data*/
+	g_print("unrealize canvas\n");
+	cv_sel_none_tool();
 }
 
 

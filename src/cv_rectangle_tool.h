@@ -25,4 +25,4 @@
  
  #include "common.h"
 
-const gp_tool * tool_rectangle_init ( gp_canvas * canvas );
+gp_tool * tool_rectangle_init ( gp_canvas * canvas );

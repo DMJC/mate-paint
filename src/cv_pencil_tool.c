@@ -38,28 +38,50 @@ static void		draw_in_pixmap	( GdkDrawable *drawable );
 
 
 /*private data*/
-static gp_tool			tool;
-static gp_canvas *		cv		= NULL;
-static GdkGC *			gc		= NULL;
-static gint 			x0,y0,x1,y1;
-static guint			button	= 0;
-static gboolean 		is_draw = FALSE;
+typedef struct {
+	gp_tool			tool;
+	gp_canvas *		cv;
+	GdkGC *			gc;
+	gint 			x0,y0,x1,y1;
+	guint			button;
+	gboolean 		is_draw;
+} private_data;
 
-const gp_tool * 
+static private_data		*m_priv = NULL;
+
+static void
+create_private_data( void )
+{
+	if (m_priv == NULL)
+	{
+		m_priv = g_new0 (private_data,1);
+		m_priv->cv		=	NULL;
+		m_priv->gc		=	NULL;
+		m_priv->button	=	0;
+		m_priv->is_draw	=	FALSE;
+	}
+}
+
+static void
+destroy_private_data( void )
+{
+	g_free (m_priv);
+	m_priv = NULL;
+}
+
+
+gp_tool * 
 tool_pencil_init ( gp_canvas * canvas )
 {
-	cv					=	canvas;
-	tool.button_press	= 	button_press;
-	tool.button_release	= 	button_release;
-	tool.button_motion	= 	button_motion;
-	tool.draw			= 	draw;
-	tool.reset			= 	reset;
-	tool.destroy		= 	destroy;
-	/*set data to be destroyed*/
-	g_object_set_data_full (	G_OBJECT(cv->widget), "pencil_tool", 
-	                        	(gpointer)&tool, 
-	                        	(GDestroyNotify)(tool.destroy) );	
-	return &tool;
+	create_private_data ();
+	m_priv->cv					=	canvas;
+	m_priv->tool.button_press	= 	button_press;
+	m_priv->tool.button_release	= 	button_release;
+	m_priv->tool.button_motion	= 	button_motion;
+	m_priv->tool.draw			= 	draw;
+	m_priv->tool.reset			= 	reset;
+	m_priv->tool.destroy		= 	destroy;
+	return &m_priv->tool;
 }
 
 static gboolean
@@ -69,17 +91,17 @@ button_press ( GdkEventButton *event )
 	{
 		if ( event->button == LEFT_BUTTON )
 		{
-			gc = cv->gc_fg_pencil;
+			m_priv->gc = m_priv->cv->gc_fg_pencil;
 		}
 		else if ( event->button == RIGHT_BUTTON )
 		{
-			gc = cv->gc_bg_pencil;
+			m_priv->gc = m_priv->cv->gc_bg_pencil;
 		}
-		is_draw = !is_draw;
-		if( is_draw ) button = event->button;
-		x0 = x1 = (gint)event->x;
-		y0 = y1 = (gint)event->y;
-		if( !is_draw ) gtk_widget_queue_draw ( cv->widget );
+		m_priv->is_draw = !m_priv->is_draw;
+		if( m_priv->is_draw ) m_priv->button = event->button;
+		m_priv->x0 = m_priv->x1 = (gint)event->x;
+		m_priv->y0 = m_priv->y1 = (gint)event->y;
+		if( !m_priv->is_draw ) gtk_widget_queue_draw ( m_priv->cv->widget );
 	}
 	return TRUE;
 }
@@ -89,15 +111,15 @@ button_release ( GdkEventButton *event )
 {
 	if ( event->type == GDK_BUTTON_RELEASE )
 	{
-		if( button == event->button )
+		if( m_priv->button == event->button )
 		{
-			if( is_draw )
+			if( m_priv->is_draw )
 			{
-				draw_in_pixmap (cv->pixmap);
+				draw_in_pixmap (m_priv->cv->pixmap);
 				file_set_unsave ();
 			}
-			gtk_widget_queue_draw ( cv->widget );
-			is_draw = FALSE;
+			gtk_widget_queue_draw ( m_priv->cv->widget );
+			m_priv->is_draw = FALSE;
 		}
 	}
 	return TRUE;
@@ -106,11 +128,11 @@ button_release ( GdkEventButton *event )
 static gboolean
 button_motion ( GdkEventMotion *event )
 {
-	if( is_draw )
+	if( m_priv->is_draw )
 	{
-		x1 = (gint)event->x;
-		y1 = (gint)event->y;
-		gtk_widget_queue_draw ( cv->widget );
+		m_priv->x1 = (gint)event->x;
+		m_priv->y1 = (gint)event->y;
+		gtk_widget_queue_draw ( m_priv->cv->widget );
 	}
 	return TRUE;
 }
@@ -118,9 +140,9 @@ button_motion ( GdkEventMotion *event )
 static void	
 draw ( void )
 {
-	if ( is_draw )
+	if ( m_priv->is_draw )
 	{
-		draw_in_pixmap ( cv->pixmap );
+		draw_in_pixmap ( m_priv->cv->pixmap );
 	}
 }
 
@@ -129,22 +151,23 @@ reset ( void )
 {
 	GdkCursor *cursor = gdk_cursor_new ( GDK_PENCIL );
 	g_assert(cursor);
-	gdk_window_set_cursor ( cv->drawing, cursor );
+	gdk_window_set_cursor ( m_priv->cv->drawing, cursor );
 	gdk_cursor_unref( cursor );
-	is_draw = FALSE;
+	m_priv->is_draw = FALSE;
 }
 
 static void 
 destroy ( gpointer data  )
 {
-	//g_print("rectangle tool destroy\n");
+	destroy_private_data ();
+	g_print("pencil tool destroy\n");
 }
 
 static void
 draw_in_pixmap ( GdkDrawable *drawable )
 {
-	gdk_draw_line (drawable, gc, x0, y0, x1, y1 );
-	x0 = x1;
-	y0 = y1;
+	gdk_draw_line (drawable, m_priv->gc, m_priv->x0, m_priv->y0, m_priv->x1, m_priv->y1 );
+	m_priv->x0 = m_priv->x1;
+	m_priv->y0 = m_priv->y1;
 }
 

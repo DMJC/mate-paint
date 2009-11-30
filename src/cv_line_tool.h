@@ -25,5 +25,5 @@
  #include "common.h"
 
 
-const gp_tool * tool_line_init ( gp_canvas * canvas );
+gp_tool * tool_line_init ( gp_canvas * canvas );
 

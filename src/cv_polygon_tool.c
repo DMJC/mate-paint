@@ -56,7 +56,7 @@ static GdkPoint 		*points		= NULL;
 static gint				n_points	= 0;
 static gp_tool_state	state		= TOOL_NONE;
 
-const gp_tool * 
+gp_tool * 
 tool_polygon_init ( gp_canvas * canvas )
 {
 	cv					=	canvas;
@@ -66,10 +66,7 @@ tool_polygon_init ( gp_canvas * canvas )
 	tool.draw			= draw;
 	tool.reset			= reset;
 	tool.destroy		= destroy;
-	/*set data to be destroyed*/
-	g_object_set_data_full (	G_OBJECT(cv->widget), "polygon_tool", 
-	                        	(gpointer)&tool, 
-	                        	(GDestroyNotify)(tool.destroy) );	
+	
 	return &tool;
 }
 

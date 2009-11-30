@@ -1,5 +1,5 @@
 /***************************************************************************
- *            cv_rectangle_tool.h
+ *            cv_poligon_tool.h
  *
  *  Thu Set 10 22:35:13 2009
  *  Copyright  2009  rogerio
@@ -25,4 +25,4 @@
  
  #include "common.h"
 
-const gp_tool * tool_polygon_init ( gp_canvas * canvas );
+gp_tool * tool_polygon_init ( gp_canvas * canvas );

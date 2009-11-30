@@ -42,6 +42,7 @@ GdkPixbufFormat *	cv_load_file			(const gchar *filename);
 
 /* GUI CallBacks */
 void on_cv_drawing_realize			(GtkWidget *widget, gpointer user_data);
+void on_cv_drawing_unrealize		(GtkWidget *widget, gpointer user_data);
 
 /* GUI events */
 gboolean on_cv_drawing_button_press_event  			(GtkWidget	   *widget, 
