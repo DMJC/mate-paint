@@ -59,7 +59,7 @@ create_private_data( void )
 		m_priv->cv		=	NULL;
 		m_priv->gcf		=	NULL;
 		m_priv->gcb		=	NULL;
-		m_priv->button	=	0;
+		m_priv->button	=	NONE_BUTTON;
 		m_priv->is_draw	=	FALSE;
 	}
 }

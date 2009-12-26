@@ -57,7 +57,9 @@ cv_set_color_bg	( GdkColor *color )
 	gdk_gc_set_rgb_bg_color ( cv.gc_fg, color );		
 	gdk_gc_set_rgb_fg_color ( cv.gc_bg, color );		
 	gdk_gc_set_rgb_bg_color ( cv.gc_fg_pencil, color );		
-	gdk_gc_set_rgb_fg_color ( cv.gc_bg_pencil, color );		
+	gdk_gc_set_rgb_fg_color ( cv.gc_bg_pencil, color );
+	gtk_widget_queue_draw ( cv.widget );
+	gdk_window_process_updates (gtk_widget_get_parent_window(cv.widget), FALSE);
 }
 
 void
@@ -67,6 +69,8 @@ cv_set_color_fg	( GdkColor *color )
 	gdk_gc_set_rgb_bg_color ( cv.gc_bg, color );
 	gdk_gc_set_rgb_fg_color ( cv.gc_fg_pencil, color );
 	gdk_gc_set_rgb_bg_color ( cv.gc_bg_pencil, color );
+	gtk_widget_queue_draw ( cv.widget );
+	gdk_window_process_updates (gtk_widget_get_parent_window(cv.widget), FALSE);
 }
 
 void
@@ -76,12 +80,16 @@ cv_set_line_width	( gint width )
 	                             GDK_CAP_NOT_LAST, GDK_JOIN_ROUND );
 	gdk_gc_set_line_attributes ( cv.gc_bg, width, GDK_LINE_SOLID, 
 	                             GDK_CAP_NOT_LAST, GDK_JOIN_ROUND );
+	gtk_widget_queue_draw ( cv.widget );
+	gdk_window_process_updates (gtk_widget_get_parent_window(cv.widget), FALSE);
 }
 
 void
 cv_set_filled ( gp_filled filled )
 {
 	cv.filled	=	filled;
+	gtk_widget_queue_draw ( cv.widget );
+	gdk_window_process_updates (gtk_widget_get_parent_window(cv.widget), FALSE);
 }
 
 void cv_sel_none_tool	( void )
@@ -200,12 +208,12 @@ cv_save_file (const gchar *filename, const gchar *type)
 				message = (*error)->message;
 			}
 			g_warning ("Could not save image %s: %s\n", filename, message);
-			dlg = gtk_message_dialog_new (cv.toplevel,
-			                              GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
-                                  		  GTK_MESSAGE_ERROR,
-                                  		  GTK_BUTTONS_CLOSE,
-                                          _("Error saving file \"%s\":\n%s"),
-                                          basename, message);
+			dlg = gtk_message_dialog_new ( GTK_WINDOW (cv.toplevel),
+			                               GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
+                                  		   GTK_MESSAGE_ERROR,
+                                  		   GTK_BUTTONS_CLOSE,
+                                           _("Error saving file \"%s\":\n%s"),
+                                           basename, message);
  			gtk_dialog_run (GTK_DIALOG (dlg));
  			gtk_widget_destroy (dlg);
 			g_free (basename);

@@ -349,7 +349,7 @@ cv_resize_stop ( gdouble x,  gdouble y)
 {
 	if( b_resize )
 	{
-		gint w, h, width, height;
+		gint width, height;
 		width	= cv->widget->allocation.width + (gint)x;
 		width	= (width<1)?1:width;
 		height	= cv->widget->allocation.height + (gint)y;

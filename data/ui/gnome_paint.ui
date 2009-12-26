@@ -817,7 +817,6 @@
                             <signal name="realize" handler="on_cv_ev_box_realize"/>
                             <child>
                               <object class="GtkTable" id="table1">
-                                <property name="visible">True</property>
                                 <property name="n_rows">3</property>
                                 <property name="n_columns">3</property>
                                 <child>
@@ -979,7 +978,6 @@
                 </child>
                 <child>
                   <object class="GtkHandleBox" id="handlebox2">
-                    <property name="visible">True</property>
                     <property name="snap_edge">left</property>
                     <property name="snap_edge_set">True</property>
                     <child>

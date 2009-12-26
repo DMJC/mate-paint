@@ -53,6 +53,14 @@ gnome_paint_SOURCES = \
 	cv_polygon_tool.c  \
 	cv_polygon_tool.h
 
+gnome_paint_CFLAGS = \
+	-DG_DISABLE_DEPRECATED\
+	-DG_DISABLE_SINGLE_INCLUDES\
+	-DGDK_DISABLE_DEPRECATED\
+	-DGTK_DISABLE_DEPRECATED\
+	-DGDK_DISABLE_SINGLE_INCLUDES\
+	-DGTK_DISABLE_SINGLE_INCLUDES
+
 gnome_paint_LDFLAGS = \
 	-Wl,--export-dynamic
 
