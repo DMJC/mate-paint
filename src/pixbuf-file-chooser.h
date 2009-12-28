@@ -1,4 +1,12 @@
-/*
+/* Gnome Paint - 
+ *
+ * Copyright (C) 2009 The Free Software Foundation
+ *
+ * Author: Rogério Ferro <rogerioferro@gmail.com>
+ *
+ * Based on eog code (src/eog-file-chooser.h) by:
+ * 	- Lucas Rocha <lucasr@gnome.org>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or

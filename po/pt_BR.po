@@ -2,107 +2,106 @@
 # Copyright (C) 2009 Rogério Ferro do Nascimento
 # This file is distributed under the same license as the gnome-paint package.
 # Rogério Ferro do Nascimento <rogerioferro@gmail.com>, 2009.
-#
-# Rogério Ferro do Nascimento <rogerioferro@gmail.com>, 2009.
+# Rogério Ferrp <rogerioferro@gmail.com>, 2009.
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: gnome-paint-0.1\n"
+"Project-Id-Version: gnome-paint-0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-12 15:31-0300\n"
-"PO-Revision-Date: 2009-07-12 15:43-0300\n"
-"Last-Translator: Rogerio <rogerioferro@gmail.com>\n"
+"POT-Creation-Date: 2009-12-28 12:02-0200\n"
+"PO-Revision-Date: 2009-12-28 11:52-0200\n"
+"Last-Translator: Rogério Ferrp <rogerioferro@gmail.com>\n"
 "Language-Team: pt_BR <rogerioferro@gmail.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: UTF-8\n"
 
 #: ../data/ui/gnome_paint.ui.h:1
-msgid "\t\t  "
-msgstr ""
-
-#: ../data/ui/gnome_paint.ui.h:2
 msgid "Free select tool"
 msgstr "Ferramenta de seleção livre"
 
-#: ../data/ui/gnome_paint.ui.h:3
-msgid "Gnome Paint"
-msgstr ""
-
-#: ../data/ui/gnome_paint.ui.h:4
+#: ../data/ui/gnome_paint.ui.h:2
 msgid "_Color"
 msgstr "_Cor"
 
-#: ../data/ui/gnome_paint.ui.h:5
+#: ../data/ui/gnome_paint.ui.h:3
 msgid "_Edit"
 msgstr "_Editar"
 
-#: ../data/ui/gnome_paint.ui.h:6
+#: ../data/ui/gnome_paint.ui.h:4
 msgid "_File"
 msgstr "_Arquivo"
 
-#: ../data/ui/gnome_paint.ui.h:7
+#: ../data/ui/gnome_paint.ui.h:5
 msgid "_Help"
 msgstr "Aj_uda"
 
-#: ../data/ui/gnome_paint.ui.h:8
+#: ../data/ui/gnome_paint.ui.h:6
 msgid "_Image"
-msgstr "_imagem"
+msgstr "_Imagem"
 
-#: ../data/ui/gnome_paint.ui.h:9
+#: ../data/ui/gnome_paint.ui.h:7
 msgid "_View"
 msgstr "_Ver"
 
-#: ../data/ui/gnome_paint.ui.h:10
-msgid "sfsadf"
-msgstr ""
+#: ../src/color.c:120
+msgid "Select Background Color"
+msgstr "Selecione a Cor de Segundo Plano"
 
-#: ../src/color.c:118
-msgid "Background Color"
-msgstr "Cor de Fundo"
+#: ../src/color.c:133
+msgid "Select Foreground Color"
+msgstr "Selecione a Cor de Primeiro Plano"
 
-#: ../src/color.c:131
-msgid "Foreground Color"
-msgstr "Cor de Frente"
-
-#: ../src/color.c:189
+#: ../src/color.c:191
 msgid "Select Color"
 msgstr "Selecione uma cor"
 
-#: ../src/cv_drawing.c:185
+#: ../src/cv_drawing.c:217
 #, c-format
 msgid ""
 "Error saving file \"%s\":\n"
 "%s"
 msgstr ""
-"Erro salvando arquivo \"%s\":\n"
+"Erro ao salvar arquivo \"%s\":\n"
 "%s"
 
-#: ../src/file.c:60
-msgid "Untitled document"
-msgstr "Documento sem título"
+#: ../src/file.c:81
+#, c-format
+msgid ""
+"Do you want to save the changes you made to \"%s\"?\n"
+"Your changes will be lost if you don't save them."
+msgstr ""
+"Você deseja salvar as mudanças que você fez em \"%s\"?\n"
+"Suas mudanças serão perdidas se você não salva-las."
 
-#: ../src/file.c:61
+#: ../src/file.c:232
 #, c-format
 msgid "%s - gnome-paint"
 msgstr ""
 
-#: ../src/pixbuf-file-chooser.c:190
+#: ../src/file.c:273
+msgid "untitled"
+msgstr "sem título"
+
+#: ../src/pixbuf-file-chooser.c:234
+msgid "All Images"
+msgstr "Todas as Imagens"
+
+#: ../src/pixbuf-file-chooser.c:353
 msgid "All Files"
 msgstr "Todos os Arquivos"
 
-#: ../src/pixbuf-file-chooser.c:195
-msgid "All Images"
-msgstr "Todas as Imagems"
-
-#: ../src/pixbuf-file-chooser.c:284
+#: ../src/pixbuf-file-chooser.c:427
 msgid "Load Image"
-msgstr "Carregar Imaggem"
+msgstr "Carregar Imagem"
 
-#: ../src/pixbuf-file-chooser.c:292
+#: ../src/pixbuf-file-chooser.c:435
 msgid "Save Image"
 msgstr "Salvar Imagem"
 
-#: ../src/pixbuf-file-chooser.c:300
+#: ../src/pixbuf-file-chooser.c:443
 msgid "Open Folder"
 msgstr "Abrir Pasta"
+
+#~ msgid "\t\t  "
+#~ msgstr "\t\t  "

@@ -2,8 +2,8 @@
  *            file.c
  *
  *  Thu Jun 11 13:19:47 2009
- *  Copyright  2009  rogerio
- *  <rogerio@<host>>
+ *  Copyright  2009  Rogério Ferro
+ *  <rogerioferro@gmail.com>
  ****************************************************************************/
 
 /*
@@ -23,13 +23,12 @@
  */
 
 #include "common.h"
-
 #include "file.h"
-
 #include "pixbuf-file-chooser.h"
-
 #include "cv_drawing.h"
 
+#include <glib/gi18n.h>
+#include <gtk/gtk.h>
 
 /*private functions*/
 static void		file_print_title	(void);

@@ -18,11 +18,13 @@ AC_HEADER_STDC
 dnl ***************************************************************************
 dnl Internatinalization
 dnl ***************************************************************************
+IT_PROG_INTLTOOL([0.35.0])
+
 GETTEXT_PACKAGE=gnome_paint
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [GETTEXT package name])
 AM_GLIB_GNU_GETTEXT
-IT_PROG_INTLTOOL([0.35.0])
+
 
 
 

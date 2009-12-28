@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-12 15:31-0300\n"
+"POT-Creation-Date: 2009-12-28 12:02-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,89 +17,84 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: ../data/ui/gnome_paint.ui.h:1
-msgid "\t\t  "
-msgstr ""
-
-#: ../data/ui/gnome_paint.ui.h:2
 msgid "Free select tool"
 msgstr ""
 
-#: ../data/ui/gnome_paint.ui.h:3
-msgid "Gnome Paint"
-msgstr ""
-
-#: ../data/ui/gnome_paint.ui.h:4
+#: ../data/ui/gnome_paint.ui.h:2
 msgid "_Color"
 msgstr ""
 
-#: ../data/ui/gnome_paint.ui.h:5
+#: ../data/ui/gnome_paint.ui.h:3
 msgid "_Edit"
 msgstr ""
 
-#: ../data/ui/gnome_paint.ui.h:6
+#: ../data/ui/gnome_paint.ui.h:4
 msgid "_File"
 msgstr ""
 
-#: ../data/ui/gnome_paint.ui.h:7
+#: ../data/ui/gnome_paint.ui.h:5
 msgid "_Help"
 msgstr ""
 
-#: ../data/ui/gnome_paint.ui.h:8
+#: ../data/ui/gnome_paint.ui.h:6
 msgid "_Image"
 msgstr ""
 
-#: ../data/ui/gnome_paint.ui.h:9
+#: ../data/ui/gnome_paint.ui.h:7
 msgid "_View"
 msgstr ""
 
-#: ../data/ui/gnome_paint.ui.h:10
-msgid "sfsadf"
+#: ../src/color.c:120
+msgid "Select Background Color"
 msgstr ""
 
-#: ../src/color.c:118
-msgid "Background Color"
+#: ../src/color.c:133
+msgid "Select Foreground Color"
 msgstr ""
 
-#: ../src/color.c:131
-msgid "Foreground Color"
-msgstr ""
-
-#: ../src/color.c:189
+#: ../src/color.c:191
 msgid "Select Color"
 msgstr ""
 
-#: ../src/cv_drawing.c:185
+#: ../src/cv_drawing.c:217
 #, c-format
 msgid ""
 "Error saving file \"%s\":\n"
 "%s"
 msgstr ""
 
-#: ../src/file.c:60
-msgid "Untitled document"
+#: ../src/file.c:81
+#, c-format
+msgid ""
+"Do you want to save the changes you made to \"%s\"?\n"
+"Your changes will be lost if you don't save them."
 msgstr ""
 
-#: ../src/file.c:61
+#: ../src/file.c:232
 #, c-format
 msgid "%s - gnome-paint"
 msgstr ""
 
-#: ../src/pixbuf-file-chooser.c:190
-msgid "All Files"
+#: ../src/file.c:273
+msgid "untitled"
 msgstr ""
 
-#: ../src/pixbuf-file-chooser.c:195
+#: ../src/pixbuf-file-chooser.c:234
 msgid "All Images"
 msgstr ""
 
-#: ../src/pixbuf-file-chooser.c:284
+#: ../src/pixbuf-file-chooser.c:353
+msgid "All Files"
+msgstr ""
+
+#: ../src/pixbuf-file-chooser.c:427
 msgid "Load Image"
 msgstr ""
 
-#: ../src/pixbuf-file-chooser.c:292
+#: ../src/pixbuf-file-chooser.c:435
 msgid "Save Image"
 msgstr ""
 
-#: ../src/pixbuf-file-chooser.c:300
+#: ../src/pixbuf-file-chooser.c:443
 msgid "Open Folder"
 msgstr ""

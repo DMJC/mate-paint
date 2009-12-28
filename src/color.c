@@ -17,9 +17,11 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "color.h"
 #include "common.h"
+#include "color.h"
 #include "cv_drawing.h"
+
+#include <glib/gi18n.h>
 
 static  GtkWidget	*background_widget = NULL;
 static  GdkColor	background_color;
@@ -115,7 +117,7 @@ on_background_color_picker_button_release_event ( GtkWidget			*widget,
 {
 	if ( event->button == LEFT_BUTTON )
 	{
-		color_dialog( &background_color, _("Background Color") );
+		color_dialog( &background_color, _("Select Background Color") );
 		background_show ();
 	}
 	return TRUE;
@@ -128,7 +130,7 @@ on_foreground_color_picker_button_release_event	(   GtkWidget	   *widget,
 {
 	if ( event->button == LEFT_BUTTON )
 	{
-		color_dialog( &foreground_color, _("Foreground Color") );
+		color_dialog( &foreground_color, _("Select Foreground Color") );
 		foreground_show ();
 	}
 	return TRUE;

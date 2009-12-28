@@ -23,9 +23,6 @@
  */
  
  
-#include <gtk/gtk.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
-
 #include "cv_drawing.h"
 #include "cv_resize.h"
 #include "cv_line_tool.h"
@@ -33,6 +30,11 @@
 #include "cv_rectangle_tool.h"
 #include "cv_ellipse_tool.h"
 #include "cv_polygon_tool.h"
+
+#include <glib/gi18n.h>
+#include <gtk/gtk.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
 
 /*Member functions*/
 static GdkGC * 	cv_create_new_gc	( char * name );

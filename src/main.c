@@ -17,7 +17,9 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "common.h"
 #include "color.h"
@@ -26,7 +28,10 @@
 #include "file.h"
 
 
-#define UI_FILE PACKAGE_DATA_DIR"/gnome-paint/ui/gnome_paint.ui"
+#include <glib/gi18n.h>
+#include <gtk/gtk.h>
+
+#define UI_FILE PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "gnome-paint" G_DIR_SEPARATOR_S "ui" G_DIR_SEPARATOR_S "gnome_paint.ui"
 
 GtkWidget	*create_window		(   void	);
 void		on_window_destroy   (   GtkObject   *object, 
@@ -39,13 +44,10 @@ main (int argc, char *argv[])
 
  	GtkWidget   *window;
 
-
-#ifdef ENABLE_NLS
 	bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
-#endif
-
+	
 	gtk_set_locale ();
 	gtk_init (&argc, &argv);
 
@@ -93,7 +95,7 @@ create_window (void)
 
 	/* Add application specific icons to search path */
 	gtk_icon_theme_append_search_path (gtk_icon_theme_get_default (),
-                                           PACKAGE_DATA_DIR"/gnome-paint/icons");
+                                           PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "gnome-paint" G_DIR_SEPARATOR_S "icons");
 
 	builder = gtk_builder_new ();
     gtk_builder_add_from_file (builder, UI_FILE, NULL);
