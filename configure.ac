@@ -48,4 +48,5 @@ data/icons/16x16/Makefile
 data/icons/16x16/actions/Makefile
 data/icons/16x16/apps/Makefile
 data/desktop/Makefile
+data/desktop/gnome-paint.desktop.in
 ])

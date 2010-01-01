@@ -1,12 +1,14 @@
 
-desktop_DATA = \
-	gnome-paint.desktop
+@INTLTOOL_DESKTOP_RULE@
 
-desktopdir = \
-	$(datadir)/applications
+DESKTOP_IN_FILES= gnome-paint.desktop.in.in
+DESKTOP_FILES= $(DESKTOP_IN_FILES:.desktop.in.in=.desktop)
 
 EXTRA_DIST = \
-	$(desktop_DATA)
+	$(DESKTOP_IN_FILES)
+
+DISTCLEANFILES = 		\
+        $(DESKTOP_FILES) 
 
 ## File created by the gnome-build tools
 

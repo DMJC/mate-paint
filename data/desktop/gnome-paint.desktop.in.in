@@ -1,9 +1,9 @@
 [Desktop Entry]
-Name= Gnome Paint Image Editor
-Comment=A very basic painting program
+_Name=Gnome Paint Drawing Editor
+_Comment=Create and Edit Drawings or Images
 TryExec=gnome-paint
 Exec=gnome-paint %U
-Icon=gnome-logo-icon-transparent.png
+Icon=gp.png
 StartupNotify=true
 Terminal=false
 Type=Application

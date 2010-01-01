@@ -1,5 +1,5 @@
 # List of source files containing translatable strings.
-
+data/desktop/gnome-paint.desktop.in.in
 [type: gettext/glade]data/ui/gnome_paint.ui
 src/color.c
 src/cv_drawing.c

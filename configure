@@ -13339,7 +13339,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile po/Makefile.in data/Makefile data/ui/Makefile data/icons/Makefile data/icons/16x16/Makefile data/icons/16x16/actions/Makefile data/icons/16x16/apps/Makefile data/desktop/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile po/Makefile.in data/Makefile data/ui/Makefile data/icons/Makefile data/icons/16x16/Makefile data/icons/16x16/actions/Makefile data/icons/16x16/apps/Makefile data/desktop/Makefile data/desktop/gnome-paint.desktop.in"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -14333,6 +14333,7 @@ do
     "data/icons/16x16/actions/Makefile") CONFIG_FILES="$CONFIG_FILES data/icons/16x16/actions/Makefile" ;;
     "data/icons/16x16/apps/Makefile") CONFIG_FILES="$CONFIG_FILES data/icons/16x16/apps/Makefile" ;;
     "data/desktop/Makefile") CONFIG_FILES="$CONFIG_FILES data/desktop/Makefile" ;;
+    "data/desktop/gnome-paint.desktop.in") CONFIG_FILES="$CONFIG_FILES data/desktop/gnome-paint.desktop.in" ;;
     "po/stamp-it") CONFIG_COMMANDS="$CONFIG_COMMANDS po/stamp-it" ;;
 
   *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;

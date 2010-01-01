@@ -51,6 +51,11 @@ main (int argc, char *argv[])
 	gtk_set_locale ();
 	gtk_init (&argc, &argv);
 
+	/* Add application specific icons to search path */
+	gtk_icon_theme_append_search_path (gtk_icon_theme_get_default (),
+                                           PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "gnome-paint" G_DIR_SEPARATOR_S "icons");
+
+	gtk_window_set_default_icon_name ("gp");
 
 	window = create_window ();
 	gnome_paint_init (argc, argv);
@@ -92,10 +97,6 @@ create_window (void)
 {
 	GtkWidget		*window;
 	GtkBuilder		*builder;
-
-	/* Add application specific icons to search path */
-	gtk_icon_theme_append_search_path (gtk_icon_theme_get_default (),
-                                           PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "gnome-paint" G_DIR_SEPARATOR_S "icons");
 
 	builder = gtk_builder_new ();
     gtk_builder_add_from_file (builder, UI_FILE, NULL);
