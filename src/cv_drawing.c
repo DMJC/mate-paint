@@ -33,8 +33,6 @@
 
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
-
 
 /*Member functions*/
 static GdkGC * 	cv_create_new_gc	( char * name );
@@ -151,48 +149,33 @@ cv_resize_pixmap ( gint width, gint height )
 	cv_create_pixmap (width, height, TRUE); 
 }
 
-GdkPixbufFormat *
-cv_load_file (const gchar *filename)
+
+void
+cv_set_pixbuf	(const GdkPixbuf	*pixbuf)
 {
-	gint width, height;
-	GdkPixbufFormat *format;
-	format = gdk_pixbuf_get_file_info (filename, &width, &height);
-	if (format != NULL )
+	if (pixbuf != NULL)
 	{
-		GError 		**error	= NULL;
-		GdkPixbuf 	*pixbuf	= NULL;
-		pixbuf = gdk_pixbuf_new_from_file (filename, error);
-		if (pixbuf != NULL)
-		{
-			cv_create_pixmap (width, height, FALSE);
-			gdk_draw_pixbuf	(cv.pixmap,
-					         cv.gc_fg,
-							 pixbuf,
-							 0, 0,
-							 0, 0,
-							 width, height,
-					         GDK_RGB_DITHER_NORMAL, 0, 0);
-			gtk_widget_queue_draw (cv.widget);
-		}
-		else
-		{
-			format = NULL;
-		}
-		g_object_unref (pixbuf);
-	}
-	return format;
+		gint width	=	gdk_pixbuf_get_width (pixbuf);
+		gint height	=	gdk_pixbuf_get_height (pixbuf);
+		cv_create_pixmap (width, height, FALSE);
+		gdk_draw_pixbuf	(cv.pixmap,
+					     cv.gc_fg,
+						 pixbuf,
+						 0, 0,
+						 0, 0,
+						 width, height,
+					     GDK_RGB_DITHER_NORMAL, 0, 0);
+		gtk_widget_queue_draw (cv.widget);
+	}	
 }
 
-gboolean
-cv_save_file (const gchar *filename, const gchar *type)
+GdkPixbuf *
+cv_get_pixbuf ( void )
 {
-	gboolean	ret		= FALSE;
+	GdkPixbuf * pixbuf	=	NULL;
 	if ( cv.pixmap != NULL )
 	{
-		GError **error = NULL;
-		GdkPixbuf * pixbuf;
 		gint w,h;
-	
 		gdk_drawable_get_size ( cv.pixmap, &w, &h );
 		pixbuf = gdk_pixbuf_get_from_drawable ( NULL, 
 		                                       cv.pixmap,
@@ -200,37 +183,8 @@ cv_save_file (const gchar *filename, const gchar *type)
 		                                       0,0,
 		                                       0,0,
 		                                       w,h);
-		if ( !gdk_pixbuf_save ( pixbuf, filename, type, error, NULL) )
-		{
-			gchar *message = "";
-			gchar *basename = g_path_get_basename (filename);
-			GtkWidget *dlg;
-			if (error !=  NULL )
-			{
-				message = (*error)->message;
-			}
-			g_warning ("Could not save image %s: %s\n", filename, message);
-			dlg = gtk_message_dialog_new ( GTK_WINDOW (cv.toplevel),
-			                               GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
-                                  		   GTK_MESSAGE_ERROR,
-                                  		   GTK_BUTTONS_CLOSE,
-                                           _("Error saving file \"%s\":\n%s"),
-                                           basename, message);
- 			gtk_dialog_run (GTK_DIALOG (dlg));
- 			gtk_widget_destroy (dlg);
-			g_free (basename);
-			if (error !=  NULL )
-			{
-				g_error_free (*error);
-			}
-		}
-		else
-		{
-			ret	=	TRUE;
-		}
-		g_object_unref (pixbuf);
 	}
-	return ret;
+	return pixbuf;
 }
 
 /* GUI CallBacks */

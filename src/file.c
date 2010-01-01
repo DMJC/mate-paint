@@ -29,6 +29,7 @@
 
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
 
 /*private functions*/
 static void		file_print_title	(void);
@@ -36,6 +37,8 @@ static void		file_set_name		(const char *name);
 static void		file_set_type		(const char *type);
 static void		file_set_title		(const char *title);
 static void		file_set_untitle	(void);
+static gboolean	file_save			(const gchar *filename, const gchar *type);
+static void		file_error_dlg		(const gchar *message, const GError *error);
 
 /*private data*/
 GtkWindow 	*parent_window	=	NULL;
@@ -108,62 +111,77 @@ file_save_dialog ( void )
 	return cancel;
 }
 
+
+
+
 gboolean	
 file_open ( const gchar * filename )
 {
-	gboolean		ret		=	FALSE;
-	gchar 			*title	=	g_filename_display_basename (filename);
-	GdkPixbufFormat	*format;
-
-	format = cv_load_file (filename);
-	if( format != NULL )
+	gboolean	ok		=	FALSE;
+	GError 		*error	= NULL;
+	GdkPixbuf 	*pixbuf	= NULL;
+	pixbuf = gdk_pixbuf_new_from_file (filename, &error);
+	if (pixbuf != NULL)
 	{
-		ret	=	TRUE;
-		if (gdk_pixbuf_format_is_writable (format))
+		if (!file_save_dialog () )
 		{
-			gchar	*type;
-			type 		=	gdk_pixbuf_format_get_name (format);
-			b_untitle	=	FALSE;
-			b_saved		=	TRUE;
-			file_set_type	(type);
-			file_set_name	(filename);
-			file_set_title	(title);
-			g_free (type);
-		}
-		else
-		{
-			b_saved	=	FALSE;
-			file_set_untitle ();
+			GdkPixbufFormat	*format	=	gdk_pixbuf_get_file_info (filename, NULL, NULL);
+			cv_set_pixbuf ( pixbuf );
+			ok	=	TRUE;
+			if (gdk_pixbuf_format_is_writable (format))
+			{
+				gchar 	*title	=	g_filename_display_basename (filename);
+				gchar	*type	=	gdk_pixbuf_format_get_name (format);
+				b_untitle	=	FALSE;
+				b_saved		=	TRUE;
+				file_set_type	(type);
+				file_set_name	(filename);
+				file_set_title	(title);
+				g_free (title);
+				g_free (type);
+			}
+			else
+			{
+				b_saved	=	FALSE;
+				file_set_untitle ();
+			}
 		}
 	}
-	g_free (title);
-
-	return ret;
+	else
+	{
+		gchar *basename	=	g_path_get_basename (filename);
+		gchar *message	=	g_strdup_printf (_("Error loading file \"%s\""), basename);
+		file_error_dlg ( message, error);
+		g_error_free (error);
+		g_free (basename);
+		g_free (message);
+	}
+	g_object_unref (pixbuf);
+	return ok;
 }
+
+
 
 /* GUI CallBacks */
 
 void
 on_menu_open_activate	( GtkMenuItem *menuitem, gpointer user_data)
 {
-	if (!file_save_dialog () )
+	GtkWidget *dialog;
+	gint response;
+
+	dialog = pixbuf_file_chooser_new (parent_window, GTK_FILE_CHOOSER_ACTION_OPEN);
+
+	response = gtk_dialog_run (GTK_DIALOG (dialog));
+	gtk_widget_hide (dialog);
+
+	if (response == GTK_RESPONSE_OK) 
 	{
-		GtkWidget *dialog;
-		gint response;
-
-		dialog = pixbuf_file_chooser_new (parent_window, GTK_FILE_CHOOSER_ACTION_OPEN);
-
-		response = gtk_dialog_run (GTK_DIALOG (dialog));
-		gtk_widget_hide (dialog);
-
-		if (response == GTK_RESPONSE_OK) 
-		{
-			gchar * name	= gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
-			file_open (name);
-			g_free (name);
-		}
-		gtk_widget_destroy (dialog);
+		gchar * name	= gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
+		file_open (name);
+		g_free (name);
 	}
+	gtk_widget_destroy (dialog);
 }
 
 void 
@@ -175,7 +193,7 @@ on_menu_save_activate	( GtkMenuItem *menuitem, gpointer user_data)
 	}
 	else
 	{
-		if (cv_save_file (file_name, file_type))
+		if (file_save (file_name, file_type))
 		{
 			b_saved		=	TRUE;
 			file_print_title ();
@@ -204,7 +222,7 @@ on_menu_save_as_activate	( GtkMenuItem *menuitem, gpointer user_data)
 		gchar * type				= gdk_pixbuf_format_get_name (format);
 
 
-		if (cv_save_file (name, type))
+		if (file_save (name, type))
 		{
 			b_untitle	=	FALSE;
 			b_saved		=	TRUE;
@@ -271,4 +289,45 @@ file_set_untitle (void)
 {
 	b_untitle		=	TRUE;
 	file_set_title (_("untitled"));
+}
+
+static gboolean
+file_save (const gchar *filename, const gchar *type)
+{
+	gboolean	ok		=	TRUE;
+	GdkPixbuf *	pixbuf	=	cv_get_pixbuf ();
+	GError *	error	=	NULL;
+
+	if ( !gdk_pixbuf_save ( pixbuf, filename, type, &error, NULL) )
+	{
+		gchar *basename	=	g_path_get_basename (filename);
+		gchar *message	=	g_strdup_printf (_("Error saving file \"%s\""), basename);
+		file_error_dlg ( message, error);
+		g_error_free (error);
+		g_free (basename);
+		g_free (message);
+		ok				=	FALSE;
+	}
+	g_object_unref (pixbuf);
+	return ok;
+}
+
+static void
+file_error_dlg (const gchar *message, const GError *error)
+{
+		gchar *error_message = _("unknown error");
+		GtkWidget *dlg;
+		if (error !=  NULL )
+		{
+			error_message = error->message;
+		}
+		g_warning ("%s: %s\n", message, error_message);
+		dlg = gtk_message_dialog_new ( parent_window,
+		                               GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
+                              		   GTK_MESSAGE_ERROR,
+                              		   GTK_BUTTONS_CLOSE,
+                                       message);
+		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG (dlg), error_message);
+		gtk_dialog_run (GTK_DIALOG (dlg));
+		gtk_widget_destroy (dlg);
 }
