@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl Created by Anjuta application wizard.
 
-AC_INIT(gnome-paint, 0.2, http://code.google.com/p/gnome-paint/)
+AC_INIT(gnome-paint, 0.2.1, http://code.google.com/p/gnome-paint/)
 
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 AC_CONFIG_HEADERS([config.h])
