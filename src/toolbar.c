@@ -96,7 +96,7 @@ on_tool_color_picker_toggled (GtkToggleToolButton *button, gpointer user_data)
 		g_return_if_fail( notebook != NULL );
 		gtk_notebook_set_current_page ( notebook, NONE );
 		/*select tool*/
-		cv_sel_none_tool ();
+		cv_sel_color_pick_tool ();
 	}
 }
 
@@ -189,7 +189,7 @@ on_tool_bucket_fill_toggled	(GtkToggleToolButton *button, gpointer user_data)
 		g_return_if_fail( notebook != NULL );
 		gtk_notebook_set_current_page ( notebook, NONE );
 		/*select tool*/
-		cv_sel_none_tool ();
+		cv_sel_flood_fill_tool ();
 	}
 }
 

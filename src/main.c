@@ -26,6 +26,7 @@
 #include "toolbar.h"
 #include "cv_drawing.h"
 #include "file.h"
+#include "undo.h"
 
 
 #include <glib/gi18n.h>

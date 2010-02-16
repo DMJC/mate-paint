@@ -1,9 +1,9 @@
 /***************************************************************************
- *            file.h
+ *            undo.h
  *
- *  Thu Jun 11 13:19:47 2009
- *  Copyright  2009  rogerio
- *  <rogerio@<host>>
+ *  Sat Jan 23 14:05:22 2010
+ *  Copyright  2010  Rogério Ferro do Nascimento
+ *  <rogerioferro@gmail.com>
  ****************************************************************************/
 
 /*
@@ -21,18 +21,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
+#include <gtk/gtk.h>
+
+
+void undo_add_pixbuf ( gint x0, gint y0, gint x1, gint y1, const gchar * message);
+
+
+
+/* GUI CallBack */
+
+void on_menu_undo_activate		( GtkMenuItem *menuitem, gpointer user_data );
+void on_menu_redo_activate		( GtkMenuItem *menuitem, gpointer user_data );
+
+
  
-
-void		file_set_parent_window	( GtkWindow * wnd );
-gboolean	file_save_dialog		( void );
-void		file_set_unsave		    ( void );
-gboolean	file_open				( const gchar * filename );
-
-
-
-/* GUI CallBacks */
-void on_menu_open_activate		( GtkMenuItem *menuitem, gpointer user_data);
-void on_menu_save_activate		( GtkMenuItem *menuitem, gpointer user_data);
-void on_menu_save_as_activate	( GtkMenuItem *menuitem, gpointer user_data);
-
-

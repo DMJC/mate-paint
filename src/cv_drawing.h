@@ -33,6 +33,8 @@ void		cv_set_color_fg			( GdkColor *color );
 void		cv_set_line_width		( gint width );
 void		cv_set_filled			( gp_filled filled );
 void		cv_sel_none_tool		( void );
+void		cv_sel_color_pick_tool	( void );
+void		cv_sel_flood_fill_tool	( void );
 void		cv_sel_pencil_tool		( void );
 void		cv_sel_line_tool		( void );
 void		cv_sel_rectangle_tool	( void );
@@ -41,13 +43,19 @@ void		cv_sel_polygon_tool		( void );
 void		cv_resize_pixmap		(gint width, gint height);
 void		cv_set_pixbuf			(const GdkPixbuf *pixbuf);
 GdkPixbuf *	cv_get_pixbuf			( void );
+gp_canvas * cv_get_canvas			( void );
 
 
 /* GUI CallBacks */
 void on_cv_drawing_realize			(GtkWidget *widget, gpointer user_data);
 void on_cv_drawing_unrealize		(GtkWidget *widget, gpointer user_data);
+void on_lb_pos_realize				(GtkWidget *widget, gpointer user_data);
+
 
 /* GUI events */
+gboolean on_cv_drawing_leave_notify_event		(GtkWidget        *widget,
+                                         		GdkEventCrossing *event,
+                                         		gpointer          user_data);
 gboolean on_cv_drawing_button_press_event  			(GtkWidget	   *widget, 
                                                  GdkEventButton *event,
                                                  gpointer       user_data );

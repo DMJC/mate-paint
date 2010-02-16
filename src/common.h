@@ -56,6 +56,7 @@ typedef struct
 	GdkGC *			gc_bg_pencil;
 	GdkPixmap *		pixmap;
 	gp_filled		filled;
+	gint			line_width;
 } gp_canvas;
 
 /* Tool Type*/

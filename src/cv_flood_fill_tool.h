@@ -1,7 +1,7 @@
 /***************************************************************************
- *            file.h
+ *            cv_flood_fill_tool.h
  *
- *  Thu Jun 11 13:19:47 2009
+ *  Wed Jun 10 21:22:13 2009
  *  Copyright  2009  rogerio
  *  <rogerio@<host>>
  ****************************************************************************/
@@ -22,17 +22,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
  
-
-void		file_set_parent_window	( GtkWindow * wnd );
-gboolean	file_save_dialog		( void );
-void		file_set_unsave		    ( void );
-gboolean	file_open				( const gchar * filename );
+ #include "common.h"
 
 
-
-/* GUI CallBacks */
-void on_menu_open_activate		( GtkMenuItem *menuitem, gpointer user_data);
-void on_menu_save_activate		( GtkMenuItem *menuitem, gpointer user_data);
-void on_menu_save_as_activate	( GtkMenuItem *menuitem, gpointer user_data);
-
+gp_tool * tool_flood_fill_init ( gp_canvas * canvas );
 

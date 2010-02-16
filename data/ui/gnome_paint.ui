@@ -72,9 +72,8 @@
                     <child>
                       <object class="GtkImageMenuItem" id="menu-quit">
                         <property name="label">gtk-quit</property>
-                        <property name="can_focus">True</property>
-                        <property name="has_focus">True</property>
-                        <property name="events">GDK_EXPOSURE_MASK | GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON2_MOTION_MASK | GDK_BUTTON3_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK | GDK_PROPERTY_CHANGE_MASK | GDK_VISIBILITY_NOTIFY_MASK | GDK_PROXIMITY_IN_MASK | GDK_PROXIMITY_OUT_MASK | GDK_SUBSTRUCTURE_MASK | GDK_SCROLL_MASK</property>
+                        <property name="visible">True</property>
+                        <property name="events"></property>
                         <property name="extension_events">all</property>
                         <property name="has_tooltip">True</property>
                         <property name="border_width">2</property>
@@ -97,35 +96,64 @@
                   <object class="GtkMenu" id="menu2">
                     <property name="visible">True</property>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem6">
+                      <object class="GtkImageMenuItem" id="menu-undo">
+                        <property name="label">gtk-undo</property>
+                        <property name="visible">True</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                        <accelerator key="z" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                        <signal name="activate" handler="on_menu_undo_activate"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="menu-redo">
+                        <property name="label">gtk-redo</property>
+                        <property name="visible">True</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                        <accelerator key="z" signal="activate" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
+                        <signal name="activate" handler="on_menu_redo_activate"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSeparatorMenuItem" id="separator">
+                        <property name="visible">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="menu-cut">
                         <property name="label">gtk-cut</property>
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <accelerator key="x" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem7">
+                      <object class="GtkImageMenuItem" id="menu-copy">
                         <property name="label">gtk-copy</property>
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <accelerator key="c" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem8">
+                      <object class="GtkImageMenuItem" id="menu-paste">
                         <property name="label">gtk-paste</property>
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <accelerator key="v" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem9">
+                      <object class="GtkImageMenuItem" id="menu-delete">
                         <property name="label">gtk-delete</property>
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <accelerator key="Delete" signal="activate"/>
                       </object>
                     </child>
                   </object>
@@ -825,13 +853,14 @@
                                   <object class="GtkDrawingArea" id="cv_drawing">
                                     <property name="width_request">300</property>
                                     <property name="height_request">300</property>
-                                    <property name="events">GDK_EXPOSURE_MASK | GDK_BUTTON_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK</property>
+                                    <property name="events">GDK_EXPOSURE_MASK | GDK_POINTER_MOTION_MASK | GDK_BUTTON_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_STRUCTURE_MASK</property>
                                     <signal name="expose_event" handler="on_cv_drawing_expose_event"/>
-                                    <signal name="button_press_event" handler="on_cv_drawing_button_press_event"/>
                                     <signal name="unrealize" handler="on_cv_drawing_unrealize"/>
-                                    <signal name="realize" handler="on_cv_drawing_realize"/>
-                                    <signal name="button_release_event" handler="on_cv_drawing_button_release_event"/>
                                     <signal name="motion_notify_event" handler="on_cv_drawing_motion_notify_event"/>
+                                    <signal name="realize" handler="on_cv_drawing_realize"/>
+                                    <signal name="leave_notify_event" handler="on_cv_drawing_leave_notify_event"/>
+                                    <signal name="button_release_event" handler="on_cv_drawing_button_release_event"/>
+                                    <signal name="button_press_event" handler="on_cv_drawing_button_press_event"/>
                                   </object>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -1867,8 +1896,17 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="label1">
+                  <object class="GtkFrame" id="frame37">
                     <property name="visible">True</property>
+                    <property name="label_xalign">0</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkLabel" id="lb_pos">
+                        <property name="visible">True</property>
+                        <property name="single_line_mode">True</property>
+                        <signal name="realize" handler="on_lb_pos_realize"/>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="position">1</property>
@@ -1885,8 +1923,16 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="lb_size">
-                    <signal name="realize" handler="on_lb_size_realize"/>
+                  <object class="GtkFrame" id="frame3">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkLabel" id="lb_size">
+                        <property name="single_line_mode">True</property>
+                        <signal name="realize" handler="on_lb_size_realize"/>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="position">3</property>

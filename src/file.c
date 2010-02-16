@@ -81,8 +81,12 @@ file_save_dialog ( void )
                GTK_DIALOG_MODAL, 
                GTK_MESSAGE_QUESTION, 
                GTK_BUTTONS_NONE, 
-               _("Do you want to save the changes you made to \"%s\"?\nYour changes will be lost if you don't save them."),
+               _("Do you want to save the changes you made to \"%s\"?"),
                file_title);
+		gtk_message_dialog_format_secondary_text(
+		    GTK_MESSAGE_DIALOG (dlg), 
+		    _("Your changes will be lost if you don't save them.") );
+
 		gtk_dialog_add_button (GTK_DIALOG(dlg), GTK_STOCK_DISCARD, GTK_RESPONSE_NO);
         gtk_dialog_add_button (GTK_DIALOG(dlg), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
         gtk_dialog_add_button (GTK_DIALOG(dlg), GTK_STOCK_SAVE, GTK_RESPONSE_YES);
@@ -126,7 +130,10 @@ file_open ( const gchar * filename )
 		if (!file_save_dialog () )
 		{
 			GdkPixbufFormat	*format	=	gdk_pixbuf_get_file_info (filename, NULL, NULL);
-			cv_set_pixbuf ( pixbuf );
+			GdkPixbuf		*orientation_changed_pixbuf;
+			orientation_changed_pixbuf	=	gdk_pixbuf_apply_embedded_orientation (pixbuf);
+			cv_set_pixbuf	( orientation_changed_pixbuf );
+			g_object_unref	( orientation_changed_pixbuf );
 			ok	=	TRUE;
 			if (gdk_pixbuf_format_is_writable (format))
 			{
@@ -326,8 +333,8 @@ file_error_dlg (const gchar *message, const GError *error)
 		                               GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
                               		   GTK_MESSAGE_ERROR,
                               		   GTK_BUTTONS_CLOSE,
-                                       message);
-		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG (dlg), error_message);
+                                       "%s",message);
+		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG (dlg), "%s",error_message);
 		gtk_dialog_run (GTK_DIALOG (dlg));
 		gtk_widget_destroy (dlg);
 }

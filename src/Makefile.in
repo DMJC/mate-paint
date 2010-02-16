@@ -56,7 +56,12 @@ am_gnome_paint_OBJECTS = gnome_paint-color.$(OBJEXT) \
 	gnome_paint-cv_rectangle_tool.$(OBJEXT) \
 	gnome_paint-cv_pencil_tool.$(OBJEXT) \
 	gnome_paint-cv_ellipse_tool.$(OBJEXT) \
-	gnome_paint-cv_polygon_tool.$(OBJEXT)
+	gnome_paint-cv_polygon_tool.$(OBJEXT) \
+	gnome_paint-undo.$(OBJEXT) gnome_paint-gp-image.$(OBJEXT) \
+	gnome_paint-cv_color_pick_tool.$(OBJEXT) \
+	gnome_paint-cv_flood_fill_tool.$(OBJEXT) \
+	gnome_paint-pixbuf_util.$(OBJEXT) \
+	gnome_paint-gp_point_array.$(OBJEXT)
 gnome_paint_OBJECTS = $(am_gnome_paint_OBJECTS)
 am__DEPENDENCIES_1 =
 gnome_paint_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -264,7 +269,19 @@ gnome_paint_SOURCES = \
 	cv_ellipse_tool.c  \
 	cv_ellipse_tool.h  \
 	cv_polygon_tool.c  \
-	cv_polygon_tool.h
+	cv_polygon_tool.h  \
+	undo.c  \
+	undo.h  \
+	gp-image.h  \
+	gp-image.c  \
+	cv_color_pick_tool.c  \
+	cv_color_pick_tool.h  \
+	cv_flood_fill_tool.c  \
+	cv_flood_fill_tool.h  \
+	pixbuf_util.c  \
+	pixbuf_util.h  \
+	gp_point_array.c  \
+	gp_point_array.h
 
 gnome_paint_CFLAGS = \
 	-DG_DISABLE_DEPRECATED\
@@ -368,17 +385,23 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-color.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_color_pick_tool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_drawing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_ellipse_tool.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_flood_fill_tool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_line_tool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_pencil_tool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_polygon_tool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_rectangle_tool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_resize.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-file.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-gp-image.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-gp_point_array.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-pixbuf-file-chooser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-pixbuf_util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-toolbar.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-undo.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -568,6 +591,90 @@ gnome_paint-cv_polygon_tool.obj: cv_polygon_tool.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cv_polygon_tool.c' object='gnome_paint-cv_polygon_tool.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-cv_polygon_tool.obj `if test -f 'cv_polygon_tool.c'; then $(CYGPATH_W) 'cv_polygon_tool.c'; else $(CYGPATH_W) '$(srcdir)/cv_polygon_tool.c'; fi`
+
+gnome_paint-undo.o: undo.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-undo.o -MD -MP -MF $(DEPDIR)/gnome_paint-undo.Tpo -c -o gnome_paint-undo.o `test -f 'undo.c' || echo '$(srcdir)/'`undo.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-undo.Tpo $(DEPDIR)/gnome_paint-undo.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='undo.c' object='gnome_paint-undo.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-undo.o `test -f 'undo.c' || echo '$(srcdir)/'`undo.c
+
+gnome_paint-undo.obj: undo.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-undo.obj -MD -MP -MF $(DEPDIR)/gnome_paint-undo.Tpo -c -o gnome_paint-undo.obj `if test -f 'undo.c'; then $(CYGPATH_W) 'undo.c'; else $(CYGPATH_W) '$(srcdir)/undo.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-undo.Tpo $(DEPDIR)/gnome_paint-undo.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='undo.c' object='gnome_paint-undo.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-undo.obj `if test -f 'undo.c'; then $(CYGPATH_W) 'undo.c'; else $(CYGPATH_W) '$(srcdir)/undo.c'; fi`
+
+gnome_paint-gp-image.o: gp-image.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-gp-image.o -MD -MP -MF $(DEPDIR)/gnome_paint-gp-image.Tpo -c -o gnome_paint-gp-image.o `test -f 'gp-image.c' || echo '$(srcdir)/'`gp-image.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-gp-image.Tpo $(DEPDIR)/gnome_paint-gp-image.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='gp-image.c' object='gnome_paint-gp-image.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-gp-image.o `test -f 'gp-image.c' || echo '$(srcdir)/'`gp-image.c
+
+gnome_paint-gp-image.obj: gp-image.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-gp-image.obj -MD -MP -MF $(DEPDIR)/gnome_paint-gp-image.Tpo -c -o gnome_paint-gp-image.obj `if test -f 'gp-image.c'; then $(CYGPATH_W) 'gp-image.c'; else $(CYGPATH_W) '$(srcdir)/gp-image.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-gp-image.Tpo $(DEPDIR)/gnome_paint-gp-image.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='gp-image.c' object='gnome_paint-gp-image.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-gp-image.obj `if test -f 'gp-image.c'; then $(CYGPATH_W) 'gp-image.c'; else $(CYGPATH_W) '$(srcdir)/gp-image.c'; fi`
+
+gnome_paint-cv_color_pick_tool.o: cv_color_pick_tool.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-cv_color_pick_tool.o -MD -MP -MF $(DEPDIR)/gnome_paint-cv_color_pick_tool.Tpo -c -o gnome_paint-cv_color_pick_tool.o `test -f 'cv_color_pick_tool.c' || echo '$(srcdir)/'`cv_color_pick_tool.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-cv_color_pick_tool.Tpo $(DEPDIR)/gnome_paint-cv_color_pick_tool.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cv_color_pick_tool.c' object='gnome_paint-cv_color_pick_tool.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-cv_color_pick_tool.o `test -f 'cv_color_pick_tool.c' || echo '$(srcdir)/'`cv_color_pick_tool.c
+
+gnome_paint-cv_color_pick_tool.obj: cv_color_pick_tool.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-cv_color_pick_tool.obj -MD -MP -MF $(DEPDIR)/gnome_paint-cv_color_pick_tool.Tpo -c -o gnome_paint-cv_color_pick_tool.obj `if test -f 'cv_color_pick_tool.c'; then $(CYGPATH_W) 'cv_color_pick_tool.c'; else $(CYGPATH_W) '$(srcdir)/cv_color_pick_tool.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-cv_color_pick_tool.Tpo $(DEPDIR)/gnome_paint-cv_color_pick_tool.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cv_color_pick_tool.c' object='gnome_paint-cv_color_pick_tool.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-cv_color_pick_tool.obj `if test -f 'cv_color_pick_tool.c'; then $(CYGPATH_W) 'cv_color_pick_tool.c'; else $(CYGPATH_W) '$(srcdir)/cv_color_pick_tool.c'; fi`
+
+gnome_paint-cv_flood_fill_tool.o: cv_flood_fill_tool.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-cv_flood_fill_tool.o -MD -MP -MF $(DEPDIR)/gnome_paint-cv_flood_fill_tool.Tpo -c -o gnome_paint-cv_flood_fill_tool.o `test -f 'cv_flood_fill_tool.c' || echo '$(srcdir)/'`cv_flood_fill_tool.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-cv_flood_fill_tool.Tpo $(DEPDIR)/gnome_paint-cv_flood_fill_tool.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cv_flood_fill_tool.c' object='gnome_paint-cv_flood_fill_tool.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-cv_flood_fill_tool.o `test -f 'cv_flood_fill_tool.c' || echo '$(srcdir)/'`cv_flood_fill_tool.c
+
+gnome_paint-cv_flood_fill_tool.obj: cv_flood_fill_tool.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-cv_flood_fill_tool.obj -MD -MP -MF $(DEPDIR)/gnome_paint-cv_flood_fill_tool.Tpo -c -o gnome_paint-cv_flood_fill_tool.obj `if test -f 'cv_flood_fill_tool.c'; then $(CYGPATH_W) 'cv_flood_fill_tool.c'; else $(CYGPATH_W) '$(srcdir)/cv_flood_fill_tool.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-cv_flood_fill_tool.Tpo $(DEPDIR)/gnome_paint-cv_flood_fill_tool.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cv_flood_fill_tool.c' object='gnome_paint-cv_flood_fill_tool.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-cv_flood_fill_tool.obj `if test -f 'cv_flood_fill_tool.c'; then $(CYGPATH_W) 'cv_flood_fill_tool.c'; else $(CYGPATH_W) '$(srcdir)/cv_flood_fill_tool.c'; fi`
+
+gnome_paint-pixbuf_util.o: pixbuf_util.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-pixbuf_util.o -MD -MP -MF $(DEPDIR)/gnome_paint-pixbuf_util.Tpo -c -o gnome_paint-pixbuf_util.o `test -f 'pixbuf_util.c' || echo '$(srcdir)/'`pixbuf_util.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-pixbuf_util.Tpo $(DEPDIR)/gnome_paint-pixbuf_util.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pixbuf_util.c' object='gnome_paint-pixbuf_util.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-pixbuf_util.o `test -f 'pixbuf_util.c' || echo '$(srcdir)/'`pixbuf_util.c
+
+gnome_paint-pixbuf_util.obj: pixbuf_util.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-pixbuf_util.obj -MD -MP -MF $(DEPDIR)/gnome_paint-pixbuf_util.Tpo -c -o gnome_paint-pixbuf_util.obj `if test -f 'pixbuf_util.c'; then $(CYGPATH_W) 'pixbuf_util.c'; else $(CYGPATH_W) '$(srcdir)/pixbuf_util.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-pixbuf_util.Tpo $(DEPDIR)/gnome_paint-pixbuf_util.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pixbuf_util.c' object='gnome_paint-pixbuf_util.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-pixbuf_util.obj `if test -f 'pixbuf_util.c'; then $(CYGPATH_W) 'pixbuf_util.c'; else $(CYGPATH_W) '$(srcdir)/pixbuf_util.c'; fi`
+
+gnome_paint-gp_point_array.o: gp_point_array.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-gp_point_array.o -MD -MP -MF $(DEPDIR)/gnome_paint-gp_point_array.Tpo -c -o gnome_paint-gp_point_array.o `test -f 'gp_point_array.c' || echo '$(srcdir)/'`gp_point_array.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-gp_point_array.Tpo $(DEPDIR)/gnome_paint-gp_point_array.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='gp_point_array.c' object='gnome_paint-gp_point_array.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-gp_point_array.o `test -f 'gp_point_array.c' || echo '$(srcdir)/'`gp_point_array.c
+
+gnome_paint-gp_point_array.obj: gp_point_array.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-gp_point_array.obj -MD -MP -MF $(DEPDIR)/gnome_paint-gp_point_array.Tpo -c -o gnome_paint-gp_point_array.obj `if test -f 'gp_point_array.c'; then $(CYGPATH_W) 'gp_point_array.c'; else $(CYGPATH_W) '$(srcdir)/gp_point_array.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-gp_point_array.Tpo $(DEPDIR)/gnome_paint-gp_point_array.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='gp_point_array.c' object='gnome_paint-gp_point_array.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-gp_point_array.obj `if test -f 'gp_point_array.c'; then $(CYGPATH_W) 'gp_point_array.c'; else $(CYGPATH_W) '$(srcdir)/gp_point_array.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

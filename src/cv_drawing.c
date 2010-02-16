@@ -25,6 +25,8 @@
  
 #include "cv_drawing.h"
 #include "cv_resize.h"
+#include "cv_color_pick_tool.h"
+#include "cv_flood_fill_tool.h"
 #include "cv_line_tool.h"
 #include "cv_pencil_tool.h"
 #include "cv_rectangle_tool.h"
@@ -37,7 +39,7 @@
 /*Member functions*/
 static GdkGC * 	cv_create_new_gc	( char * name );
 static void		cv_create_pixmap	(gint width, gint height, gboolean b_resize);
-
+static void		cv_print_pos		( gint x, gint y );
 
 
 /* private data  */
@@ -45,6 +47,9 @@ static gp_canvas	cv;
 static gp_tool		*cv_tool		=	NULL;
 static GdkColor 	white_color		=	{ 0, 0xffff, 0xffff, 0xffff  };
 static GdkColor 	black_color		=	{ 0, 0x0000, 0x0000, 0x0000  };
+static GtkWidget	*lb_pos			=	NULL;
+static gboolean		b_pos_pressed	=	FALSE;
+static gint			x_pos,y_pos;
 
 
 /*
@@ -77,11 +82,12 @@ void
 cv_set_line_width	( gint width )
 {
 	gdk_gc_set_line_attributes ( cv.gc_fg, width, GDK_LINE_SOLID, 
-	                             GDK_CAP_NOT_LAST, GDK_JOIN_ROUND );
+	                             GDK_CAP_ROUND, GDK_JOIN_ROUND );
 	gdk_gc_set_line_attributes ( cv.gc_bg, width, GDK_LINE_SOLID, 
-	                             GDK_CAP_NOT_LAST, GDK_JOIN_ROUND );
+	                             GDK_CAP_ROUND, GDK_JOIN_ROUND );
 	gtk_widget_queue_draw ( cv.widget );
 	gdk_window_process_updates (gtk_widget_get_parent_window(cv.widget), FALSE);
+	cv.line_width = width;
 }
 
 void
@@ -97,6 +103,20 @@ void cv_sel_none_tool	( void )
 	gdk_window_set_cursor ( cv.drawing, NULL);
 	if (cv_tool != NULL) cv_tool->destroy(NULL);
 	cv_tool = NULL;
+}
+
+void cv_sel_color_pick_tool	( void )
+{
+	if (cv_tool != NULL) cv_tool->destroy(NULL);
+	cv_tool = tool_color_pick_init ( &cv );
+	cv_tool->reset ();
+}
+
+void cv_sel_flood_fill_tool	( void )
+{
+	if (cv_tool != NULL) cv_tool->destroy(NULL);
+	cv_tool = tool_flood_fill_init ( &cv );
+	cv_tool->reset ();
 }
 
 void cv_sel_pencil_tool	( void )
@@ -187,6 +207,12 @@ cv_get_pixbuf ( void )
 	return pixbuf;
 }
 
+gp_canvas *
+cv_get_canvas ( void )
+{
+	return &cv;
+}
+
 /* GUI CallBacks */
 
 void
@@ -216,6 +242,11 @@ on_cv_drawing_unrealize	(GtkWidget *widget, gpointer user_data)
 	cv_sel_none_tool();
 }
 
+void 
+on_lb_pos_realize (GtkWidget *widget, gpointer user_data)
+{
+	lb_pos	=	widget;
+}
 
 /* events */
 gboolean
@@ -223,7 +254,11 @@ on_cv_drawing_button_press_event (	GtkWidget	   *widget,
                                		GdkEventButton *event,
                                 	gpointer       user_data )
 {
-	gboolean ret = TRUE;
+	gboolean ret	=	TRUE;
+	b_pos_pressed	=	TRUE;
+	x_pos	= (gint)event->x;
+	y_pos	= (gint)event->y;
+	cv_print_pos ( event->x, event->y );
 
 	if ( cv_tool != NULL )
 	{
@@ -238,7 +273,9 @@ on_cv_drawing_button_release_event (	GtkWidget	   *widget,
                                     	GdkEventButton *event,
                                     	gpointer       user_data )
 {
-	gboolean ret = TRUE;
+	gboolean ret	=	TRUE;
+	b_pos_pressed	=	FALSE;
+	cv_print_pos ( event->x, event->y );
 
 	if ( cv_tool != NULL )
 	{
@@ -246,6 +283,13 @@ on_cv_drawing_button_release_event (	GtkWidget	   *widget,
 	}
 
 	return ret;
+}
+gboolean 
+on_cv_drawing_leave_notify_event ( GtkWidget        *widget,
+                                 GdkEventCrossing *event,
+                                 gpointer          user_data)
+{
+	gtk_label_set_text( GTK_LABEL(lb_pos), "" );
 }
 									
 gboolean
@@ -259,7 +303,7 @@ on_cv_drawing_motion_notify_event (	GtkWidget      *widget,
 	{
 		ret = cv_tool->button_motion( event );
 	}
-
+	cv_print_pos ( event->x, event->y );
 	return ret;
 }
 
@@ -335,3 +379,22 @@ cv_create_pixmap ( gint width, gint height, gboolean b_resize )
 	cv_resize_adjust_box_size (width, height);
 }
 
+static void		
+cv_print_pos ( gint x, gint y )
+{
+	GString *str = g_string_new("");
+	if ( b_pos_pressed )
+	{
+		gint w	=	x - x_pos;
+		gint h	=	y - y_pos;
+		w = ( w < 0 )?(w-1):(w+1);
+		h = ( h < 0 )?(h-1):(h+1);
+		g_string_printf (str, "%d,%d->%d,%d (%dx%d)", x_pos, y_pos, x, y, w, h);
+	}
+	else
+	{
+		g_string_printf (str, "%d,%d", x, y );
+	}
+	gtk_label_set_text( GTK_LABEL(lb_pos), str->str );
+	g_string_free( str, TRUE);
+}

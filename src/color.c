@@ -20,6 +20,7 @@
 #include "common.h"
 #include "color.h"
 #include "cv_drawing.h"
+#include "pixbuf_util.h"
 
 #include <glib/gi18n.h>
 
@@ -69,6 +70,18 @@ static void pallete_show						( guint palette );
 /*
  *   CODE
  */
+
+void foreground_set_color_from_rgb  ( guint color )
+{
+   foreground_color.red   = getr(color);
+   foreground_color.red   <<= 8;
+   foreground_color.green = getg(color);
+   foreground_color.green <<= 8;
+   foreground_color.blue  = getb(color);
+   foreground_color.blue  <<= 8;
+   foreground_show ();
+   /*g_debug("%s %d", __FILE__, __LINE__);*/
+}
 
 
 void

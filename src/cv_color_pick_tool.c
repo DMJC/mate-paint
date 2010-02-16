@@ -1,32 +1,30 @@
 /***************************************************************************
- *            cv_line_tool.c
- *
- *  Wed Jun 10 21:22:13 2009
- *  Copyright  2009  rogerio
- *  <rogerio@<host>>
- ****************************************************************************/
+    Copyright (C) Rogério Ferro do Nascimento 2010 <rogerioferro@gmail.com>
+    Contributed by Juan Balderas
 
-/*
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Library General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
- */
- 
- #include <gtk/gtk.h>
+    This file is part of gnome-paint.
 
-#include "cv_line_tool.h"
+    gnome-paint is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    gnome-paint is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with gnome-paint.  If not, see <http://www.gnu.org/licenses/>.
+****************************************************************************/
+
+#include <gtk/gtk.h>
+
+#include "cv_color_pick_tool.h"
+#include "pixbuf_util.h"
 #include "file.h"
-#include "undo.h"
+#include "cv_drawing.h"
+#include "color.h"
 
 /*Member functions*/
 static gboolean	button_press	( GdkEventButton *event );
@@ -41,7 +39,7 @@ typedef struct {
 	gp_tool			tool;
 	gp_canvas *		cv;
 	GdkGC *			gc;
-	gint 			x0,y0,x1,y1;
+	gint 			x0,y0;
 	guint			button;
 	gboolean 		is_draw;
 } private_data;
@@ -69,10 +67,8 @@ destroy_private_data( void )
 }
 
 
-
-
 gp_tool * 
-tool_line_init ( gp_canvas * canvas )
+tool_color_pick_init ( gp_canvas * canvas )
 {
 	create_private_data ();
 	m_priv->cv					= canvas;
@@ -85,9 +81,13 @@ tool_line_init ( gp_canvas * canvas )
 	return &m_priv->tool;
 }
 
+// cv_set_color_fg ( &GdkColor );
 gboolean
 button_press ( GdkEventButton *event )
 {
+	guint color = 0;
+	GdkPixbuf *pixbuf = NULL;
+
 	if ( event->type == GDK_BUTTON_PRESS )
 	{
 		if ( event->button == LEFT_BUTTON )
@@ -99,12 +99,29 @@ button_press ( GdkEventButton *event )
 			m_priv->gc = m_priv->cv->gc_bg;
 		}
 		m_priv->is_draw = !m_priv->is_draw;
-		if( m_priv->is_draw ) 
+		if( m_priv->is_draw ) m_priv->button = event->button;
+
+		m_priv->x0 = (gint)event->x;
+		m_priv->y0 = (gint)event->y;
+
+		pixbuf = cv_get_pixbuf ( );
+
+		if( GDK_IS_PIXBUF( pixbuf ) )
 		{
-			m_priv->button = event->button;
+			if(!gdk_pixbuf_get_has_alpha ( pixbuf ) )
+			{
+				GdkPixbuf *tmp ;
+				tmp = gdk_pixbuf_add_alpha( pixbuf, FALSE, 0, 0, 0 );
+				g_object_unref(pixbuf);
+				pixbuf = tmp;
+			}
+			if(get_pixel_from_pixbuf( pixbuf, &color, m_priv->x0, m_priv->y0) )
+			{
+				foreground_set_color_from_rgb  ( color );
+			}
+			
+			g_object_unref ( pixbuf );
 		}
-		m_priv->x0 = m_priv->x1 = (gint)event->x;
-		m_priv->y0 = m_priv->y1 = (gint)event->y;
 		if( !m_priv->is_draw ) gtk_widget_queue_draw ( m_priv->cv->widget );
 	}
 	return TRUE;
@@ -113,20 +130,7 @@ button_press ( GdkEventButton *event )
 gboolean
 button_release ( GdkEventButton *event )
 {
-	if ( event->type == GDK_BUTTON_RELEASE )
-	{
-		if( m_priv->button == event->button )
-		{
-			if( m_priv->is_draw )
-			{
-				undo_add_pixbuf ( m_priv->x0, m_priv->y0, m_priv->x1, m_priv->y1, NULL);
-				gdk_draw_line ( m_priv->cv->pixmap, m_priv->gc, m_priv->x0, m_priv->y0, m_priv->x1, m_priv->y1 );
-				file_set_unsave ();
-			}
-			gtk_widget_queue_draw ( m_priv->cv->widget );
-			m_priv->is_draw = FALSE;
-		}
-	}
+	
 	return TRUE;
 }
 
@@ -135,9 +139,7 @@ button_motion ( GdkEventMotion *event )
 {
 	if( m_priv->is_draw )
 	{
-		m_priv->x1 = (gint)event->x;
-		m_priv->y1 = (gint)event->y;
-		gtk_widget_queue_draw ( m_priv->cv->widget );
+		
 	}
 	return TRUE;
 }
@@ -147,7 +149,7 @@ draw ( void )
 {
 	if ( m_priv->is_draw )
 	{
-		gdk_draw_line ( m_priv->cv->drawing, m_priv->gc, m_priv->x0, m_priv->y0, m_priv->x1, m_priv->y1 );
+
 	}
 }
 
@@ -163,5 +165,8 @@ void reset ( void )
 void destroy ( gpointer data  )
 {
 	destroy_private_data ();
-	g_print("line tool destroy\n");
+	g_print("color_pick tool destroy\n");
 }
+
+
+

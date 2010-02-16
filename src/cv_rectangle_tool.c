@@ -118,6 +118,7 @@ button_release ( GdkEventButton *event )
 		{
 			if( m_priv->is_draw )
 			{
+				undo_add_pixbuf ( m_priv->x0, m_priv->y0, m_priv->x1, m_priv->y1, NULL);
 				draw_in_pixmap (m_priv->cv->pixmap);
 				file_set_unsave ();
 			}

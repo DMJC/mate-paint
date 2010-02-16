@@ -51,7 +51,19 @@ gnome_paint_SOURCES = \
 	cv_ellipse_tool.c  \
 	cv_ellipse_tool.h  \
 	cv_polygon_tool.c  \
-	cv_polygon_tool.h
+	cv_polygon_tool.h  \
+	undo.c  \
+	undo.h  \
+	gp-image.h  \
+	gp-image.c  \
+	cv_color_pick_tool.c  \
+	cv_color_pick_tool.h  \
+	cv_flood_fill_tool.c  \
+	cv_flood_fill_tool.h  \
+	pixbuf_util.c  \
+	pixbuf_util.h  \
+	gp_point_array.c  \
+	gp_point_array.h
 
 gnome_paint_CFLAGS = \
 	-DG_DISABLE_DEPRECATED\

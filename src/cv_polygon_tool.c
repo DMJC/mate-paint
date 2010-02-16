@@ -25,6 +25,7 @@
  #include <gtk/gtk.h>
 
 #include "cv_polygon_tool.h"
+#include "gp_point_array.h"
 #include "file.h"
 
 /*Member functions*/
@@ -36,10 +37,6 @@ static void		reset			( void );
 static void		destroy			( gpointer data  );
 static void		draw_in_pixmap	( GdkDrawable *drawable );
 
-static void		change_point	( gint x, gint y );
-static void		add_point 		( gint x, gint y );
-static void		clear_points	( void );
-
 /*private data*/
 typedef enum
 {
@@ -50,12 +47,12 @@ typedef enum
 
 typedef struct {
 	gp_tool			tool;
-	gp_canvas *		cv;
-	GdkGC *			gcf;
-	GdkGC *			gcb;
+	gp_canvas       *cv;
+	GdkGC           *gcf;
+	GdkGC           *gcb;
 	guint			button;
 	gboolean 		is_draw;
-	GArray			*garray;
+    gp_point_array  *pa;
 	gp_tool_state	state;
 } private_data;
 
@@ -72,7 +69,7 @@ create_private_data( void )
 		m_priv->gcb			=	NULL;
 		m_priv->button		=	NONE_BUTTON;
 		m_priv->is_draw		=	FALSE;
-		m_priv->garray		=	NULL;
+        m_priv->pa          =   gp_point_array_new();
 		m_priv->state		=	TOOL_NONE;		
 	}
 }
@@ -80,7 +77,7 @@ create_private_data( void )
 static void
 destroy_private_data( void )
 {
-	clear_points ();
+    gp_point_array_free( m_priv->pa );
 	g_free (m_priv);
 	m_priv = NULL;
 }
@@ -122,12 +119,10 @@ button_press ( GdkEventButton *event )
 				m_priv->is_draw	= TRUE;
 				m_priv->button	= event->button;
 
-				clear_points ();
-				/*New Array*/
-				m_priv->garray = g_array_new (FALSE, FALSE, sizeof (GdkPoint));
+                gp_point_array_clear ( m_priv->pa );
 				/*add two point*/
-				add_point ( (gint)event->x, (gint)event->y );
-				add_point ( (gint)event->x, (gint)event->y );
+                gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
+                gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
 				break;
 			}
 			case TOOL_DRAWING:
@@ -137,7 +132,7 @@ button_press ( GdkEventButton *event )
 					/*cancel*/
 					m_priv->state 		= TOOL_NONE;
 					m_priv->is_draw		= FALSE;
-					clear_points ();
+                    gp_point_array_clear ( m_priv->pa );
 				}
 				break;
 			}
@@ -147,7 +142,7 @@ button_press ( GdkEventButton *event )
 				{
 					/*next point*/
 					m_priv->state = TOOL_DRAWING;
-					add_point ( (gint)event->x, (gint)event->y );
+                    gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
 				}
 				else
 				{
@@ -156,7 +151,7 @@ button_press ( GdkEventButton *event )
 					m_priv->is_draw	= FALSE;
 					draw_in_pixmap (m_priv->cv->pixmap);
 					file_set_unsave ();
-					clear_points ();
+                    gp_point_array_clear ( m_priv->pa );
 				}
 				break;
 			}
@@ -187,7 +182,8 @@ button_motion ( GdkEventMotion *event )
 {
 	if( m_priv->is_draw )
 	{
-		change_point( (gint)event->x, (gint)event->y );
+        gint index = gp_point_array_size ( m_priv->pa ) - 1;
+        gp_point_array_set ( m_priv->pa, index, (gint)event->x, (gint)event->y );
 		gtk_widget_queue_draw ( m_priv->cv->widget );
 	}
 	return TRUE;
@@ -223,10 +219,10 @@ destroy ( gpointer data  )
 static void
 draw_in_pixmap ( GdkDrawable *drawable )
 {
-	if ( m_priv->garray != NULL )
+	if ( gp_point_array_size (m_priv->pa) > 0 )
 	{
-		GdkPoint *	points		=	(GdkPoint *)m_priv->garray->data;
-		gint		n_points	=	(gint)m_priv->garray->len;
+		GdkPoint *	points		=	gp_point_array_data (m_priv->pa);
+		gint		n_points	=	gp_point_array_size (m_priv->pa);
 		if ( m_priv->cv->filled == FILLED_BACK )
 		{
 			gdk_draw_polygon ( drawable, m_priv->gcb, TRUE, points, n_points);
@@ -243,29 +239,3 @@ draw_in_pixmap ( GdkDrawable *drawable )
 		}
 	}
 }
-
-static void
-change_point ( gint x, gint y)
-{
-	GdkPoint *	point	=	&g_array_index (m_priv->garray, GdkPoint, m_priv->garray->len - 1 );
-	point->x = x;
-	point->y = y;
-}
-
-static void
-add_point ( gint x, gint y)
-{
-	GdkPoint	point	=	{ x, y };
-	g_array_append_val ( m_priv->garray, point );
-}
-
-static void
-clear_points( void )
-{
-	if( m_priv->garray != NULL )
-	{
-		g_array_free ( m_priv->garray, TRUE);
-		m_priv->garray	=	NULL;
-	}
-}
-
