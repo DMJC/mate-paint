@@ -25,8 +25,13 @@
  #include <gtk/gtk.h>
 
 #include "cv_line_tool.h"
+#include "cv_drawing.h"
 #include "file.h"
 #include "undo.h"
+#include "gp_point_array.h"
+
+
+
 
 /*Member functions*/
 static gboolean	button_press	( GdkEventButton *event );
@@ -35,6 +40,7 @@ static gboolean	button_motion	( GdkEventMotion *event );
 static void		draw			( void );
 static void		reset			( void );
 static void		destroy			( gpointer data  );
+static void     save_undo       ( void );
 
 /*private data*/
 typedef struct {
@@ -106,6 +112,7 @@ button_press ( GdkEventButton *event )
 		m_priv->x0 = m_priv->x1 = (gint)event->x;
 		m_priv->y0 = m_priv->y1 = (gint)event->y;
 		if( !m_priv->is_draw ) gtk_widget_queue_draw ( m_priv->cv->widget );
+        gtk_widget_queue_draw ( m_priv->cv->widget );
 	}
 	return TRUE;
 }
@@ -118,11 +125,12 @@ button_release ( GdkEventButton *event )
 		if( m_priv->button == event->button )
 		{
 			if( m_priv->is_draw )
-			{
-				undo_add_pixbuf ( m_priv->x0, m_priv->y0, m_priv->x1, m_priv->y1, NULL);
+             {
+                save_undo ();
 				gdk_draw_line ( m_priv->cv->pixmap, m_priv->gc, m_priv->x0, m_priv->y0, m_priv->x1, m_priv->y1 );
 				file_set_unsave ();
-			}
+
+    		}
 			gtk_widget_queue_draw ( m_priv->cv->widget );
 			m_priv->is_draw = FALSE;
 		}
@@ -153,7 +161,7 @@ draw ( void )
 
 void reset ( void )
 {
-	GdkCursor *cursor = gdk_cursor_new ( GDK_CROSSHAIR );
+    GdkCursor *cursor = gdk_cursor_new ( GDK_DOTBOX );
 	g_assert(cursor);
 	gdk_window_set_cursor ( m_priv->cv->drawing, cursor );
 	gdk_cursor_unref( cursor );
@@ -165,3 +173,30 @@ void destroy ( gpointer data  )
 	destroy_private_data ();
 	g_print("line tool destroy\n");
 }
+
+static void     
+save_undo ( void )
+{
+    GdkRectangle    rect;
+    GdkRectangle    rect_max;
+    GdkBitmap       *mask;
+    GdkGC	        *gc_mask;
+    gp_point_array  *pa  = gp_point_array_new ();
+
+    gp_point_array_append (pa, m_priv->x0, m_priv->y0 );
+    gp_point_array_append (pa, m_priv->x1, m_priv->y1 );
+
+    cv_get_rect_size ( &rect_max );
+    gp_point_array_get_clipbox ( pa, &rect, m_priv->cv->line_width, &rect_max );
+     
+    undo_create_mask ( rect.width, rect.height, &mask, &gc_mask );
+    gdk_draw_line ( mask, gc_mask, 
+                    m_priv->x0 - rect.x, m_priv->y0 - rect.y,
+                    m_priv->x1 - rect.x, m_priv->y1 - rect.y );
+    undo_add ( &rect, mask, NULL);
+
+    gp_point_array_free (pa);
+    g_object_unref (gc_mask);
+    g_object_unref (mask);
+}
+

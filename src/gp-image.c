@@ -34,13 +34,6 @@ struct _GpImagePrivate
 };
 
 
-static gint
-gp_image_priv_test (void)
-{
-	/* TODO: Add private function implementation here */
-	return 0;
-}
-
 G_DEFINE_TYPE (GpImage, gp_image, G_TYPE_OBJECT);
 
 static void
@@ -65,12 +58,11 @@ gp_image_class_init (GpImageClass *klass)
 	object_class->finalize = gp_image_finalize;
 
 	g_type_class_add_private (object_class, sizeof (GpImagePrivate));
-
 }
 
 
 GpImage * 
-gp_image_new ( gint width, gint height )
+gp_image_new ( gint width, gint height, gboolean has_alpha  )
 {
 	GpImage *image;
 
@@ -79,7 +71,7 @@ gp_image_new ( gint width, gint height )
 	
 	image = g_object_new (GP_TYPE_IMAGE, NULL);
     image->priv->pixbuf = gdk_pixbuf_new (
-            GDK_COLORSPACE_RGB, TRUE, BITS_PER_SAMPLE, width, height);
+            GDK_COLORSPACE_RGB, has_alpha, BITS_PER_SAMPLE, width, height);
     g_assert(image->priv->pixbuf);
 	g_object_set_data ( G_OBJECT(image), "pixbuf", image->priv->pixbuf);
 
@@ -88,7 +80,7 @@ gp_image_new ( gint width, gint height )
 
 
 GpImage * 
-gp_image_new_from_pixmap ( GdkPixmap* pixmap, GdkRectangle *rect )
+gp_image_new_from_pixmap ( GdkPixmap* pixmap, GdkRectangle *rect, gboolean has_alpha  )
 {
     GpImage			*image;
 	GdkRectangle	r;
@@ -108,7 +100,7 @@ gp_image_new_from_pixmap ( GdkPixmap* pixmap, GdkRectangle *rect )
 		r.height=   rect->height;
 	}
 	
-	image   = gp_image_new( r.width, r.height );
+	image   = gp_image_new( r.width, r.height, has_alpha );
 	g_return_val_if_fail ( image != NULL, NULL);
 	
     gdk_pixbuf_get_from_drawable(
@@ -120,8 +112,6 @@ gp_image_new_from_pixmap ( GdkPixmap* pixmap, GdkRectangle *rect )
                 r.width, r.height);
     return image;
 }
-
-
 
 GdkPixbuf *
 gp_image_get_pixbuf ( GpImage *image )
@@ -145,6 +135,13 @@ gp_image_set_mask ( GpImage *image, GdkBitmap *mask )
 	
 
 	pixbuf		=   image->priv->pixbuf;
+	if(!gdk_pixbuf_get_has_alpha ( pixbuf ) )
+	{  /*add alpha*/
+		GdkPixbuf *tmp ;
+		tmp = gdk_pixbuf_add_alpha(pixbuf, FALSE, 0, 0, 0);
+		g_object_unref(pixbuf);
+		pixbuf = tmp;
+	}
 	m_pixbuf	=   gdk_pixbuf_copy ( pixbuf );
 	
 	gdk_pixbuf_get_from_drawable (  m_pixbuf, 

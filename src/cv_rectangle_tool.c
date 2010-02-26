@@ -26,6 +26,8 @@
 
 #include "cv_rectangle_tool.h"
 #include "file.h"
+#include "undo.h"
+#include "gp_point_array.h"
 
 /*Member functions*/
 static gboolean	button_press	( GdkEventButton *event );
@@ -35,6 +37,7 @@ static void		draw			( void );
 static void		reset			( void );
 static void		destroy			( gpointer data  );
 static void		draw_in_pixmap	( GdkDrawable *drawable );
+static void     save_undo       ( void );
 
 
 /*private data*/
@@ -43,7 +46,7 @@ typedef struct {
 	gp_canvas *		cv;
 	GdkGC *			gcf;
 	GdkGC *			gcb;
-	gint 			x0,y0,x1,y1;
+    gp_point_array  *pa;
 	guint			button;
 	gboolean 		is_draw;
 } private_data;
@@ -61,12 +64,15 @@ create_private_data( void )
 		m_priv->gcb		=	NULL;
 		m_priv->button	=	NONE_BUTTON;
 		m_priv->is_draw	=	FALSE;
+        m_priv->pa      =   gp_point_array_new();
+        
 	}
 }
 
 static void
 destroy_private_data( void )
 {
+    gp_point_array_free( m_priv->pa );
 	g_free (m_priv);
 	m_priv = NULL;
 }
@@ -102,9 +108,14 @@ button_press ( GdkEventButton *event )
 		}
 		m_priv->is_draw = !m_priv->is_draw;
 		if( m_priv->is_draw ) m_priv->button = event->button;
-		m_priv->x0 = m_priv->x1 = (gint)event->x;
-		m_priv->y0 = m_priv->y1 = (gint)event->y;
+
+        gp_point_array_clear ( m_priv->pa );
+		/*add two point*/
+        gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
+        gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
+        
 		if( !m_priv->is_draw ) gtk_widget_queue_draw ( m_priv->cv->widget );
+		gtk_widget_queue_draw ( m_priv->cv->widget );
 	}
 	return TRUE;
 }
@@ -118,12 +129,13 @@ button_release ( GdkEventButton *event )
 		{
 			if( m_priv->is_draw )
 			{
-				undo_add_pixbuf ( m_priv->x0, m_priv->y0, m_priv->x1, m_priv->y1, NULL);
+   	            save_undo ();
 				draw_in_pixmap (m_priv->cv->pixmap);
 				file_set_unsave ();
 			}
 			gtk_widget_queue_draw ( m_priv->cv->widget );
-			m_priv->is_draw = FALSE;
+            gp_point_array_clear ( m_priv->pa );
+            m_priv->is_draw = FALSE;
 		}
 	}
 	return TRUE;
@@ -134,8 +146,7 @@ button_motion ( GdkEventMotion *event )
 {
 	if( m_priv->is_draw )
 	{
-		m_priv->x1 = (gint)event->x;
-		m_priv->y1 = (gint)event->y;
+        gp_point_array_set ( m_priv->pa, 1, (gint)event->x, (gint)event->y );
 		gtk_widget_queue_draw ( m_priv->cv->widget );
 	}
 	return TRUE;
@@ -153,7 +164,7 @@ draw ( void )
 static void 
 reset ( void )
 {
-	GdkCursor *cursor = gdk_cursor_new ( GDK_CROSSHAIR );
+    GdkCursor *cursor = gdk_cursor_new ( GDK_DOTBOX );
 	g_assert(cursor);
 	gdk_window_set_cursor ( m_priv->cv->drawing, cursor );
 	gdk_cursor_unref( cursor );
@@ -170,23 +181,48 @@ destroy ( gpointer data  )
 static void
 draw_in_pixmap ( GdkDrawable *drawable )
 {
-	guint x = MIN(m_priv->x0,m_priv->x1);
-	guint y = MIN(m_priv->y0,m_priv->y1);
-	guint w = ABS(m_priv->x1-m_priv->x0);
-	guint h = ABS(m_priv->y1-m_priv->y0);
+    GdkRectangle    rect;
+    GdkPoint        *p = gp_point_array_data (m_priv->pa);
+	rect.x      = MIN(p[0].x,p[1].x);
+	rect.y      = MIN(p[0].y,p[1].y);
+	rect.width  = ABS(p[1].x-p[0].x);
+	rect.height = ABS(p[1].y-p[0].y);
+
 	if ( m_priv->cv->filled == FILLED_BACK )
 	{
-		gdk_draw_rectangle (drawable, m_priv->gcb, TRUE, x, y, w, h);
+		gdk_draw_rectangle (drawable, m_priv->gcb, TRUE, rect.x, rect.y, rect.width, rect.height );
 	}
 	else
 	if ( m_priv->cv->filled == FILLED_FORE )
 	{
-		gdk_draw_rectangle (drawable, m_priv->gcf, TRUE, x, y, w, h);
+		gdk_draw_rectangle (drawable, m_priv->gcf, TRUE, rect.x, rect.y, rect.width, rect.height );
 	}
-
-	if ( m_priv->cv->filled != FILLED_FORE )
-	{
-		gdk_draw_rectangle (drawable, m_priv->gcf, FALSE, x, y, w, h);
-	}
+	gdk_draw_rectangle (drawable, m_priv->gcf, FALSE, rect.x, rect.y, rect.width, rect.height );
 }
 
+static void     
+save_undo ( void )
+{
+    GdkRectangle    rect;
+    GdkRectangle    rect_max;
+    GdkBitmap       *mask = NULL;
+
+    cv_get_rect_size ( &rect_max );
+    gp_point_array_get_clipbox ( m_priv->pa, &rect, m_priv->cv->line_width, &rect_max );
+    if ( m_priv->cv->filled == FILLED_NONE )
+    {
+        GdkPoint    *p = gp_point_array_data (m_priv->pa);
+        GdkGC	    *gc_mask;
+        gint        x,y,w,h;
+        x   = MIN(p[0].x,p[1].x);
+        y   = MIN(p[0].y,p[1].y);
+        w   = ABS(p[1].x-p[0].x);
+        h   = ABS(p[1].y-p[0].y);
+        undo_create_mask ( rect.width, rect.height, &mask, &gc_mask );
+        gdk_draw_rectangle ( mask, gc_mask, FALSE, 
+                             x - rect.x, y-rect.y, w, h );
+        g_object_unref (gc_mask);
+    }                
+    undo_add ( &rect, mask, NULL);
+    if ( mask != NULL ) g_object_unref (mask);
+}

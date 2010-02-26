@@ -36,6 +36,7 @@ static void		draw			( void );
 static void		reset			( void );
 static void		destroy			( gpointer data  );
 static void		draw_in_pixmap	( GdkDrawable *drawable );
+static void     save_undo       ( void );
 
 /*private data*/
 typedef enum
@@ -123,6 +124,7 @@ button_press ( GdkEventButton *event )
 				/*add two point*/
                 gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
                 gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
+                gtk_widget_queue_draw ( m_priv->cv->widget );
 				break;
 			}
 			case TOOL_DRAWING:
@@ -146,7 +148,8 @@ button_press ( GdkEventButton *event )
 				}
 				else
 				{
-					/*finish*/
+ 					/*finish*/
+                    save_undo ();
 					m_priv->state = TOOL_NONE;
 					m_priv->is_draw	= FALSE;
 					draw_in_pixmap (m_priv->cv->pixmap);
@@ -201,7 +204,7 @@ draw ( void )
 static void 
 reset ( void )
 {
-	GdkCursor *cursor = gdk_cursor_new ( GDK_CROSSHAIR );
+    GdkCursor *cursor = gdk_cursor_new ( GDK_DOTBOX );
 	g_assert(cursor);
 	gdk_window_set_cursor ( m_priv->cv->drawing, cursor );
 	gdk_cursor_unref( cursor );
@@ -232,10 +235,40 @@ draw_in_pixmap ( GdkDrawable *drawable )
 		{
 			gdk_draw_polygon ( drawable, m_priv->gcf, TRUE, points, n_points);
 		}
-
-		if ( m_priv->cv->filled != FILLED_FORE )
-		{
-			gdk_draw_polygon ( drawable, m_priv->gcf, FALSE, points, n_points);
-		}
+		gdk_draw_polygon ( drawable, m_priv->gcf, FALSE, points, n_points);
 	}
 }
+
+static void     
+save_undo ( void )
+{
+    GdkRectangle    rect;
+    GdkRectangle    rect_max;
+    GdkBitmap       *mask;
+    GdkGC	        *gc_mask;
+    gp_point_array  *pa;
+    GdkPoint        *points;
+    gint	        n_points;
+
+    pa = gp_point_array_new ();
+    gp_point_array_copy ( m_priv->pa, pa );
+    points 		=	gp_point_array_data ( pa );
+    n_points	=	gp_point_array_size ( pa );
+
+    cv_get_rect_size ( &rect_max );
+    gp_point_array_get_clipbox ( pa, &rect, m_priv->cv->line_width, &rect_max );
+    undo_create_mask ( rect.width, rect.height, &mask, &gc_mask );
+    gp_point_array_offset ( pa, -rect.x, -rect.y);
+
+    gdk_draw_polygon ( mask, gc_mask, FALSE, points, n_points);
+    if ( m_priv->cv->filled != FILLED_NONE )
+    {
+        gdk_draw_polygon ( mask, gc_mask, TRUE, points, n_points);
+    }
+
+    undo_add ( &rect, mask, NULL);
+
+    gp_point_array_free ( pa );
+    g_object_unref (gc_mask);
+    g_object_unref (mask);
+ }

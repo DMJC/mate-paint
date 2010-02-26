@@ -51,8 +51,8 @@ struct _GpImage
 };
 
 GType		gp_image_get_type			( void ) G_GNUC_CONST;
-GpImage *   gp_image_new				( gint width, gint height );
-GpImage *   gp_image_new_from_pixmap	( GdkPixmap* pixmap, GdkRectangle *rect );
+GpImage *   gp_image_new				( gint width, gint height, gboolean has_alpha );
+GpImage *   gp_image_new_from_pixmap	( GdkPixmap* pixmap, GdkRectangle *rect, gboolean has_alpha );
 void		gp_image_set_mask			( GpImage *image, GdkBitmap *mask );
 GdkPixbuf * gp_image_get_pixbuf			( GpImage *image );
                                                          

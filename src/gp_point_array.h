@@ -34,5 +34,10 @@ void                gp_point_array_get_clipbox  ( gp_point_array *pa,
                                                  GdkRectangle *rectangle,
                                                  gint pixel_width,
                                                  GdkRectangle *rect_max);
+void                gp_point_array_offset       ( gp_point_array *pa, 
+                                                  gint dx, gint dy);
+void                gp_point_array_copy         ( gp_point_array *src, 
+                                                  gp_point_array *dst );
+
 
 #endif /*__GP_POINT_ARRAY_H__*/

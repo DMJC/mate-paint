@@ -181,10 +181,6 @@ draw_in_pixmap ( GdkDrawable *drawable )
 	{
 		gdk_draw_arc (drawable, m_priv->gcf, TRUE, x, y, w, h, 0, 23040);
 	}
-
-	if ( m_priv->cv->filled != FILLED_FORE )
-	{
-		gdk_draw_arc (drawable, m_priv->gcf, FALSE, x, y, w, h, 0, 23040);
-	}
+	gdk_draw_arc (drawable, m_priv->gcf, FALSE, x, y, w, h, 0, 23040);
 }
 

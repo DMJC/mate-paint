@@ -24,7 +24,12 @@
 #include <gtk/gtk.h>
 
 
-void undo_add_pixbuf ( gint x0, gint y0, gint x1, gint y1, const gchar * message);
+void undo_create_mask ( gint        width, 
+                        gint        height, 
+                        GdkBitmap   **mask, 
+                        GdkGC       **gc_mask );
+
+void undo_add (GdkRectangle *rect, GdkBitmap * mask, const gchar * message );
 
 
 

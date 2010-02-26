@@ -213,6 +213,18 @@ cv_get_canvas ( void )
 	return &cv;
 }
 
+void        
+cv_get_rect_size ( GdkRectangle *rectangle )
+{
+    rectangle->x = 0;
+    rectangle->y = 0;
+    gdk_drawable_get_size ( cv.pixmap, 
+                            &rectangle->width, 
+                            &rectangle->height );
+    return;
+}
+
+
 /* GUI CallBacks */
 
 void

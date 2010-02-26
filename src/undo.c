@@ -68,71 +68,50 @@ static void				undo_pixbuf_free	( GpUndo *undo );
 void DestroyNotify  (gpointer data);
 
 void 
-undo_add_pixbuf ( gint x0, gint y0, gint x1, gint y1, const gchar * message)
+undo_create_mask ( gint width, gint height, GdkBitmap **mask, GdkGC **gc_mask )
 {
-	GpUndo			*undo;
-	GdkRectangle 	*rect;
-	GdkRectangle 	rect_max;
-	GdkPixbuf 		*pixbuf = NULL;
-    GdkRegion       *region;
-	gp_canvas		*cv	=	cv_get_canvas();
-    gp_point_array  *pa =   gp_point_array_new();
-	gint 			wd,hd;
-	gdk_drawable_get_size ( cv->pixmap, &wd, &hd );
-    rect_max.x = 0;
-    rect_max.y = 0;
-    rect_max.width = wd;
-    rect_max.height = hd;
-    
-    gp_point_array_append ( pa, x0, y0);
-    gp_point_array_append ( pa, x1, y1);
+    GdkColor    color;
+	gp_canvas   *cv	=	cv_get_canvas();
+     
+    *mask 		=	gdk_pixmap_new (NULL, width, height, 1 );
+    *gc_mask	=	gdk_gc_new ( *mask );
+    gdk_gc_set_line_attributes ( *gc_mask, cv->line_width, GDK_LINE_SOLID, 
+                             	GDK_CAP_ROUND, GDK_JOIN_ROUND );
 
-    rect = g_new ( GdkRectangle, 1 );
-    gp_point_array_get_clipbox ( pa, rect, cv->line_width, &rect_max );
+    color.pixel = 0;
+    gdk_gc_set_foreground (*gc_mask, &color);
+    gdk_draw_rectangle (*mask, *gc_mask, TRUE, 0, 0, width, height);
 
-    g_print ("x:%d,y:%d,w:%d,h:%d\n", rect->x, rect->y, rect->width, rect->height);
-
-    
-	/*TODO*/
-	 {
-		GdkColor color;
-		GpImage	*image = NULL;
-		GdkBitmap * mask = NULL;
-		GdkGC	  * gc_mask = NULL;
-		 
-        mask 		=	gdk_pixmap_new (NULL, rect->width, rect->height, 1 );
-		gc_mask		=	gdk_gc_new ( mask );
-		gdk_gc_set_line_attributes ( gc_mask, cv->line_width, GDK_LINE_SOLID, 
-	                             	GDK_CAP_ROUND, GDK_JOIN_ROUND );
-
-		color.pixel = 0;
-  		gdk_gc_set_foreground (gc_mask, &color);
-		gdk_draw_rectangle (mask, gc_mask, TRUE, 0, 0, rect->width, rect->height);
-
-  		color.pixel = 1;
-  		gdk_gc_set_foreground (gc_mask, &color);
-
-		gdk_draw_line ( mask, gc_mask, x0 - rect->x, y0 - rect->y, x1 - rect->x, y1 - rect->y);
-
-		image = gp_image_new_from_pixmap ( cv->pixmap, rect );
-         
-        gp_image_set_mask ( image, mask );
-		pixbuf = gp_image_get_pixbuf (image);
-
-		g_object_unref (gc_mask);
-		g_object_unref (mask);
-		g_object_unref (image);
-	 }
-	
-	g_print ("With mask:\n");
-	undo	=	undo_pixbuf_new (pixbuf, rect->x, rect->y, message );
-
-
-	g_queue_push_head	( undo_queue, undo );
-	g_object_unref (pixbuf);
-	g_free (rect);
+    color.pixel = 1;
+    gdk_gc_set_foreground (*gc_mask, &color);
+    return;
 }
 
+void
+undo_add (GdkRectangle *rect, GdkBitmap * mask, const gchar * message )
+{
+	GpUndo		*undo;
+	GdkPixbuf	*pixbuf;
+	GpImage     *image;
+    gboolean    has_alpha;
+	gp_canvas	*cv	    = cv_get_canvas();
+
+    has_alpha   =   (mask != NULL);
+    image = gp_image_new_from_pixmap ( cv->pixmap, rect, has_alpha );
+    if (has_alpha)
+    {
+        gp_image_set_mask ( image, mask );
+    }
+    pixbuf = gp_image_get_pixbuf (image);
+    g_object_unref (image);
+    
+	undo	=	undo_pixbuf_new (pixbuf, rect->x, rect->y, message );
+
+	g_queue_push_head	( undo_queue, undo );
+    
+    
+	g_object_unref (pixbuf);
+}
 
 
 

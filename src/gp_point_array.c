@@ -125,3 +125,26 @@ gp_point_array_get_clipbox ( gp_point_array *pa,
     rectangle->width  = x_max - x_min + 1;
     rectangle->height = y_max - y_min + 1;
 }
+
+void                
+gp_point_array_offset       ( gp_point_array *pa, 
+                              gint dx, gint dy)
+{
+    GdkPoint* pts = gp_point_array_data( pa );
+    gint i;
+    for (i = 0; i < pa->array->len; i++)
+    {
+        pts[i].x += dx;
+        pts[i].y += dy;
+    }    
+}
+
+void
+gp_point_array_copy(gp_point_array *src, gp_point_array *dst )
+{
+    g_array_set_size(dst->array, src->array->len);
+    memcpy(dst->array->data, src->array->data, sizeof(GdkPoint) * dst->array->len);
+}
+
+
+
