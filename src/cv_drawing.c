@@ -98,63 +98,72 @@ cv_set_filled ( gp_filled filled )
 	gdk_window_process_updates (gtk_widget_get_parent_window(cv.widget), FALSE);
 }
 
-void cv_sel_none_tool	( void )
-{
-	gdk_window_set_cursor ( cv.drawing, NULL);
-	if (cv_tool != NULL) cv_tool->destroy(NULL);
-	cv_tool = NULL;
-}
 
-void cv_sel_color_pick_tool	( void )
+void
+cv_set_tool ( gp_tool_enum tool )
 {
 	if (cv_tool != NULL) cv_tool->destroy(NULL);
-	cv_tool = tool_color_pick_init ( &cv );
-	cv_tool->reset ();
+    switch ( tool )
+    {
+        default:
+        case TOOL_NONE:
+	        cv_tool = NULL;
+            break;
+        case TOOL_FREE_SELECT:
+	        cv_tool = NULL;
+            break;
+        case TOOL_RECT_SELECT:
+	        cv_tool = NULL;
+            break;
+        case TOOL_ERASER:
+	        cv_tool = NULL;
+            break;
+        case TOOL_COLOR_PICKER:
+        	cv_tool = tool_color_pick_init ( &cv );
+            break;
+        case TOOL_PENCIL:
+            cv_tool = tool_pencil_init ( &cv );
+            break;
+        case TOOL_AIRBRUSH:
+	        cv_tool = NULL;
+            break;
+        case TOOL_BUCKET_FILL:
+            cv_tool = tool_flood_fill_init ( &cv );
+            break;
+        case TOOL_ZOOM:
+	        cv_tool = NULL;
+            break;
+        case TOOL_PAINTBRUSH:
+	        cv_tool = NULL;
+            break;
+        case TOOL_TEXT:
+	        cv_tool = NULL;
+            break;
+        case TOOL_LINE:
+            cv_tool = tool_line_init ( &cv );
+            break;
+        case TOOL_RECTANGLE:
+            cv_tool = tool_rectangle_init ( &cv );
+            break;
+        case TOOL_ELLIPSE:
+            cv_tool = tool_ellipse_init ( &cv );
+            break;
+        case TOOL_CURVE:
+	        cv_tool = NULL;
+            break;
+        case TOOL_POLYGON:
+            cv_tool = tool_polygon_init ( &cv );
+            break;
+        case TOOL_ROUNDED_RECTANGLE:
+	        cv_tool = NULL;
+            break;
+    }
+	if (cv_tool == NULL) 
+        gdk_window_set_cursor ( cv.drawing, NULL);
+    else
+        cv_tool->reset();
 }
 
-void cv_sel_flood_fill_tool	( void )
-{
-	if (cv_tool != NULL) cv_tool->destroy(NULL);
-	cv_tool = tool_flood_fill_init ( &cv );
-	cv_tool->reset ();
-}
-
-void cv_sel_pencil_tool	( void )
-{
-	if (cv_tool != NULL) cv_tool->destroy(NULL);
-	cv_tool = tool_pencil_init ( &cv );
-	cv_tool->reset ();
-}
-
-
-void cv_sel_line_tool	( void )
-{
-	if (cv_tool != NULL) cv_tool->destroy(NULL);
-	cv_tool = tool_line_init ( &cv );
-	cv_tool->reset ();
-}
-
-
-void cv_sel_rectangle_tool	( void )
-{
-	if (cv_tool != NULL) cv_tool->destroy(NULL);
-	cv_tool = tool_rectangle_init ( &cv );
-	cv_tool->reset ();
-}
-
-void cv_sel_ellipse_tool ( void )
-{
-	if (cv_tool != NULL) cv_tool->destroy(NULL);
-	cv_tool = tool_ellipse_init ( &cv );
-	cv_tool->reset ();
-}
-
-void cv_sel_polygon_tool ( void )
-{
-	if (cv_tool != NULL) cv_tool->destroy(NULL);
-	cv_tool = tool_polygon_init ( &cv );
-	cv_tool->reset ();
-}
 
 void  my_g_object_unref(gpointer data)
 {
@@ -251,7 +260,7 @@ on_cv_drawing_unrealize	(GtkWidget *widget, gpointer user_data)
 {
 	/*free all private data*/
 	g_print("unrealize canvas\n");
-	cv_sel_none_tool();
+	cv_set_tool ( TOOL_NONE );
 }
 
 void 

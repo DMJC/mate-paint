@@ -1,10 +1,9 @@
 /***************************************************************************
- *            cv_rectangle_tool.c
+ *            cv_pencil_tool.c
  *
  *  Thu Set 10 22:35:13 2009
- *  Copyright  2009  rogerio
- *  <rogerio@<host>>
- *  by Jacson
+ *  Copyright  2009  Rogério Ferro do Nascimento
+ *  <rogerioferro@gmail.com>
  ****************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -25,6 +24,8 @@
  #include <gtk/gtk.h>
 
 #include "cv_pencil_tool.h"
+#include "gp_point_array.h"
+#include "undo.h"
 #include "file.h"
 
 /*Member functions*/
@@ -35,6 +36,7 @@ static void		draw			( void );
 static void		reset			( void );
 static void		destroy			( gpointer data  );
 static void		draw_in_pixmap	( GdkDrawable *drawable );
+static void     save_undo       ( void );
 
 
 /*private data*/
@@ -42,7 +44,7 @@ typedef struct {
 	gp_tool			tool;
 	gp_canvas *		cv;
 	GdkGC *			gc;
-	gint 			x0,y0,x1,y1;
+    gp_point_array  *pa;
 	guint			button;
 	gboolean 		is_draw;
 } private_data;
@@ -57,7 +59,8 @@ create_private_data( void )
 		m_priv = g_new0 (private_data,1);
 		m_priv->cv		=	NULL;
 		m_priv->gc		=	NULL;
-		m_priv->button	=	0;
+		m_priv->button	=	NONE_BUTTON;
+        m_priv->pa      =   gp_point_array_new();
 		m_priv->is_draw	=	FALSE;
 	}
 }
@@ -65,6 +68,7 @@ create_private_data( void )
 static void
 destroy_private_data( void )
 {
+    gp_point_array_free( m_priv->pa );
 	g_free (m_priv);
 	m_priv = NULL;
 }
@@ -99,8 +103,8 @@ button_press ( GdkEventButton *event )
 		}
 		m_priv->is_draw = !m_priv->is_draw;
 		if( m_priv->is_draw ) m_priv->button = event->button;
-		m_priv->x0 = m_priv->x1 = (gint)event->x;
-		m_priv->y0 = m_priv->y1 = (gint)event->y;
+        gp_point_array_clear ( m_priv->pa );
+        gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
 		if( !m_priv->is_draw ) gtk_widget_queue_draw ( m_priv->cv->widget );
 	}
 	return TRUE;
@@ -115,11 +119,14 @@ button_release ( GdkEventButton *event )
 		{
 			if( m_priv->is_draw )
 			{
+                gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
+                save_undo ();
 				draw_in_pixmap (m_priv->cv->pixmap);
 				file_set_unsave ();
 			}
 			gtk_widget_queue_draw ( m_priv->cv->widget );
 			m_priv->is_draw = FALSE;
+            gp_point_array_clear ( m_priv->pa );
 		}
 	}
 	return TRUE;
@@ -130,8 +137,7 @@ button_motion ( GdkEventMotion *event )
 {
 	if( m_priv->is_draw )
 	{
-		m_priv->x1 = (gint)event->x;
-		m_priv->y1 = (gint)event->y;
+        gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
 		gtk_widget_queue_draw ( m_priv->cv->widget );
 	}
 	return TRUE;
@@ -142,7 +148,7 @@ draw ( void )
 {
 	if ( m_priv->is_draw )
 	{
-		draw_in_pixmap ( m_priv->cv->pixmap );
+		draw_in_pixmap (m_priv->cv->drawing);
 	}
 }
 
@@ -166,8 +172,39 @@ destroy ( gpointer data  )
 static void
 draw_in_pixmap ( GdkDrawable *drawable )
 {
-	gdk_draw_line (drawable, m_priv->gc, m_priv->x0, m_priv->y0, m_priv->x1, m_priv->y1 );
-	m_priv->x0 = m_priv->x1;
-	m_priv->y0 = m_priv->y1;
+	GdkPoint *	points		=	gp_point_array_data (m_priv->pa);
+	gint		n_points	=	gp_point_array_size (m_priv->pa);
+	gdk_draw_lines (drawable, m_priv->gc, points, n_points );
 }
+
+static void     
+save_undo ( void )
+{
+    GdkRectangle    rect;
+    GdkRectangle    rect_max;
+    GdkBitmap       *mask;
+    GdkGC	        *gc_mask;
+    gp_point_array  *pa;
+    GdkPoint        *points;
+    gint	        n_points;
+
+    pa = gp_point_array_new ();
+    gp_point_array_copy ( m_priv->pa, pa );
+    points 		=	gp_point_array_data ( pa );
+    n_points	=	gp_point_array_size ( pa );
+
+    cv_get_rect_size ( &rect_max );
+    gp_point_array_get_clipbox ( pa, &rect, m_priv->cv->line_width, &rect_max );
+    undo_create_mask ( rect.width, rect.height, &mask, &gc_mask );
+    gp_point_array_offset ( pa, -rect.x, -rect.y);
+
+    gdk_draw_lines ( mask, gc_mask, points, n_points);
+
+    undo_add ( &rect, mask, NULL);
+
+    gp_point_array_free ( pa );
+    g_object_unref (gc_mask);
+    g_object_unref (mask);
+ }
+
 

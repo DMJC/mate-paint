@@ -22,26 +22,47 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
 
+#ifndef __TOOLBAR_H__
+#define __TOOLBAR_H__
+
 #include <gtk/gtk.h>
 
-
+typedef enum {
+    TOOL_NONE,
+    TOOL_FREE_SELECT,
+    TOOL_RECT_SELECT,
+    TOOL_ERASER,
+    TOOL_COLOR_PICKER,
+    TOOL_PENCIL,
+    TOOL_AIRBRUSH,
+    TOOL_BUCKET_FILL,
+    TOOL_ZOOM,
+    TOOL_PAINTBRUSH,
+    TOOL_TEXT,
+    TOOL_LINE,
+    TOOL_RECTANGLE,
+    TOOL_ELLIPSE,
+    TOOL_CURVE,
+    TOOL_POLYGON,
+    TOOL_ROUNDED_RECTANGLE
+} gp_tool_enum;
 
 /* GUI CallBack */
 
 /*Toolbar toggled functions*/
 void on_tool_free_select_toggled		(GtkToggleToolButton *button, gpointer user_data);
+void on_tool_rect_select_toggled		(GtkToggleToolButton *button, gpointer user_data);
 void on_tool_eraser_toggled				(GtkToggleToolButton *button, gpointer user_data);
 void on_tool_color_picker_toggled		(GtkToggleToolButton *button, gpointer user_data);
 void on_tool_pencil_toggled				(GtkToggleToolButton *button, gpointer user_data);
 void on_tool_airbrush_toggled			(GtkToggleToolButton *button, gpointer user_data);
-void on_draw_line_toggled				(GtkToggleToolButton *button, gpointer user_data);
-void on_draw_rectangle_toggled			(GtkToggleToolButton *button, gpointer user_data);
-void on_draw_ellipse_toggled			(GtkToggleToolButton *button, gpointer user_data);
-void on_tool_rect_select_toggled		(GtkToggleToolButton *button, gpointer user_data);
 void on_tool_bucket_fill_toggled		(GtkToggleToolButton *button, gpointer user_data);
 void on_tool_zoom_toggled				(GtkToggleToolButton *button, gpointer user_data);
 void on_tool_paintbrush_toggled			(GtkToggleToolButton *button, gpointer user_data);
 void on_tool_text_toggled				(GtkToggleToolButton *button, gpointer user_data);
+void on_draw_line_toggled				(GtkToggleToolButton *button, gpointer user_data);
+void on_draw_rectangle_toggled			(GtkToggleToolButton *button, gpointer user_data);
+void on_draw_ellipse_toggled			(GtkToggleToolButton *button, gpointer user_data);
 void on_draw_curve_toggled				(GtkToggleToolButton *button, gpointer user_data);
 void on_draw_polygon_toggled			(GtkToggleToolButton *button, gpointer user_data);
 void on_draw_rounded_rectangle_toggled  (GtkToggleToolButton *button, gpointer user_data);
@@ -72,4 +93,4 @@ void on_rect0_toggled					(GtkToggleToolButton *button, gpointer user_data);
 void on_rect1_toggled					(GtkToggleToolButton *button, gpointer user_data);
 void on_rect2_toggled					(GtkToggleToolButton *button, gpointer user_data);
 
-
+#endif /*__TOOLBAR_H__*/

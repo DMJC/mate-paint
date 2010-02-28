@@ -26,6 +26,7 @@
 
 #include "cv_polygon_tool.h"
 #include "gp_point_array.h"
+#include "undo.h"
 #include "file.h"
 
 /*Member functions*/

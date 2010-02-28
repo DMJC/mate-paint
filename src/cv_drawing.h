@@ -24,6 +24,7 @@
  
 #include "common.h"
 #include "cv_resize.h"
+#include "toolbar.h"
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
@@ -32,14 +33,7 @@ void		cv_set_color_bg			( GdkColor *color );
 void		cv_set_color_fg			( GdkColor *color );
 void		cv_set_line_width		( gint width );
 void		cv_set_filled			( gp_filled filled );
-void		cv_sel_none_tool		( void );
-void		cv_sel_color_pick_tool	( void );
-void		cv_sel_flood_fill_tool	( void );
-void		cv_sel_pencil_tool		( void );
-void		cv_sel_line_tool		( void );
-void		cv_sel_rectangle_tool	( void );
-void		cv_sel_ellipse_tool		( void );
-void		cv_sel_polygon_tool		( void );
+void        cv_set_tool             ( gp_tool_enum tool );
 void		cv_resize_pixmap		(gint width, gint height);
 void		cv_set_pixbuf			(const GdkPixbuf *pixbuf);
 GdkPixbuf *	cv_get_pixbuf			( void );

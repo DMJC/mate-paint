@@ -58,220 +58,104 @@ static gboolean		frame_rect_show		= FALSE;
 /* private functions */
 static GtkWidget *	get_gtk_image( GtkWidget *widget, gchar** xpm );
 static void			show_frame_rect	( gboolean show );
+static void         tool_toggled ( GtkToggleToolButton *button, gp_tool_enum tool );
 
 /* CODE */
 
 void
 on_tool_free_select_toggled	(GtkToggleToolButton *button, gpointer user_data)
 {
-	if ( gtk_toggle_tool_button_get_active ( button ) )
-	{
-		/*show tool options */
-		g_return_if_fail( notebook != NULL );
-		gtk_notebook_set_current_page ( notebook, SELECTION );
-		/*select tool*/
-		cv_sel_none_tool ();
-	}
-}
-
-void 
-on_tool_eraser_toggled	(GtkToggleToolButton *button, gpointer user_data)
-{
-	if ( gtk_toggle_tool_button_get_active ( button ) )
-	{
-		/*show tool options */
-		g_return_if_fail( notebook != NULL );
-		gtk_notebook_set_current_page ( notebook, NONE );
-		/*select tool*/
-		cv_sel_none_tool ();
-	}
-}
-
-void 
-on_tool_color_picker_toggled (GtkToggleToolButton *button, gpointer user_data)
-{
-	if ( gtk_toggle_tool_button_get_active ( button ) )
-	{
-		/*show tool options */
-		g_return_if_fail( notebook != NULL );
-		gtk_notebook_set_current_page ( notebook, NONE );
-		/*select tool*/
-		cv_sel_color_pick_tool ();
-	}
-}
-
-void 
-on_tool_pencil_toggled	(GtkToggleToolButton *button, gpointer user_data)
-{
-	if ( gtk_toggle_tool_button_get_active ( button ) )
-	{
-		/*show tool options */
-		g_return_if_fail( notebook != NULL );
-		gtk_notebook_set_current_page ( notebook, NONE );
-		/*select tool*/
-		cv_sel_pencil_tool ();
-	}
-}
-
-void 
-on_tool_airbrush_toggled (GtkToggleToolButton *button, gpointer user_data)
-{
-	if ( gtk_toggle_tool_button_get_active ( button ) )
-	{
-		/*show tool options */
-		g_return_if_fail( notebook != NULL );
-		gtk_notebook_set_current_page ( notebook, NONE );
-		/*select tool*/
-		cv_sel_none_tool ();
-	}
-}
-
-void 
-on_draw_line_toggled (GtkToggleToolButton *button, gpointer user_data)
-{
-	if ( gtk_toggle_tool_button_get_active ( button ) )
-	{
-		/*show tool options */
-		g_return_if_fail( notebook != NULL );
-		show_frame_rect ( FALSE );
-		gtk_notebook_set_current_page ( notebook, RECT_LINE );
-		/*select tool*/
-		cv_sel_line_tool ();
-	}
-}
-
-void 
-on_draw_rectangle_toggled (GtkToggleToolButton *button, gpointer user_data)
-{
-	if ( gtk_toggle_tool_button_get_active ( button ) )
-	{
-		/*show tool options */
-		g_return_if_fail( notebook != NULL );
-		show_frame_rect ( TRUE );
-		gtk_notebook_set_current_page ( notebook, RECT_LINE );
-		/*select tool*/
-		cv_sel_rectangle_tool ();
-	}
-}
-
-void 
-on_draw_ellipse_toggled	(GtkToggleToolButton *button, gpointer user_data)
-{
-	if ( gtk_toggle_tool_button_get_active ( button ) )
-	{
-		/*show tool options */
-		show_frame_rect ( TRUE );
-		gtk_notebook_set_current_page ( notebook, RECT_LINE );
-		/*select tool*/
-		cv_sel_ellipse_tool ();
-	}
+    tool_toggled ( button, TOOL_FREE_SELECT );
 }
 
 void
 on_tool_rect_select_toggled	(GtkToggleToolButton *button, gpointer user_data)
 {
-	if ( gtk_toggle_tool_button_get_active ( button ) )
-	{
-		/*show tool options */
-		g_return_if_fail( notebook != NULL );
-		gtk_notebook_set_current_page ( notebook, SELECTION );
-		/*select tool*/
-		cv_sel_none_tool ();
-	}
+    tool_toggled ( button, TOOL_RECT_SELECT );
+}
+
+void 
+on_tool_eraser_toggled	(GtkToggleToolButton *button, gpointer user_data)
+{
+    tool_toggled ( button, TOOL_ERASER );
+}
+
+void 
+on_tool_color_picker_toggled (GtkToggleToolButton *button, gpointer user_data)
+{
+    tool_toggled ( button, TOOL_COLOR_PICKER );
+}
+
+void 
+on_tool_pencil_toggled	(GtkToggleToolButton *button, gpointer user_data)
+{
+    tool_toggled ( button, TOOL_PENCIL );
+}
+
+void 
+on_tool_airbrush_toggled (GtkToggleToolButton *button, gpointer user_data)
+{
+    tool_toggled ( button, TOOL_AIRBRUSH );
 }
 
 void
 on_tool_bucket_fill_toggled	(GtkToggleToolButton *button, gpointer user_data)
 {
-	if ( gtk_toggle_tool_button_get_active ( button ) )
-	{
-		/*show tool options */
-		g_return_if_fail( notebook != NULL );
-		gtk_notebook_set_current_page ( notebook, NONE );
-		/*select tool*/
-		cv_sel_flood_fill_tool ();
-	}
+    tool_toggled ( button, TOOL_BUCKET_FILL );
 }
 
 void
 on_tool_zoom_toggled (GtkToggleToolButton *button, gpointer user_data)
 {
-	if ( gtk_toggle_tool_button_get_active ( button ) )
-	{
-		/*show tool options */
-		g_return_if_fail( notebook != NULL );
-		gtk_notebook_set_current_page ( notebook, NONE );
-		/*select tool*/
-		cv_sel_none_tool ();
-	}
+    tool_toggled ( button, TOOL_ZOOM );
 }
 
 void
 on_tool_paintbrush_toggled	(GtkToggleToolButton *button, gpointer user_data)
 {
-	if ( gtk_toggle_tool_button_get_active ( button ) )
-	{
-		/*show tool options */
-		g_return_if_fail( notebook != NULL );
-		gtk_notebook_set_current_page ( notebook, NONE );
-		/*select tool*/
-		cv_sel_none_tool ();
-	}
+    tool_toggled ( button, TOOL_PAINTBRUSH );
 }
 
 void
 on_tool_text_toggled (GtkToggleToolButton *button, gpointer user_data)
 {
-	if ( gtk_toggle_tool_button_get_active ( button ) )
-	{
-		/*show tool options */
-		g_return_if_fail( notebook != NULL );
-		gtk_notebook_set_current_page ( notebook, SELECTION );
-		/*select tool*/
-		cv_sel_none_tool ();
-	}
+    tool_toggled ( button, TOOL_TEXT );
+}
+
+void 
+on_draw_line_toggled (GtkToggleToolButton *button, gpointer user_data)
+{
+    tool_toggled ( button, TOOL_LINE );
+}
+
+void 
+on_draw_rectangle_toggled (GtkToggleToolButton *button, gpointer user_data)
+{
+    tool_toggled ( button, TOOL_RECTANGLE );
+}
+
+void 
+on_draw_ellipse_toggled	(GtkToggleToolButton *button, gpointer user_data)
+{
+    tool_toggled ( button, TOOL_ELLIPSE );
 }
 
 void
 on_draw_curve_toggled (GtkToggleToolButton *button, gpointer user_data)
 {
-	if ( gtk_toggle_tool_button_get_active ( button ) )
-	{
-		/*show tool options */
-		g_return_if_fail( notebook != NULL );
-		show_frame_rect ( FALSE );
-		gtk_notebook_set_current_page ( notebook, RECT_LINE );
-		/*select tool*/
-		cv_sel_none_tool ();
-	}
+    tool_toggled ( button, TOOL_CURVE );
 }
 
 void
 on_draw_polygon_toggled	(GtkToggleToolButton *button, gpointer user_data)
 {
-	if ( gtk_toggle_tool_button_get_active ( button ) )
-	{
-		/*show tool options */
-		g_return_if_fail( notebook != NULL );
-		show_frame_rect ( TRUE );
-		gtk_notebook_set_current_page ( notebook, RECT_LINE );
-		/*select tool*/
-		cv_sel_polygon_tool ();
-	}
+    tool_toggled ( button, TOOL_POLYGON );
 }
 
 void
 on_draw_rounded_rectangle_toggled  (GtkToggleToolButton *button, gpointer user_data)
 {
-	if ( gtk_toggle_tool_button_get_active ( button ) )
-	{
-		/*show tool options */
-		g_return_if_fail( notebook != NULL );
-		show_frame_rect ( TRUE );
-		gtk_notebook_set_current_page ( notebook, RECT_LINE );
-		/*select tool*/
-		cv_sel_none_tool ();
-	}
+    tool_toggled ( button, TOOL_ROUNDED_RECTANGLE );
 }
 
 void
@@ -464,3 +348,47 @@ show_frame_rect	( gboolean show )
 		}
 	}
 }
+
+static void
+tool_toggled ( GtkToggleToolButton *button, gp_tool_enum tool )
+{
+	if ( gtk_toggle_tool_button_get_active ( button ) )
+	{
+		/*show tool options */
+		g_return_if_fail( notebook != NULL );
+        switch ( tool )
+        {
+            case TOOL_NONE:
+            case TOOL_FREE_SELECT:
+            case TOOL_RECT_SELECT:
+            case TOOL_TEXT:
+           		gtk_notebook_set_current_page ( notebook, SELECTION );
+                break;
+            case TOOL_LINE:
+            case TOOL_CURVE:
+        		show_frame_rect ( FALSE );
+                gtk_notebook_set_current_page ( notebook, RECT_LINE );
+                break;
+            case TOOL_RECTANGLE:
+            case TOOL_ELLIPSE:
+            case TOOL_POLYGON:
+            case TOOL_ROUNDED_RECTANGLE:
+        		show_frame_rect ( TRUE );
+                gtk_notebook_set_current_page ( notebook, RECT_LINE );
+                break;
+            case TOOL_ERASER:
+            case TOOL_COLOR_PICKER:
+            case TOOL_PENCIL:
+            case TOOL_AIRBRUSH:
+            case TOOL_BUCKET_FILL:
+            case TOOL_ZOOM:
+            case TOOL_PAINTBRUSH:
+            default:
+                gtk_notebook_set_current_page ( notebook, NONE );
+                break;
+        }
+		/*select tool*/
+        cv_set_tool ( tool );
+	}
+}
+
