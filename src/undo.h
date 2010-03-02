@@ -24,13 +24,16 @@
 #include <gtk/gtk.h>
 
 
-void undo_create_mask ( gint        width, 
-                        gint        height, 
-                        GdkBitmap   **mask, 
-                        GdkGC       **gc_mask );
+void undo_create_mask   ( gint        width, 
+                          gint        height, 
+                          GdkBitmap   **mask, 
+                          GdkGC       **gc_mask );
 
-void undo_add (GdkRectangle *rect, GdkBitmap * mask, const gchar * message );
+void undo_add           ( GdkRectangle *rect, 
+                          GdkBitmap * mask, 
+                          const gchar * message );
 
+void undo_add_resize    ( gint width, gint height );
 
 
 /* GUI CallBack */

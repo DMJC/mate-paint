@@ -355,7 +355,8 @@ cv_resize_stop ( gdouble x,  gdouble y)
 		height	= cv->widget->allocation.height + (gint)y;
 		height	= (height<1)?1:height;
 
-		cv_resize_pixmap ( width, height );
+        undo_add_resize ( width, height );
+        cv_resize_pixmap ( width, height );
 		file_set_unsave ();
 	}
 	cv_resize_cancel();

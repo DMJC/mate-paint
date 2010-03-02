@@ -32,6 +32,7 @@
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <accelerator key="n" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                        <signal name="activate" handler="on_menu_new_activate"/>
                       </object>
                     </child>
                     <child>
@@ -856,11 +857,11 @@
                                     <property name="events">GDK_EXPOSURE_MASK | GDK_POINTER_MOTION_MASK | GDK_BUTTON_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_STRUCTURE_MASK</property>
                                     <signal name="expose_event" handler="on_cv_drawing_expose_event"/>
                                     <signal name="unrealize" handler="on_cv_drawing_unrealize"/>
+                                    <signal name="button_press_event" handler="on_cv_drawing_button_press_event"/>
                                     <signal name="motion_notify_event" handler="on_cv_drawing_motion_notify_event"/>
                                     <signal name="realize" handler="on_cv_drawing_realize"/>
                                     <signal name="leave_notify_event" handler="on_cv_drawing_leave_notify_event"/>
                                     <signal name="button_release_event" handler="on_cv_drawing_button_release_event"/>
-                                    <signal name="button_press_event" handler="on_cv_drawing_button_press_event"/>
                                   </object>
                                   <packing>
                                     <property name="left_attach">1</property>

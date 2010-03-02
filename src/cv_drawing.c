@@ -32,6 +32,7 @@
 #include "cv_rectangle_tool.h"
 #include "cv_ellipse_tool.h"
 #include "cv_polygon_tool.h"
+#include "undo.h"
 
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>

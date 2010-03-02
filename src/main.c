@@ -38,6 +38,12 @@ GtkWidget	*create_window		(   void	);
 void		on_window_destroy   (   GtkObject   *object, 
 									gpointer	user_data   );
 void		gnome_paint_init	( int argc, char *argv[] );
+void		
+on_menu_new_activate( GtkMenuItem *menuitem, gpointer user_data)
+{
+	g_spawn_command_line_async ("gnome-paint", NULL);
+	g_print ("new\n");
+}
 
 int
 main (int argc, char *argv[])
