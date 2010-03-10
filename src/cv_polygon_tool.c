@@ -184,7 +184,7 @@ button_release ( GdkEventButton *event )
 static gboolean
 button_motion ( GdkEventMotion *event )
 {
-	if( m_priv->is_draw )
+	if( m_priv->state == TOOL_DRAWING )
 	{
         gint index = gp_point_array_size ( m_priv->pa ) - 1;
         gp_point_array_set ( m_priv->pa, index, (gint)event->x, (gint)event->y );

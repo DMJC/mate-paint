@@ -27,6 +27,12 @@
 
 const int BITS_PER_SAMPLE = 8;
 
+struct _GpImageData
+{
+    guint8  *buffer;
+    gsize   len;
+};
+
 
 struct _GpImagePrivate
 {
@@ -113,6 +119,60 @@ gp_image_new_from_pixmap ( GdkPixmap* pixmap, GdkRectangle *rect, gboolean has_a
     return image;
 }
 
+GpImage *
+gp_image_new_from_data ( GpImageData *data )
+{
+	GpImage			*image;
+    GInputStream	*stream;
+
+	g_return_val_if_fail (data, NULL);
+
+	image = g_object_new (GP_TYPE_IMAGE, NULL);
+
+	stream  =	g_memory_input_stream_new_from_data ( data->buffer, data->len, NULL );
+    image->priv->pixbuf  =   gdk_pixbuf_new_from_stream ( stream, NULL, NULL );
+    g_input_stream_close ( stream, NULL, NULL );
+	g_object_unref ( stream );
+
+	g_assert(image->priv->pixbuf);
+	g_object_set_data ( G_OBJECT(image), "pixbuf", image->priv->pixbuf);
+
+
+	return image;
+}
+
+GpImageData *   
+gp_image_get_data ( GpImage *image )
+{
+	GpImageData *data;
+	GError		*error = NULL;
+	guint8		*buffer;
+	gsize		len;
+	gdk_pixbuf_save_to_buffer ( image->priv->pixbuf, 
+                                &buffer, 
+                                &len, 
+                                "png", &error, NULL );
+	if ( error != NULL )
+	{
+		g_error_free ( error );
+		return NULL;
+	}
+
+	g_print ("data size:%d\n",len);
+	
+	data			= g_slice_new ( GpImageData );
+	data->buffer	= buffer;
+	data->len		= len;
+	return data;
+}
+
+void
+gp_image_data_free ( GpImageData *data )
+{
+	g_free (data->buffer);
+	g_slice_free (GpImageData, data);
+}
+
 GdkPixbuf *
 gp_image_get_pixbuf ( GpImage *image )
 {
@@ -179,6 +239,47 @@ gp_image_set_mask ( GpImage *image, GdkBitmap *mask )
 	g_object_unref (m_pixbuf);
 }
 
+void
+gp_image_draw ( GpImage *image, 
+                GdkDrawable *drawable,
+                GdkGC *gc,
+				gint x, gint y )
+{
+	gdk_draw_pixbuf	( drawable,
+			          gc,
+			     	  image->priv->pixbuf,
+			          0, 0,
+			          x, y,
+			          -1, -1,
+			          GDK_RGB_DITHER_NORMAL, 
+		              0, 0);
+}
 
+gint
+gp_image_get_width ( GpImage *image )
+{
+	return (gint)gdk_pixbuf_get_width (image->priv->pixbuf);
+}
+
+gint
+gp_image_get_height ( GpImage *image )
+{
+	return (gint)gdk_pixbuf_get_height (image->priv->pixbuf);
+}
+
+gboolean
+gp_image_get_has_alpha ( GpImage *image )
+{
+	return (gint)gdk_pixbuf_get_has_alpha (image->priv->pixbuf);
+}
+
+GdkBitmap *
+gp_image_get_mask ( GpImage *image )
+{
+	GdkBitmap   *mask;
+	gdk_pixbuf_render_pixmap_and_mask ( image->priv->pixbuf, 
+	                                    NULL, &mask, 255 );
+	return mask;
+}
 
 

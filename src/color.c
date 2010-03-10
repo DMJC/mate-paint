@@ -166,6 +166,7 @@ on_color_palette_entry_button_press_event ( GtkWidget	   *widget,
 	if ( event->button == LEFT_BUTTON )
 	{
 		foreground_set_color_from_palette ( i );
+		notify_brush_of_fg_color_change();
 	}
 	else if ( event->button == RIGHT_BUTTON )
 	{

@@ -29,36 +29,32 @@
 #include "gp_point_array.h"
 
 
-static GdkColor 	white_color		=	{ 0, 0xffff, 0xffff, 0xffff  };
-static GdkColor 	black_color		=	{ 0, 0x0000, 0x0000, 0x0000  };
-static GdkColor 	back_color		=	{ 0, 0xff00, 0x0000, 0xff00  };
-
 
 typedef enum
 {
-	UNDO_PIXBUF,
+	UNDO_IMAGE,
 	UNDO_RESIZE
 } undo_type;
 
 typedef struct
 {
-	GInputStream	*stream;
-	gint			x;
-	gint			y;
-} GpUndoPixbuf;
+	GpImageData *im_data;
+	gint        x;
+	gint        y;
+} GpUndoImage;
 
 typedef struct
 {
-	GInputStream	*stream_width;
-	GInputStream	*stream_height;
-	gint			width;
-	gint			height;
+	GpImageData *im_data_width;
+	GpImageData *im_data_height;
+	gint		width;
+	gint		height;
 } GpUndoResize;
 
 typedef struct
 {
 	undo_type	type;
-	gpointer	data;
+	gpointer	t_data;
 	gchar		*message;
 } GpUndo;
 
@@ -71,18 +67,14 @@ GQueue _redo_queue = G_QUEUE_INIT;
 GQueue	*undo_queue	=	&_undo_queue;
 GQueue	*redo_queue	=	&_redo_queue;
 
-static GpUndo * 		undo_pixbuf_new		( const GdkPixbuf *pixbuf, 
-                                              gint x, gint y, 
-                                              const gchar * message );
-static void				undo_pixbuf_free	( GpUndo *undo );
-
-static GpUndo * 		undo_resize_new		( const GdkPixbuf *pixbuf_width,
-                                              const GdkPixbuf *pixbuf_height,
-                                              gint width, gint height );
-
-static GInputStream	*   get_stream_from_pixbuf  ( const GdkPixbuf *pixbuf );
-void                    DestroyNotify           (gpointer data);
-static void             draw_stream             ( GInputStream	*stream, gint x, gint y );
+static GpUndo * 	undo_image_new	   	( const GpImage *image,
+                                          gint x, gint y, 
+                                          const gchar * message );
+static GpUndo *     undo_resize_new     ( gp_canvas	*cv, gint width, gint height );
+static void			undo_free	        ( GpUndo *undo );
+static GpUndo *     draw_undo           ( GpUndo *undo );
+static GpImage *    get_redo_image      ( const GpImage *image, gint x, gint y );
+static void         free_redo_queue     ( void );
 
 /* CODE */
 
@@ -95,7 +87,7 @@ undo_create_mask ( gint width, gint height, GdkBitmap **mask, GdkGC **gc_mask )
     *mask 		=	gdk_pixmap_new (NULL, width, height, 1 );
     *gc_mask	=	gdk_gc_new ( *mask );
     gdk_gc_set_line_attributes ( *gc_mask, cv->line_width, GDK_LINE_SOLID, 
-                             	GDK_CAP_ROUND, GDK_JOIN_ROUND );
+                             	 GDK_CAP_ROUND, GDK_JOIN_ROUND );
 
     color.pixel = 0;
     gdk_gc_set_foreground (*gc_mask, &color);
@@ -110,7 +102,6 @@ void
 undo_add (GdkRectangle *rect, GdkBitmap * mask, const gchar * message )
 {
 	GpUndo		*undo;
-	GdkPixbuf	*pixbuf;
 	GpImage     *image;
     gboolean    has_alpha;
 	gp_canvas	*cv	    = cv_get_canvas();
@@ -121,225 +112,224 @@ undo_add (GdkRectangle *rect, GdkBitmap * mask, const gchar * message )
     {
         gp_image_set_mask ( image, mask );
     }
-    pixbuf = gp_image_get_pixbuf (image);
-    g_object_unref (image);
     
-	undo	=	undo_pixbuf_new (pixbuf, rect->x, rect->y, message );
+	undo	=	undo_image_new (image, rect->x, rect->y, message );
 	g_queue_push_head	( undo_queue, undo );
-	g_object_unref (pixbuf);
+	g_object_unref (image);
+    free_redo_queue ();
 }
 
 void 
 undo_add_resize ( gint width, gint height )
 {
-	GpUndo		*undo;
-    GdkRectangle rect;
-	GdkPixbuf	*pixbuf_width   = NULL;
-	GdkPixbuf	*pixbuf_height  = NULL;
-	gp_canvas	*cv	            = cv_get_canvas();
-
-    cv_get_rect_size ( &rect );
-
-    if ( width < rect.width )
-    {
-        GdkRectangle    rect_width;
-    	GpImage         *image;
-        rect_width.x        =   width;
-        rect_width.width    =   rect.width - width;
-        rect_width.y        =   0;
-        rect_width.height   =   rect.height;
-        image           = gp_image_new_from_pixmap ( cv->pixmap, &rect_width, FALSE );
-        pixbuf_width    = gp_image_get_pixbuf (image);
-        g_object_unref (image);
-    }
-
-    if ( height < rect.height )
-    {
-        GdkRectangle    rect_height;
-    	GpImage         *image;
-        rect_height.x        =   0;
-        rect_height.width    =   MIN ( width, rect.width );
-        rect_height.y        =   height;
-        rect_height.height   =   rect.height - height;
-        image           = gp_image_new_from_pixmap ( cv->pixmap, &rect_height, FALSE );
-        pixbuf_height    = gp_image_get_pixbuf (image);
-        g_object_unref (image);
-    }
-
-    undo	=	undo_resize_new ( pixbuf_width, pixbuf_height, rect.width, rect.height );
+	GpUndo      *undo;
+	gp_canvas   *cv = cv_get_canvas();
+    undo	=	undo_resize_new ( cv, width, height );
 	g_queue_push_head	( undo_queue, undo );
-	if ( pixbuf_width != NULL ) g_object_unref (pixbuf_width);
-	if ( pixbuf_height != NULL ) g_object_unref (pixbuf_height);
+    free_redo_queue ();
 }
 
 /* GUI CallBack */
 void 
 on_menu_undo_activate ( GtkMenuItem *menuitem, gpointer user_data)
 {
-	GpUndo		*undo	=	g_queue_pop_head (undo_queue);
+	GpUndo		*undo	=	g_queue_pop_head ( undo_queue );
 	if ( undo != NULL )
 	{
-		if (undo->type == UNDO_PIXBUF)
-		{
-			GpUndoPixbuf	*data	=	(GpUndoPixbuf*)undo->data;
-            draw_stream ( data->stream, data->x, data->y );
-        }
-        if (undo->type == UNDO_RESIZE)
-        {
-            GdkRectangle    rect;
-            GpUndoResize    *data	=	(GpUndoResize*)undo->data;
-            
-            cv_get_rect_size ( &rect );
-            cv_resize_pixmap ( data->width, data->height );
-            
-            if ( data->stream_width != NULL )
-            {
-                draw_stream ( data->stream_width, rect.width, 0 );
-            }
-            if ( data->stream_height != NULL )
-            {
-                draw_stream ( data->stream_height, 0, rect.height );
-            }
-        }
-		undo_pixbuf_free (undo);
-		g_print ("on menu undo\n");
+        g_queue_push_head	( redo_queue, draw_undo ( undo ) );
+		undo_free (undo);
 	}
 }
 
 void 
 on_menu_redo_activate ( GtkMenuItem *menuitem, gpointer user_data)
 {
-	g_print ("on menu redo\n");
+	GpUndo		*undo	=	g_queue_pop_head ( redo_queue );
+	if ( undo != NULL )
+	{
+        g_queue_push_head	( undo_queue, draw_undo ( undo ) );
+		undo_free (undo);
+	}
 }
 
 /*private*/
 static GpUndo * 
-undo_pixbuf_new ( const GdkPixbuf *pixbuf, gint x, gint y, const gchar * message)
+undo_image_new ( const GpImage *image, 
+                  gint x, gint y, 
+                  const gchar * message )
 {
 	GpUndo	*undo	=	NULL;
-	if ( pixbuf != NULL )
+	if ( image != NULL )
 	{
-		GpUndoPixbuf	*data   =	g_new (GpUndoPixbuf, 1);
-		data->stream	=	get_stream_from_pixbuf ( pixbuf );
-		data->x			=	x;
-		data->y			=	y;
-		undo			=	g_new (GpUndo, 1);
-		undo->type		=	UNDO_PIXBUF;
-		undo->data		=	(gpointer)data;
+		GpUndoImage	*t_data   =	g_slice_new (GpUndoImage);
+        t_data->im_data =   gp_image_get_data ( image );
+		t_data->x	    =	x;
+		t_data->y		=	y;
+		undo			=	g_slice_new (GpUndo);
+		undo->type		=	UNDO_IMAGE;
+		undo->t_data	=	(gpointer)t_data;
 		undo->message	=	g_strdup (message);
-
 	}
-	return undo;		
+	return undo;
 }
 
 static GpUndo * 		
-undo_resize_new		( const GdkPixbuf *pixbuf_width,
-                      const GdkPixbuf *pixbuf_height,
-                      gint width, gint height )
+undo_resize_new	( gp_canvas	*cv, gint width, gint height )
 {
+    GdkRectangle    cv_rect;
 	GpUndo	        *undo	=	NULL;
-    GpUndoResize	*data	=	g_new (GpUndoResize, 1);
+    GpUndoResize	*t_data	=	g_slice_new (GpUndoResize);
+    cv_get_rect_size ( &cv_rect );
 
-    data->width     =   width;
-    data->height    =   height;
+    t_data->width     =   cv_rect.width;
+    t_data->height    =   cv_rect.height;
 
-    if ( pixbuf_width != NULL )
-		data->stream_width	=	get_stream_from_pixbuf ( pixbuf_width );
+    if ( width < cv_rect.width )
+    {
+        GpImage         *image;
+        GdkRectangle    rect;
+        rect.x        = width;
+        rect.width    = cv_rect.width - width;
+        rect.y        = 0;
+        rect.height   = cv_rect.height;
+        image         = gp_image_new_from_pixmap ( cv->pixmap, &rect, FALSE );
+        t_data->im_data_width  =   gp_image_get_data ( image );
+        g_object_unref (image);
+    }
     else
-        data->stream_width  =   NULL;
+    {
+        t_data->im_data_width  = NULL;
+    }
 
-    if ( pixbuf_height != NULL )
-		data->stream_height	=	get_stream_from_pixbuf ( pixbuf_height );
+    if ( height < cv_rect.height )
+    {
+        GpImage         *image;
+        GdkRectangle    rect;
+        rect.x        = 0;
+        rect.width    = MIN ( width, cv_rect.width );
+        rect.y        = height;
+        rect.height   = cv_rect.height - height;
+        image         = gp_image_new_from_pixmap ( cv->pixmap, &rect, FALSE );
+        t_data->im_data_height =   gp_image_get_data ( image );
+        g_object_unref (image);
+    }
     else
-        data->stream_height  =   NULL;
-    
-    undo			=	g_new (GpUndo, 1);
+    {
+        t_data->im_data_height =   NULL;
+    }    
+
+    undo			=	g_slice_new (GpUndo);
 	undo->type		=	UNDO_RESIZE;
-	undo->data		=	(gpointer)data;
+	undo->t_data	=	(gpointer)t_data;
 	undo->message	=	NULL;
     
 	return undo;		
 }
 
-static void 
-undo_pixbuf_free ( GpUndo *undo )
+
+static void
+undo_free ( GpUndo *undo )
 {
-	if (undo->type == UNDO_PIXBUF)
+    if (undo->type == UNDO_IMAGE)
 	{
-		GpUndoPixbuf	*data	=	(GpUndoPixbuf*)undo->data;
-        g_input_stream_close ( data->stream, NULL, NULL);
-		g_object_unref (data->stream);
+		GpUndoImage    *t_data	=	(GpUndoImage*)undo->t_data;
+        gp_image_data_free ( t_data->im_data );
+    	g_slice_free (GpUndoImage, undo->t_data);
 	}
     else
     if (undo->type == UNDO_RESIZE)
     {
-        GpUndoResize    *data	=	(GpUndoResize*)undo->data;
-        if ( data->stream_width != NULL )
+        GpUndoResize    *t_data	=	(GpUndoResize*)undo->t_data;
+        if ( t_data->im_data_width != NULL )
         {
-            g_input_stream_close ( data->stream_width, NULL, NULL);
-		    g_object_unref (data->stream_width);
+            gp_image_data_free ( t_data->im_data_width );
         }
-        if ( data->stream_height != NULL )
+        if ( t_data->im_data_height != NULL )
         {
-            g_input_stream_close ( data->stream_height, NULL, NULL);
-		    g_object_unref (data->stream_height);
+            gp_image_data_free ( t_data->im_data_height );
         }
+    	g_slice_free (GpUndoResize, undo->t_data);
     }
-	g_free (undo->data);
 	g_free (undo->message);
-	g_free (undo);
-	return;	
+	g_slice_free (GpUndo,undo);
+	return;
 }
 
-static GInputStream	*
-get_stream_from_pixbuf ( const GdkPixbuf *pixbuf )
+static void
+free_redo_queue ( void )
 {
-    GInputStream	*stream     =   NULL;
-    GError	        *error		=	NULL;
-    gchar           *buffer 	=	NULL;
-    gsize	        buffer_size	=	0;
-    gdk_pixbuf_save_to_buffer ( (GdkPixbuf *)pixbuf, &buffer, &buffer_size, "png", &error, NULL );
-    g_print ("data addr:%d\n",(int)buffer);
-    if ( error != NULL )
+	GpUndo		*undo;
+    while ( ( undo = g_queue_pop_head ( redo_queue ) ) != NULL )
     {
-        g_print("TODO: error\n");
-        g_error_free ( error );
+        undo_free ( undo );
+    }
+}
+
+
+static GpImage *
+get_redo_image ( const GpImage *image, gint x, gint y )
+{
+	gp_canvas       *cv = cv_get_canvas();
+  	GpImage         *ret_image;
+    GdkRectangle    rect;
+    gboolean        has_alpha;
+    rect.x      =   x;
+    rect.y      =   y;
+    rect.width  =   gp_image_get_width      ( image );
+    rect.height =   gp_image_get_height     ( image );
+    has_alpha   =   gp_image_get_has_alpha  ( image );
+    ret_image   =   gp_image_new_from_pixmap ( cv->pixmap, &rect, has_alpha );
+    if ( has_alpha )
+    {
+        GdkBitmap   *mask;
+        mask    =   gp_image_get_mask ( image );
+        gp_image_set_mask ( ret_image, mask );
+        g_object_unref ( mask );            
+    }
+    return ret_image;
+}
+
+
+static GpUndo *
+draw_undo ( GpUndo *undo )
+{
+    GpUndo      *ret_undo   = NULL;
+    gp_canvas   *cv	        = cv_get_canvas();
+
+	if (undo->type == UNDO_IMAGE)
+	{
+		GpUndoImage	*t_data	=	(GpUndoImage*)undo->t_data;
+        GpImage     *image, *redo_image;
+        image       =   gp_image_new_from_data ( t_data->im_data );
+        redo_image  =   get_redo_image ( image, t_data->x, t_data->y );
+        ret_undo	=	undo_image_new (redo_image, t_data->x, t_data->y, undo->message );
+        g_object_unref (redo_image);
+        gp_image_draw ( image, cv->pixmap, cv->gc_fg, t_data->x, t_data->y );
+        g_object_unref ( image );
     }
     else
+    if (undo->type == UNDO_RESIZE)
     {
-        stream	=	g_memory_input_stream_new_from_data ( buffer, buffer_size, DestroyNotify );
+        GdkRectangle    cv_rect;
+        GpUndoResize    *t_data	=	(GpUndoResize*)undo->t_data;
+        ret_undo	=	undo_resize_new (cv, t_data->width, t_data->height );
+        cv_get_rect_size ( &cv_rect );
+        cv_resize_pixmap ( t_data->width, t_data->height );
+        if ( t_data->im_data_width != NULL )
+        {
+            GpImage     *image;
+            image   =   gp_image_new_from_data ( t_data->im_data_width );
+            gp_image_draw ( image, cv->pixmap, cv->gc_fg, cv_rect.width, 0 );
+            g_object_unref ( image );
+        }
+        if ( t_data->im_data_height != NULL )
+        {
+            GpImage     *image;
+            image   =   gp_image_new_from_data ( t_data->im_data_height );
+            gp_image_draw ( image, cv->pixmap, cv->gc_fg, 0, cv_rect.height );
+            g_object_unref ( image );
+        }
     }
-	g_print ("buffer_size:%d\n",buffer_size);
-    return stream;
-}
-
-void DestroyNotify  (gpointer data)
-{
-    g_print ("data addr:%d\n",(int)data);
-	g_free (data);
-	g_print("data freed\n");
-}
-
-static void             
-draw_stream ( GInputStream	*stream, gint x, gint y )
-{
-    GError 			*error	= NULL;
-    GdkPixbuf 		*pixbuf	= NULL;
-    gp_canvas		*cv	    =	cv_get_canvas();
-
-    pixbuf = gdk_pixbuf_new_from_stream ( stream, NULL, &error);
-    if( error != NULL) 
-    {
-	    g_print("TODO: error\n");
-	    g_error_free (error);
-    }
-    gdk_draw_pixbuf	(cv->pixmap,
-				     cv->gc_fg,
-				     pixbuf,
-				     0, 0,
-				     x, y,
-				     -1, -1,
-				     GDK_RGB_DITHER_NORMAL, 0, 0);
     gtk_widget_queue_draw (cv->widget);
-    g_object_unref (pixbuf);    
+    return ret_undo;
 }

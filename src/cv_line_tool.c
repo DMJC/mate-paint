@@ -111,7 +111,6 @@ button_press ( GdkEventButton *event )
 		}
 		m_priv->x0 = m_priv->x1 = (gint)event->x;
 		m_priv->y0 = m_priv->y1 = (gint)event->y;
-		if( !m_priv->is_draw ) gtk_widget_queue_draw ( m_priv->cv->widget );
         gtk_widget_queue_draw ( m_priv->cv->widget );
 	}
 	return TRUE;

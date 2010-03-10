@@ -63,7 +63,11 @@ gnome_paint_SOURCES = \
 	pixbuf_util.c  \
 	pixbuf_util.h  \
 	gp_point_array.c  \
-	gp_point_array.h
+	gp_point_array.h  \
+	cv_paintbrush_tool.c  \
+	cv_paintbrush_tool.h  \
+	cv_rounded_rectangle_tool.c  \
+	cv_rounded_rectangle_tool.h
 
 gnome_paint_CFLAGS = \
 	-DG_DISABLE_DEPRECATED\

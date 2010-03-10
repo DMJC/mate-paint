@@ -33,10 +33,10 @@ G_BEGIN_DECLS
 #define GP_IS_IMAGE_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE ((klass), GP_TYPE_IMAGE))
 #define GP_IMAGE_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), GP_TYPE_IMAGE, GpImageClass))
 
-typedef struct _GpImageClass GpImageClass;
-typedef struct _GpImage GpImage;
+typedef struct _GpImageClass	GpImageClass;
+typedef struct _GpImage			GpImage;
 typedef struct _GpImagePrivate  GpImagePrivate;
-
+typedef struct _GpImageData		GpImageData;
 
 struct _GpImageClass
 {
@@ -50,12 +50,26 @@ struct _GpImage
 	GpImagePrivate  *priv;
 };
 
-GType		gp_image_get_type			( void ) G_GNUC_CONST;
-GpImage *   gp_image_new				( gint width, gint height, gboolean has_alpha );
-GpImage *   gp_image_new_from_pixmap	( GdkPixmap* pixmap, GdkRectangle *rect, gboolean has_alpha );
-void		gp_image_set_mask			( GpImage *image, GdkBitmap *mask );
-GdkPixbuf * gp_image_get_pixbuf			( GpImage *image );
-                                                         
+GType			gp_image_get_type			( void ) G_GNUC_CONST;
+GpImage *		gp_image_new				( gint width, gint height, 
+						                      gboolean has_alpha );
+GpImage *		gp_image_new_from_pixmap	( GdkPixmap* pixmap, 
+			                                  GdkRectangle *rect, 
+			                                  gboolean has_alpha );
+GpImage *		gp_image_new_from_data		( GpImageData *data );
+void			gp_image_set_mask			( GpImage *image, GdkBitmap *mask );
+GdkPixbuf *		gp_image_get_pixbuf			( GpImage *image );
+GpImageData *   gp_image_get_data			( GpImage *image );
+void			gp_image_data_free			( GpImageData *data );
+void			gp_image_draw				( GpImage *image, 
+							                  GdkDrawable *drawable,
+							                  GdkGC *gc,
+							                  gint x, gint y );
+gint			gp_image_get_width			( GpImage *image );
+gint			gp_image_get_height			( GpImage *image );
+gboolean		gp_image_get_has_alpha		( GpImage *image );
+GdkBitmap *		gp_image_get_mask			( GpImage *image );
+
 G_END_DECLS
 
 #endif /* _GP_IMAGE_H_ */

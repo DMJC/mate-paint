@@ -32,6 +32,8 @@
 #include "cv_rectangle_tool.h"
 #include "cv_ellipse_tool.h"
 #include "cv_polygon_tool.h"
+#include "cv_paintbrush_tool.h"
+#include "cv_rounded_rectangle_tool.h"
 #include "undo.h"
 
 #include <glib/gi18n.h>
@@ -135,7 +137,7 @@ cv_set_tool ( gp_tool_enum tool )
 	        cv_tool = NULL;
             break;
         case TOOL_PAINTBRUSH:
-	        cv_tool = NULL;
+	        cv_tool = tool_paintbrush_init ( &cv );
             break;
         case TOOL_TEXT:
 	        cv_tool = NULL;
@@ -156,7 +158,7 @@ cv_set_tool ( gp_tool_enum tool )
             cv_tool = tool_polygon_init ( &cv );
             break;
         case TOOL_ROUNDED_RECTANGLE:
-	        cv_tool = NULL;
+	        cv_tool = tool_rounded_rectangle_init ( &cv );
             break;
     }
 	if (cv_tool == NULL) 
@@ -251,6 +253,11 @@ on_cv_drawing_realize (GtkWidget *widget, gpointer user_data)
 	cv_set_color_fg ( &black_color );
 	cv_set_color_bg ( &white_color );
 	cv_set_line_width ( 1 );
+	gdk_gc_set_line_attributes ( cv.gc_fg_pencil, 1, GDK_LINE_SOLID, 
+	                             GDK_CAP_ROUND, GDK_JOIN_ROUND );
+	gdk_gc_set_line_attributes ( cv.gc_bg_pencil, 1, GDK_LINE_SOLID, 
+	                             GDK_CAP_ROUND, GDK_JOIN_ROUND );
+    
 	cv_set_filled ( FILLED_NONE );
 	cv_resize_set_canvas ( &cv );
 	cv_create_pixmap ( 320, 200, TRUE);
