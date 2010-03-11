@@ -17,8 +17,12 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 #include "gp-image.h"
+#include <string.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib/gi18n.h>
+
 
 
 #define GP_IMAGE_GET_PRIVATE(object)	\
@@ -26,6 +30,7 @@
 
 
 const int BITS_PER_SAMPLE = 8;
+
 
 struct _GpImageData
 {
@@ -52,7 +57,13 @@ gp_image_init (GpImage *object)
 static void
 gp_image_finalize (GObject *object)
 {
-	G_OBJECT_CLASS (gp_image_parent_class)->finalize (object);
+	GpImagePrivate *priv;
+	priv	=	GP_IMAGE (object)->priv;
+	if ( priv->pixbuf != NULL )
+	{
+		g_object_unref ( priv->pixbuf );
+	}
+	G_OBJECT_CLASS (gp_image_parent_class)->finalize (object);	
 }
 
 static void
@@ -131,7 +142,7 @@ gp_image_new_from_data ( GpImageData *data )
 
 	stream  =	g_memory_input_stream_new_from_data ( data->buffer, data->len, NULL );
     image->priv->pixbuf  =   gdk_pixbuf_new_from_stream ( stream, NULL, NULL );
-    g_input_stream_close ( stream, NULL, NULL );
+   // g_input_stream_close ( stream, NULL, NULL );
 	g_object_unref ( stream );
 
 	g_assert(image->priv->pixbuf);
@@ -141,29 +152,75 @@ gp_image_new_from_data ( GpImageData *data )
 	return image;
 }
 
+
+struct SaveToBufferData {
+	gchar *buffer;
+	gsize len, max;
+};
+
+
+static gboolean            
+save_to_buffer_callback ( const gchar *data,
+             			  gsize count,
+             			  GError **error,
+            			  gpointer user_data )
+{
+	struct SaveToBufferData *sdata = user_data;
+	gchar *new_buffer;
+	gsize new_max;
+
+	if (sdata->len + count > sdata->max) 
+	{
+		new_max = sdata->len + count + 16;
+		new_buffer = g_try_realloc (sdata->buffer, new_max);
+		g_print ("realloc:%d\n",new_max);
+		if (!new_buffer) 
+		{
+            /*Insufficient memory to save image into a buffer*/
+			return FALSE;
+		}
+		sdata->buffer = new_buffer;
+		sdata->max = new_max;
+	}
+	memcpy (sdata->buffer + sdata->len, data, count);
+	sdata->len += count;
+	return TRUE;
+}
+
 GpImageData *   
 gp_image_get_data ( GpImage *image )
 {
-	GpImageData *data;
+	static const gint initial_max = 66;
+	struct SaveToBufferData sdata;
 	GError		*error = NULL;
-	guint8		*buffer;
-	gsize		len;
-	gdk_pixbuf_save_to_buffer ( image->priv->pixbuf, 
-                                &buffer, 
-                                &len, 
-                                "png", &error, NULL );
-	if ( error != NULL )
+
+	g_print ("alloc:%d\n",initial_max);
+	sdata.buffer = g_try_malloc (initial_max);
+	sdata.max = initial_max;
+	sdata.len = 0;
+	if (!sdata.buffer) 
 	{
+		/*Insufficient memory to save image into a buffer*/
+		return NULL;
+	}
+	if (!gdk_pixbuf_save_to_callback ( image->priv->pixbuf,
+	                          		   save_to_buffer_callback,
+	                                   &sdata,
+	                                   "png", &error, NULL ) ) 
+	{
+		g_free (sdata.buffer);
 		g_error_free ( error );
 		return NULL;
 	}
-
-	g_print ("data size:%d\n",len);
-	
-	data			= g_slice_new ( GpImageData );
-	data->buffer	= buffer;
-	data->len		= len;
-	return data;
+	else
+	{
+		GpImageData *data;
+		g_print ("data size:%d\n",sdata.len);
+		data			= g_slice_new ( GpImageData );
+		data->buffer	= sdata.buffer;
+		data->len		= sdata.len;
+		return data;
+	}
 }
 
 void

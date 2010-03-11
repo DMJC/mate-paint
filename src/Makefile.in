@@ -63,7 +63,8 @@ am_gnome_paint_OBJECTS = gnome_paint-color.$(OBJEXT) \
 	gnome_paint-pixbuf_util.$(OBJEXT) \
 	gnome_paint-gp_point_array.$(OBJEXT) \
 	gnome_paint-cv_paintbrush_tool.$(OBJEXT) \
-	gnome_paint-cv_rounded_rectangle_tool.$(OBJEXT)
+	gnome_paint-cv_rounded_rectangle_tool.$(OBJEXT) \
+	gnome_paint-cv_airbrush_tool.$(OBJEXT)
 gnome_paint_OBJECTS = $(am_gnome_paint_OBJECTS)
 am__DEPENDENCIES_1 =
 gnome_paint_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -287,7 +288,9 @@ gnome_paint_SOURCES = \
 	cv_paintbrush_tool.c  \
 	cv_paintbrush_tool.h  \
 	cv_rounded_rectangle_tool.c  \
-	cv_rounded_rectangle_tool.h
+	cv_rounded_rectangle_tool.h  \
+	cv_airbrush_tool.c  \
+	cv_airbrush_tool.h
 
 gnome_paint_CFLAGS = \
 	-DG_DISABLE_DEPRECATED\
@@ -391,6 +394,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-color.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_airbrush_tool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_color_pick_tool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_drawing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_ellipse_tool.Po@am__quote@
@@ -711,6 +715,20 @@ gnome_paint-cv_rounded_rectangle_tool.obj: cv_rounded_rectangle_tool.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cv_rounded_rectangle_tool.c' object='gnome_paint-cv_rounded_rectangle_tool.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-cv_rounded_rectangle_tool.obj `if test -f 'cv_rounded_rectangle_tool.c'; then $(CYGPATH_W) 'cv_rounded_rectangle_tool.c'; else $(CYGPATH_W) '$(srcdir)/cv_rounded_rectangle_tool.c'; fi`
+
+gnome_paint-cv_airbrush_tool.o: cv_airbrush_tool.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-cv_airbrush_tool.o -MD -MP -MF $(DEPDIR)/gnome_paint-cv_airbrush_tool.Tpo -c -o gnome_paint-cv_airbrush_tool.o `test -f 'cv_airbrush_tool.c' || echo '$(srcdir)/'`cv_airbrush_tool.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-cv_airbrush_tool.Tpo $(DEPDIR)/gnome_paint-cv_airbrush_tool.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cv_airbrush_tool.c' object='gnome_paint-cv_airbrush_tool.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-cv_airbrush_tool.o `test -f 'cv_airbrush_tool.c' || echo '$(srcdir)/'`cv_airbrush_tool.c
+
+gnome_paint-cv_airbrush_tool.obj: cv_airbrush_tool.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-cv_airbrush_tool.obj -MD -MP -MF $(DEPDIR)/gnome_paint-cv_airbrush_tool.Tpo -c -o gnome_paint-cv_airbrush_tool.obj `if test -f 'cv_airbrush_tool.c'; then $(CYGPATH_W) 'cv_airbrush_tool.c'; else $(CYGPATH_W) '$(srcdir)/cv_airbrush_tool.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-cv_airbrush_tool.Tpo $(DEPDIR)/gnome_paint-cv_airbrush_tool.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cv_airbrush_tool.c' object='gnome_paint-cv_airbrush_tool.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-cv_airbrush_tool.obj `if test -f 'cv_airbrush_tool.c'; then $(CYGPATH_W) 'cv_airbrush_tool.c'; else $(CYGPATH_W) '$(srcdir)/cv_airbrush_tool.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

@@ -139,6 +139,8 @@ on_menu_undo_activate ( GtkMenuItem *menuitem, gpointer user_data)
         g_queue_push_head	( redo_queue, draw_undo ( undo ) );
 		undo_free (undo);
 	}
+    else
+        g_queue_clear (undo_queue);
 }
 
 void 
@@ -150,6 +152,8 @@ on_menu_redo_activate ( GtkMenuItem *menuitem, gpointer user_data)
         g_queue_push_head	( undo_queue, draw_undo ( undo ) );
 		undo_free (undo);
 	}
+    else
+        g_queue_clear (redo_queue);
 }
 
 /*private*/
@@ -168,7 +172,7 @@ undo_image_new ( const GpImage *image,
 		undo			=	g_slice_new (GpUndo);
 		undo->type		=	UNDO_IMAGE;
 		undo->t_data	=	(gpointer)t_data;
-		undo->message	=	g_strdup (message);
+		undo->message	=	NULL;//g_strdup (message);
 	}
 	return undo;
 }
@@ -263,6 +267,7 @@ free_redo_queue ( void )
     {
         undo_free ( undo );
     }
+    g_queue_clear (redo_queue);
 }
 
 

@@ -34,6 +34,7 @@
 #include "cv_polygon_tool.h"
 #include "cv_paintbrush_tool.h"
 #include "cv_rounded_rectangle_tool.h"
+#include "cv_airbrush_tool.h"
 #include "undo.h"
 
 #include <glib/gi18n.h>
@@ -128,7 +129,7 @@ cv_set_tool ( gp_tool_enum tool )
             cv_tool = tool_pencil_init ( &cv );
             break;
         case TOOL_AIRBRUSH:
-	        cv_tool = NULL;
+	        cv_tool = tool_airbrush_init ( &cv );
             break;
         case TOOL_BUCKET_FILL:
             cv_tool = tool_flood_fill_init ( &cv );
@@ -327,7 +328,6 @@ on_cv_drawing_motion_notify_event (	GtkWidget      *widget,
                                 	gpointer        user_data)
 {
 	gboolean ret = TRUE;
-
 	if ( cv_tool != NULL )
 	{
 		ret = cv_tool->button_motion( event );
@@ -341,7 +341,6 @@ on_cv_drawing_expose_event	(   GtkWidget	   *widget,
 								GdkEventExpose *event,
                					gpointer       user_data )
 {
-
     gdk_draw_drawable (	widget->window,
                     	widget->style->fg_gc[GTK_WIDGET_STATE(widget)],
     	                cv.pixmap,
@@ -355,8 +354,7 @@ on_cv_drawing_expose_event	(   GtkWidget	   *widget,
 	}
 
 	cv_resize_draw();
-	
-	return TRUE;
+    return TRUE;
 }
 
 /*private functions*/
