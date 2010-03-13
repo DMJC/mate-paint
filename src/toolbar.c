@@ -40,14 +40,32 @@
 #include "./pixmaps/rect0.xpm"
 #include "./pixmaps/rect1.xpm"
 #include "./pixmaps/rect2.xpm"
+#include "./pixmaps/erase_0.xpm"
+#include "./pixmaps/erase_1.xpm"
+#include "./pixmaps/erase_2.xpm"
+#include "./pixmaps/erase_3.xpm"
+#include "./pixmaps/brush_0.xpm"
+#include "./pixmaps/brush_1.xpm"
+#include "./pixmaps/brush_2.xpm"
+#include "./pixmaps/brush_3.xpm"
+#include "./pixmaps/brush_4.xpm"
+#include "./pixmaps/brush_5.xpm"
+#include "./pixmaps/brush_6.xpm"
+#include "./pixmaps/brush_7.xpm"
+#include "./pixmaps/brush_8.xpm"
+#include "./pixmaps/brush_9.xpm"
+#include "./pixmaps/brush_10.xpm"
+#include "./pixmaps/brush_11.xpm"
 
 
 typedef enum {
-	NONE,
-	SELECTION,
-	RECT_LINE,
-	ERASE,
-	
+	TAB_NONE,
+	TAB_SELECTION,
+	TAB_RECT_LINE,
+	TAB_ERASE,
+    TAB_ZOOM,
+    TAB_BRUSH,
+    TAB_SPRAY
 } TypeBar;
 
 /* private data */
@@ -230,13 +248,13 @@ on_rect2_toggled (GtkToggleToolButton *button, gpointer user_data)
 	}
 }
 
+/*Option Bar realize funcitons*/
 void 
 on_notebook_realize   (GtkObject *object, gpointer user_data)
 {
 	notebook	=	GTK_NOTEBOOK( object );
-	gtk_notebook_set_current_page ( notebook, SELECTION );
+	gtk_notebook_set_current_page ( notebook, TAB_SELECTION );
 }
-
 void 
 on_frame_rect_realize  (GtkObject *object, gpointer user_data)
 {
@@ -244,48 +262,13 @@ on_frame_rect_realize  (GtkObject *object, gpointer user_data)
 	show_frame_rect ( frame_rect_show );
 }
 
-void
-on_line0_realize   (GtkObject *object, gpointer user_data)
-{
-	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
-	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)line_0_xpm ) );
-}
-
-void
-on_line1_realize   (GtkObject *object, gpointer user_data)
-{
-	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
-	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)line_1_xpm ) );
-}
-
-void
-on_line2_realize   (GtkObject *object, gpointer user_data)
-{
-	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
-	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)line_2_xpm ) );
-}
-
-void
-on_line3_realize   (GtkObject *object, gpointer user_data)
-{
-	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
-	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)line_3_xpm ) );
-}
-
-void
-on_line4_realize   (GtkObject *object, gpointer user_data)
-{
-	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
-	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)line_4_xpm ) );
-}
-
+/*Selection Bar realize functions*/
 void 
 on_sel1_realize   (GtkObject *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)sel1_xpm ) );
 }
-
 void 
 on_sel2_realize   (GtkObject *object, gpointer user_data)
 {
@@ -293,26 +276,157 @@ on_sel2_realize   (GtkObject *object, gpointer user_data)
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)sel2_xpm ) );
 }
 
+/*Rect Bar realize functions*/
 void 
 on_rect0_realize   (GtkObject *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)rect0_xpm ) );
 }
-
 void 
 on_rect1_realize   (GtkObject *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)rect1_xpm ) );
 }
-
 void 
 on_rect2_realize   (GtkObject *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)rect2_xpm ) );
 }
+
+/*Line Bar realize functions*/
+void
+on_line0_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
+	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)line_0_xpm ) );
+}
+void
+on_line1_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
+	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)line_1_xpm ) );
+}
+void
+on_line2_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
+	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)line_2_xpm ) );
+}
+void
+on_line3_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
+	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)line_3_xpm ) );
+}
+void
+on_line4_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
+	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)line_4_xpm ) );
+}
+
+/*Erase Bar realize functions*/
+void
+on_erase0_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
+	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)erase_0_xpm ) );
+}
+void
+on_erase1_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
+	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)erase_1_xpm ) );
+}
+void
+on_erase2_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
+	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)erase_2_xpm ) );
+}
+void
+on_erase3_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
+	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)erase_3_xpm ) );
+}
+/*Brush Bar realize functions*/
+void
+on_brush0_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
+                                     	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_0_xpm ) );
+}
+void
+on_brush1_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
+                                     	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_1_xpm ) );
+}
+void
+on_brush2_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
+                                     	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_2_xpm ) );
+}
+void
+on_brush3_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
+                                     	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_3_xpm ) );
+}
+void
+on_brush4_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
+                                     	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_4_xpm ) );
+}
+void
+on_brush5_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
+                                     	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_5_xpm ) );
+}
+void
+on_brush6_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
+                                     	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_6_xpm ) );
+}
+void
+on_brush7_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
+                                     	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_7_xpm ) );
+}
+void
+on_brush8_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
+                                     	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_8_xpm ) );
+}
+void
+on_brush9_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
+                                     	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_9_xpm ) );
+}
+void
+on_brush10_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
+                                     	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_10_xpm ) );
+}
+void
+on_brush11_realize   (GtkObject *object, gpointer user_data)
+{
+	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
+                                     	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_11_xpm ) );
+}
+
 
 /*private*/
 
@@ -362,29 +476,37 @@ tool_toggled ( GtkToggleToolButton *button, gp_tool_enum tool )
             case TOOL_FREE_SELECT:
             case TOOL_RECT_SELECT:
             case TOOL_TEXT:
-           		gtk_notebook_set_current_page ( notebook, SELECTION );
+           		gtk_notebook_set_current_page ( notebook, TAB_SELECTION );
                 break;
             case TOOL_LINE:
             case TOOL_CURVE:
         		show_frame_rect ( FALSE );
-                gtk_notebook_set_current_page ( notebook, RECT_LINE );
+                gtk_notebook_set_current_page ( notebook, TAB_RECT_LINE );
                 break;
             case TOOL_RECTANGLE:
             case TOOL_ELLIPSE:
             case TOOL_POLYGON:
             case TOOL_ROUNDED_RECTANGLE:
         		show_frame_rect ( TRUE );
-                gtk_notebook_set_current_page ( notebook, RECT_LINE );
+                gtk_notebook_set_current_page ( notebook, TAB_RECT_LINE );
                 break;
             case TOOL_ERASER:
-            case TOOL_COLOR_PICKER:
-            case TOOL_PENCIL:
+                gtk_notebook_set_current_page ( notebook, TAB_ERASE );
+                break;
             case TOOL_AIRBRUSH:
-            case TOOL_BUCKET_FILL:
+                gtk_notebook_set_current_page ( notebook, TAB_SPRAY );
+                break;
             case TOOL_ZOOM:
+                gtk_notebook_set_current_page ( notebook, TAB_ZOOM );
+                break;
             case TOOL_PAINTBRUSH:
+                gtk_notebook_set_current_page ( notebook, TAB_BRUSH );
+                break;
+            case TOOL_COLOR_PICKER:
+            case TOOL_BUCKET_FILL:
+            case TOOL_PENCIL:
             default:
-                gtk_notebook_set_current_page ( notebook, NONE );
+                gtk_notebook_set_current_page ( notebook, TAB_NONE );
                 break;
         }
 		/*select tool*/

@@ -82,6 +82,28 @@ void on_line1_realize   				(GtkObject *object, gpointer user_data);
 void on_line2_realize   				(GtkObject *object, gpointer user_data);
 void on_line3_realize   				(GtkObject *object, gpointer user_data);
 void on_line4_realize   				(GtkObject *object, gpointer user_data);
+/*Erase Bar realize functions*/
+void on_erase0_realize   				(GtkObject *object, gpointer user_data);
+void on_erase1_realize   				(GtkObject *object, gpointer user_data);
+void on_erase2_realize   				(GtkObject *object, gpointer user_data);
+void on_erase3_realize   				(GtkObject *object, gpointer user_data);
+/*Brush Bar realize functions*/
+void on_brush0_realize   				(GtkObject *object, gpointer user_data);
+void on_brush1_realize   				(GtkObject *object, gpointer user_data);
+void on_brush2_realize   				(GtkObject *object, gpointer user_data);
+void on_brush3_realize   				(GtkObject *object, gpointer user_data);
+void on_brush4_realize   				(GtkObject *object, gpointer user_data);
+void on_brush5_realize   				(GtkObject *object, gpointer user_data);
+void on_brush6_realize   				(GtkObject *object, gpointer user_data);
+void on_brush7_realize   				(GtkObject *object, gpointer user_data);
+void on_brush8_realize   				(GtkObject *object, gpointer user_data);
+void on_brush9_realize   				(GtkObject *object, gpointer user_data);
+void on_brush10_realize   				(GtkObject *object, gpointer user_data);
+void on_brush11_realize   				(GtkObject *object, gpointer user_data);
+
+
+
+
 /*Line toolbar toggled functions*/
 void on_line0_toggled					(GtkToggleToolButton *button, gpointer user_data);
 void on_line1_toggled					(GtkToggleToolButton *button, gpointer user_data);
@@ -92,5 +114,6 @@ void on_line4_toggled					(GtkToggleToolButton *button, gpointer user_data);
 void on_rect0_toggled					(GtkToggleToolButton *button, gpointer user_data);
 void on_rect1_toggled					(GtkToggleToolButton *button, gpointer user_data);
 void on_rect2_toggled					(GtkToggleToolButton *button, gpointer user_data);
+
 
 #endif /*__TOOLBAR_H__*/

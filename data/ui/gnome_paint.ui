@@ -235,6 +235,7 @@
                     <child>
                       <object class="GtkHBox" id="hbox1">
                         <property name="visible">True</property>
+                        <property name="homogeneous">True</property>
                         <child>
                           <object class="GtkToolbar" id="toolbar1">
                             <property name="visible">True</property>
@@ -348,7 +349,6 @@
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
                             <property name="fill">False</property>
                             <property name="position">0</property>
                           </packing>
@@ -443,7 +443,7 @@
                               <object class="GtkRadioToolButton" id="draw-polygon">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="icon_name">stock_draw-polygon</property>
+                                <property name="icon_name">stock_draw-fill_polygon</property>
                                 <property name="group">tool-free-select</property>
                                 <signal name="toggled" handler="on_draw_polygon_toggled"/>
                               </object>
@@ -467,7 +467,6 @@
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
                             <property name="fill">False</property>
                             <property name="position">1</property>
                           </packing>
@@ -488,7 +487,7 @@
                         <property name="tab_vborder">0</property>
                         <signal name="realize" handler="on_notebook_realize"/>
                         <child>
-                          <object class="GtkVBox" id="tab0">
+                          <object class="GtkVBox" id="tab_none">
                             <property name="visible">True</property>
                             <property name="orientation">vertical</property>
                             <child>
@@ -500,7 +499,7 @@
                           <placeholder/>
                         </child>
                         <child>
-                          <object class="GtkVBox" id="tab1">
+                          <object class="GtkVBox" id="tab_selection">
                             <property name="visible">True</property>
                             <property name="orientation">vertical</property>
                             <child>
@@ -555,7 +554,7 @@
                           <placeholder/>
                         </child>
                         <child>
-                          <object class="GtkVBox" id="tab2">
+                          <object class="GtkVBox" id="tab_rect_line">
                             <property name="visible">True</property>
                             <property name="orientation">vertical</property>
                             <child>
@@ -614,7 +613,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkFrame" id="frame36">
+                              <object class="GtkFrame" id="frame_line">
                                 <property name="visible">True</property>
                                 <property name="border_width">2</property>
                                 <property name="label_xalign">0</property>
@@ -700,7 +699,7 @@
                           <placeholder/>
                         </child>
                         <child>
-                          <object class="GtkVBox" id="tab3">
+                          <object class="GtkVBox" id="tab_erase">
                             <property name="visible">True</property>
                             <property name="orientation">vertical</property>
                             <child>
@@ -710,7 +709,53 @@
                                 <property name="label_xalign">0</property>
                                 <property name="shadow_type">in</property>
                                 <child>
-                                  <placeholder/>
+                                  <object class="GtkToolbar" id="toolbar6">
+                                    <property name="visible">True</property>
+                                    <property name="orientation">vertical</property>
+                                    <property name="show_arrow">False</property>
+                                    <property name="icon_size">1</property>
+                                    <property name="icon_size_set">True</property>
+                                    <child>
+                                      <object class="GtkRadioToolButton" id="erase0">
+                                        <property name="active">True</property>
+                                        <signal name="realize" handler="on_erase0_realize"/>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="homogeneous">True</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkRadioToolButton" id="erase1">
+                                        <property name="group">erase0</property>
+                                        <signal name="realize" handler="on_erase1_realize"/>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="homogeneous">True</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkRadioToolButton" id="erase2">
+                                        <property name="group">erase0</property>
+                                        <signal name="realize" handler="on_erase2_realize"/>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="homogeneous">True</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkRadioToolButton" id="erase3">
+                                        <property name="group">erase0</property>
+                                        <signal name="realize" handler="on_erase3_realize"/>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="homogeneous">True</property>
+                                      </packing>
+                                    </child>
+                                  </object>
                                 </child>
                               </object>
                               <packing>
@@ -728,7 +773,7 @@
                           <placeholder/>
                         </child>
                         <child>
-                          <object class="GtkVBox" id="tab4">
+                          <object class="GtkVBox" id="tab_zoom">
                             <property name="visible">True</property>
                             <property name="orientation">vertical</property>
                             <child>
@@ -738,7 +783,49 @@
                                 <property name="label_xalign">0</property>
                                 <property name="shadow_type">in</property>
                                 <child>
-                                  <placeholder/>
+                                  <object class="GtkToolbar" id="toolbar7">
+                                    <property name="visible">True</property>
+                                    <property name="orientation">vertical</property>
+                                    <property name="show_arrow">False</property>
+                                    <property name="icon_size">1</property>
+                                    <property name="icon_size_set">True</property>
+                                    <child>
+                                      <object class="GtkRadioToolButton" id="zoom0">
+                                        <property name="active">True</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="homogeneous">True</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkRadioToolButton" id="zoom1">
+                                        <property name="group">zoom0</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="homogeneous">True</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkRadioToolButton" id="zoom2">
+                                        <property name="group">zoom0</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="homogeneous">True</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkRadioToolButton" id="zoom3">
+                                        <property name="group">zoom0</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="homogeneous">True</property>
+                                      </packing>
+                                    </child>
+                                  </object>
                                 </child>
                               </object>
                               <packing>
@@ -756,7 +843,7 @@
                           <placeholder/>
                         </child>
                         <child>
-                          <object class="GtkVBox" id="tab5">
+                          <object class="GtkVBox" id="tab_brush">
                             <property name="visible">True</property>
                             <property name="orientation">vertical</property>
                             <child>
@@ -766,7 +853,179 @@
                                 <property name="label_xalign">0</property>
                                 <property name="shadow_type">in</property>
                                 <child>
-                                  <placeholder/>
+                                  <object class="GtkVBox" id="vbox4">
+                                    <property name="visible">True</property>
+                                    <property name="orientation">vertical</property>
+                                    <child>
+                                      <object class="GtkToolbar" id="tb_brush0">
+                                        <property name="show_arrow">False</property>
+                                        <property name="icon_size">1</property>
+                                        <property name="icon_size_set">True</property>
+                                        <child>
+                                          <object class="GtkRadioToolButton" id="brush0">
+                                            <property name="active">True</property>
+                                            <signal name="realize" handler="on_brush0_realize"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">True</property>
+                                            <property name="homogeneous">True</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkRadioToolButton" id="brush1">
+                                            <property name="group">brush0</property>
+                                            <signal name="realize" handler="on_brush1_realize"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">True</property>
+                                            <property name="homogeneous">True</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkRadioToolButton" id="brush2">
+                                            <property name="group">brush0</property>
+                                            <signal name="realize" handler="on_brush2_realize"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">True</property>
+                                            <property name="homogeneous">True</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">False</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkToolbar" id="toolbar10">
+                                        <property name="visible">True</property>
+                                        <property name="show_arrow">False</property>
+                                        <property name="icon_size">1</property>
+                                        <property name="icon_size_set">True</property>
+                                        <child>
+                                          <object class="GtkRadioToolButton" id="brush3">
+                                            <property name="active">True</property>
+                                            <property name="group">brush0</property>
+                                            <signal name="realize" handler="on_brush3_realize"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">True</property>
+                                            <property name="homogeneous">True</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkRadioToolButton" id="brush4">
+                                            <property name="group">brush0</property>
+                                            <signal name="realize" handler="on_brush4_realize"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">True</property>
+                                            <property name="homogeneous">True</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkRadioToolButton" id="brush5">
+                                            <property name="group">brush0</property>
+                                            <signal name="realize" handler="on_brush5_realize"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">True</property>
+                                            <property name="homogeneous">True</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkToolbar" id="toolbar11">
+                                        <property name="visible">True</property>
+                                        <property name="show_arrow">False</property>
+                                        <property name="icon_size">1</property>
+                                        <property name="icon_size_set">True</property>
+                                        <child>
+                                          <object class="GtkRadioToolButton" id="brush6">
+                                            <property name="group">brush0</property>
+                                            <signal name="realize" handler="on_brush6_realize"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">True</property>
+                                            <property name="homogeneous">True</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkRadioToolButton" id="brush7">
+                                            <property name="group">brush0</property>
+                                            <signal name="realize" handler="on_brush7_realize"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">True</property>
+                                            <property name="homogeneous">True</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkRadioToolButton" id="brush8">
+                                            <property name="group">brush0</property>
+                                            <signal name="realize" handler="on_brush8_realize"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">True</property>
+                                            <property name="homogeneous">True</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkToolbar" id="toolbar12">
+                                        <property name="visible">True</property>
+                                        <property name="show_arrow">False</property>
+                                        <property name="icon_size">1</property>
+                                        <property name="icon_size_set">True</property>
+                                        <child>
+                                          <object class="GtkRadioToolButton" id="brush9">
+                                            <property name="group">brush0</property>
+                                            <signal name="realize" handler="on_brush9_realize"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">True</property>
+                                            <property name="homogeneous">True</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkRadioToolButton" id="brush10">
+                                            <property name="group">brush0</property>
+                                            <signal name="realize" handler="on_brush10_realize"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">True</property>
+                                            <property name="homogeneous">True</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkRadioToolButton" id="brush11">
+                                            <property name="group">brush0</property>
+                                            <signal name="realize" handler="on_brush11_realize"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">True</property>
+                                            <property name="homogeneous">True</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">3</property>
+                                      </packing>
+                                    </child>
+                                  </object>
                                 </child>
                               </object>
                               <packing>
@@ -784,7 +1043,7 @@
                           <placeholder/>
                         </child>
                         <child>
-                          <object class="GtkVBox" id="tab6">
+                          <object class="GtkVBox" id="tab_spray">
                             <property name="visible">True</property>
                             <property name="orientation">vertical</property>
                             <child>
@@ -794,7 +1053,40 @@
                                 <property name="label_xalign">0</property>
                                 <property name="shadow_type">in</property>
                                 <child>
-                                  <placeholder/>
+                                  <object class="GtkToolbar" id="toolbar8">
+                                    <property name="visible">True</property>
+                                    <property name="orientation">vertical</property>
+                                    <property name="show_arrow">False</property>
+                                    <property name="icon_size">1</property>
+                                    <property name="icon_size_set">True</property>
+                                    <child>
+                                      <object class="GtkRadioToolButton" id="spray0">
+                                        <property name="active">True</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="homogeneous">True</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkRadioToolButton" id="spray1">
+                                        <property name="group">spray0</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="homogeneous">True</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkRadioToolButton" id="spray2">
+                                        <property name="group">spray0</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="homogeneous">True</property>
+                                      </packing>
+                                    </child>
+                                  </object>
                                 </child>
                               </object>
                               <packing>
@@ -858,9 +1150,9 @@
                                     <signal name="expose_event" handler="on_cv_drawing_expose_event"/>
                                     <signal name="unrealize" handler="on_cv_drawing_unrealize"/>
                                     <signal name="button_press_event" handler="on_cv_drawing_button_press_event"/>
-                                    <signal name="motion_notify_event" handler="on_cv_drawing_motion_notify_event"/>
                                     <signal name="realize" handler="on_cv_drawing_realize"/>
                                     <signal name="leave_notify_event" handler="on_cv_drawing_leave_notify_event"/>
+                                    <signal name="motion_notify_event" handler="on_cv_drawing_motion_notify_event"/>
                                     <signal name="button_release_event" handler="on_cv_drawing_button_release_event"/>
                                   </object>
                                   <packing>
