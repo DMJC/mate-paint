@@ -192,7 +192,7 @@ save_undo ( void )
     gdk_draw_line ( mask, gc_mask, 
                     m_priv->x0 - rect.x, m_priv->y0 - rect.y,
                     m_priv->x1 - rect.x, m_priv->y1 - rect.y );
-    undo_add ( &rect, mask, NULL);
+    undo_add ( &rect, mask, TOOL_LINE );
 
     gp_point_array_free (pa);
     g_object_unref (gc_mask);

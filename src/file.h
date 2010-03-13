@@ -25,9 +25,10 @@
 
 void		file_set_parent_window	( GtkWindow * wnd );
 gboolean	file_save_dialog		( void );
+gboolean    file_is_save            ( void );
 void		file_set_unsave		    ( void );
+void        file_set_save           ( void );
 gboolean	file_open				( const gchar * filename );
-
 
 
 /* GUI CallBacks */

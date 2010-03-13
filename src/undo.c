@@ -27,6 +27,7 @@
 #include "cv_drawing.h"
 #include "gp-image.h"
 #include "gp_point_array.h"
+#include "file.h"
 
 
 
@@ -38,9 +39,10 @@ typedef enum
 
 typedef struct
 {
-	GpImageData *im_data;
-	gint        x;
-	gint        y;
+	GpImageData     *im_data;
+	gint            x;
+	gint            y;
+    gp_tool_enum    tool;
 } GpUndoImage;
 
 typedef struct
@@ -53,11 +55,9 @@ typedef struct
 
 typedef struct
 {
-	undo_type	type;
 	gpointer	t_data;
-	gchar		*message;
+	undo_type	type;
 } GpUndo;
-
 
 /*statics queue*/
 GQueue _undo_queue = G_QUEUE_INIT;
@@ -67,9 +67,11 @@ GQueue _redo_queue = G_QUEUE_INIT;
 GQueue	*undo_queue	=	&_undo_queue;
 GQueue	*redo_queue	=	&_redo_queue;
 
+GpUndo  *undo_saved =   NULL;
+
 static GpUndo * 	undo_image_new	   	( const GpImage *image,
                                           gint x, gint y, 
-                                          const gchar * message );
+                                          gp_tool_enum  tool );
 static GpUndo *     undo_resize_new     ( gp_canvas	*cv, gint width, gint height );
 static void			undo_free	        ( GpUndo *undo );
 static GpUndo *     draw_undo           ( GpUndo *undo );
@@ -99,7 +101,7 @@ undo_create_mask ( gint width, gint height, GdkBitmap **mask, GdkGC **gc_mask )
 }
 
 void
-undo_add (GdkRectangle *rect, GdkBitmap * mask, const gchar * message )
+undo_add (GdkRectangle *rect, GdkBitmap * mask, gp_tool_enum  tool )
 {
 	GpUndo		*undo;
 	GpImage     *image;
@@ -113,7 +115,7 @@ undo_add (GdkRectangle *rect, GdkBitmap * mask, const gchar * message )
         gp_image_set_mask ( image, mask );
     }
     
-	undo	=	undo_image_new (image, rect->x, rect->y, message );
+	undo	=	undo_image_new (image, rect->x, rect->y, tool );
 	g_queue_push_head	( undo_queue, undo );
 	g_object_unref (image);
     free_redo_queue ();
@@ -160,7 +162,7 @@ on_menu_redo_activate ( GtkMenuItem *menuitem, gpointer user_data)
 static GpUndo * 
 undo_image_new ( const GpImage *image, 
                   gint x, gint y, 
-                  const gchar * message )
+                  gp_tool_enum  tool )
 {
 	GpUndo	*undo	=	NULL;
 	if ( image != NULL )
@@ -169,10 +171,11 @@ undo_image_new ( const GpImage *image,
         t_data->im_data =   gp_image_get_data ( image );
 		t_data->x	    =	x;
 		t_data->y		=	y;
+        t_data->tool    =   tool;
 		undo			=	g_slice_new (GpUndo);
-		undo->type		=	UNDO_IMAGE;
 		undo->t_data	=	(gpointer)t_data;
-		undo->message	=	NULL;//g_strdup (message);
+		undo->type		=	UNDO_IMAGE;
+        if ( file_is_save() ) undo_saved = undo;
 	}
 	return undo;
 }
@@ -223,10 +226,9 @@ undo_resize_new	( gp_canvas	*cv, gint width, gint height )
     }    
 
     undo			=	g_slice_new (GpUndo);
-	undo->type		=	UNDO_RESIZE;
 	undo->t_data	=	(gpointer)t_data;
-	undo->message	=	NULL;
-    
+	undo->type		=	UNDO_RESIZE;
+    if ( file_is_save() ) undo_saved = undo;
 	return undo;		
 }
 
@@ -254,7 +256,6 @@ undo_free ( GpUndo *undo )
         }
     	g_slice_free (GpUndoResize, undo->t_data);
     }
-	g_free (undo->message);
 	g_slice_free (GpUndo,undo);
 	return;
 }
@@ -307,7 +308,7 @@ draw_undo ( GpUndo *undo )
         GpImage     *image, *redo_image;
         image       =   gp_image_new_from_data ( t_data->im_data );
         redo_image  =   get_redo_image ( image, t_data->x, t_data->y );
-        ret_undo	=	undo_image_new (redo_image, t_data->x, t_data->y, undo->message );
+        ret_undo	=	undo_image_new (redo_image, t_data->x, t_data->y, t_data->tool );
         g_object_unref (redo_image);
         gp_image_draw ( image, cv->pixmap, cv->gc_fg, t_data->x, t_data->y );
         g_object_unref ( image );
@@ -335,6 +336,10 @@ draw_undo ( GpUndo *undo )
             g_object_unref ( image );
         }
     }
+    if ( undo_saved == undo )   file_set_save();
+    else                        file_set_unsave();
+    
+       
     gtk_widget_queue_draw (cv->widget);
     return ret_undo;
 }

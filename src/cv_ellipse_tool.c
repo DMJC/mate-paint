@@ -224,7 +224,7 @@ save_undo ( void )
         gdk_draw_arc ( mask, gc_mask, TRUE, 
                        x - rect.x, y - rect.y, w, h, 0, 23040);        
     }
-    undo_add ( &rect, mask, NULL);
+    undo_add ( &rect, mask, TOOL_ELLIPSE );
     g_object_unref (gc_mask);
     g_object_unref (mask);
 }

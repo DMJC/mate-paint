@@ -61,11 +61,24 @@ file_set_parent_window	( GtkWindow * wnd )
 	file_set_untitle ();
 }
 
+gboolean
+file_is_save ( void )
+{
+    return b_saved;
+}
+
 void		
 file_set_unsave ( void )
 {
 	b_saved	=	FALSE;
 	file_print_title ();
+}
+
+void
+file_set_save ( void )
+{
+	b_saved	=	TRUE;
+	file_print_title ();    
 }
 
 gboolean

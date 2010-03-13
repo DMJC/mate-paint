@@ -22,6 +22,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
 #include <gtk/gtk.h>
+#include "toolbar.h"
 
 
 void undo_create_mask   ( gint        width, 
@@ -29,9 +30,9 @@ void undo_create_mask   ( gint        width,
                           GdkBitmap   **mask, 
                           GdkGC       **gc_mask );
 
-void undo_add           ( GdkRectangle *rect, 
-                          GdkBitmap * mask, 
-                          const gchar * message );
+void undo_add           ( GdkRectangle  *rect, 
+                          GdkBitmap     *mask, 
+                          gp_tool_enum  tool );
 
 void undo_add_resize    ( gint width, gint height );
 

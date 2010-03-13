@@ -42,10 +42,10 @@ static void     save_undo       ( void );
 /*private data*/
 typedef enum
 {
-	TOOL_NONE,
-	TOOL_DRAWING,
-	TOOL_WAITING
-} gp_tool_state;
+	POLY_NONE,
+	POLY_DRAWING,
+	POLY_WAITING
+} gp_poly_state;
 
 typedef struct {
 	gp_tool			tool;
@@ -55,7 +55,7 @@ typedef struct {
 	guint			button;
 	gboolean 		is_draw;
     gp_point_array  *pa;
-	gp_tool_state	state;
+	gp_poly_state	state;
 } private_data;
 
 static private_data		*m_priv = NULL;
@@ -72,7 +72,7 @@ create_private_data( void )
 		m_priv->button		=	NONE_BUTTON;
 		m_priv->is_draw		=	FALSE;
         m_priv->pa          =   gp_point_array_new();
-		m_priv->state		=	TOOL_NONE;		
+		m_priv->state		=	POLY_NONE;		
 	}
 }
 
@@ -105,7 +105,7 @@ button_press ( GdkEventButton *event )
 	{
 		switch ( m_priv->state )
 		{
-			case TOOL_NONE:
+			case POLY_NONE:
 			{
 				if ( event->button == LEFT_BUTTON )
 				{
@@ -117,7 +117,7 @@ button_press ( GdkEventButton *event )
 					m_priv->gcf = m_priv->cv->gc_bg;
 					m_priv->gcb = m_priv->cv->gc_fg;
 				}
-				m_priv->state = TOOL_DRAWING;
+				m_priv->state = POLY_DRAWING;
 				m_priv->is_draw	= TRUE;
 				m_priv->button	= event->button;
 
@@ -128,30 +128,30 @@ button_press ( GdkEventButton *event )
                 gtk_widget_queue_draw ( m_priv->cv->widget );
 				break;
 			}
-			case TOOL_DRAWING:
+			case POLY_DRAWING:
 			{
 				if ( m_priv->button != event->button )
 				{
 					/*cancel*/
-					m_priv->state 		= TOOL_NONE;
+					m_priv->state 		= POLY_NONE;
 					m_priv->is_draw		= FALSE;
                     gp_point_array_clear ( m_priv->pa );
 				}
 				break;
 			}
-			case TOOL_WAITING:
+			case POLY_WAITING:
 			{
 				if ( m_priv->button == event->button )
 				{
 					/*next point*/
-					m_priv->state = TOOL_DRAWING;
+					m_priv->state = POLY_DRAWING;
                     gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
 				}
 				else
 				{
  					/*finish*/
                     save_undo ();
-					m_priv->state = TOOL_NONE;
+					m_priv->state = POLY_NONE;
 					m_priv->is_draw	= FALSE;
 					draw_in_pixmap (m_priv->cv->pixmap);
 					file_set_unsave ();
@@ -170,11 +170,11 @@ button_release ( GdkEventButton *event )
 {
 	if ( event->type == GDK_BUTTON_RELEASE )
 	{
-		if ( m_priv->state == TOOL_DRAWING )
+		if ( m_priv->state == POLY_DRAWING )
 		{
 			if( m_priv->button == event->button )
 			{
-				m_priv->state = TOOL_WAITING;
+				m_priv->state = POLY_WAITING;
 			}
 		}
 	}
@@ -184,7 +184,7 @@ button_release ( GdkEventButton *event )
 static gboolean
 button_motion ( GdkEventMotion *event )
 {
-	if( m_priv->state == TOOL_DRAWING )
+	if( m_priv->state == POLY_DRAWING )
 	{
         gint index = gp_point_array_size ( m_priv->pa ) - 1;
         gp_point_array_set ( m_priv->pa, index, (gint)event->x, (gint)event->y );
@@ -267,7 +267,7 @@ save_undo ( void )
         gdk_draw_polygon ( mask, gc_mask, TRUE, points, n_points);
     }
 
-    undo_add ( &rect, mask, NULL);
+    undo_add ( &rect, mask, TOOL_POLYGON );
 
     gp_point_array_free ( pa );
     g_object_unref (gc_mask);

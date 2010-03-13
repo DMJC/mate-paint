@@ -223,6 +223,6 @@ save_undo ( void )
                              x - rect.x, y-rect.y, w, h );
         g_object_unref (gc_mask);
     }                
-    undo_add ( &rect, mask, NULL);
+    undo_add ( &rect, mask, TOOL_RECTANGLE );
     if ( mask != NULL ) g_object_unref (mask);
 }

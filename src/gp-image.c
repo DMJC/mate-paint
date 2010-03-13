@@ -142,7 +142,6 @@ gp_image_new_from_data ( GpImageData *data )
 
 	stream  =	g_memory_input_stream_new_from_data ( data->buffer, data->len, NULL );
     image->priv->pixbuf  =   gdk_pixbuf_new_from_stream ( stream, NULL, NULL );
-   // g_input_stream_close ( stream, NULL, NULL );
 	g_object_unref ( stream );
 
 	g_assert(image->priv->pixbuf);
@@ -173,7 +172,6 @@ save_to_buffer_callback ( const gchar *data,
 	{
 		new_max = sdata->len + count + 16;
 		new_buffer = g_try_realloc (sdata->buffer, new_max);
-		g_print ("realloc:%d\n",new_max);
 		if (!new_buffer) 
 		{
             /*Insufficient memory to save image into a buffer*/
@@ -192,9 +190,6 @@ gp_image_get_data ( GpImage *image )
 {
 	static const gint initial_max = 66;
 	struct SaveToBufferData sdata;
-	GError		*error = NULL;
-
-	g_print ("alloc:%d\n",initial_max);
 	sdata.buffer = g_try_malloc (initial_max);
 	sdata.max = initial_max;
 	sdata.len = 0;
@@ -206,10 +201,9 @@ gp_image_get_data ( GpImage *image )
 	if (!gdk_pixbuf_save_to_callback ( image->priv->pixbuf,
 	                          		   save_to_buffer_callback,
 	                                   &sdata,
-	                                   "png", &error, NULL ) ) 
+	                                   "png", NULL, NULL ) ) 
 	{
 		g_free (sdata.buffer);
-		g_error_free ( error );
 		return NULL;
 	}
 	else
