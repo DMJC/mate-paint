@@ -34,6 +34,8 @@
 
 #define UI_FILE PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "gnome-paint" G_DIR_SEPARATOR_S "ui" G_DIR_SEPARATOR_S "gnome_paint.ui"
 
+//static GdkScreen	*main_screen = NULL;
+
 GtkWidget	*create_window		(   void	);
 void		on_window_destroy   (   GtkObject   *object, 
 									gpointer	user_data   );
@@ -41,8 +43,7 @@ void		gnome_paint_init	( int argc, char *argv[] );
 void		
 on_menu_new_activate( GtkMenuItem *menuitem, gpointer user_data)
 {
-	g_spawn_command_line_async ("gnome-paint", NULL);
-	g_print ("new\n");
+	g_spawn_command_line_async (g_get_prgname(), NULL);
 }
 
 int
@@ -82,9 +83,31 @@ main (int argc, char *argv[])
 void
 gnome_paint_init	( int argc, char *argv[] )
 {
+	g_print (argv[0]);
+	g_print (" \n");
+
 	if (argc > 1)
 	{
-		/* only open the first one for now; open additonal ones TO DO */
+		if( argc > 2 )
+		{   /*open others images*/
+			gchar   *new_argv[argc];
+			gint	i,n;
+			n = argc - 1;
+			new_argv[0] = argv[0];
+			new_argv[n] = NULL;
+
+			for (i=1; i < n ; i++)
+			{
+				new_argv[i] = argv[i+1];
+			}
+
+			g_spawn_async_with_pipes ( NULL,
+				                  	   new_argv,
+			                           NULL,
+			                           G_SPAWN_SEARCH_PATH,
+			                           NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+		}
+		/*open the first image*/
 		file_open (argv[1]);
 	}
 }

@@ -4,7 +4,6 @@
   <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkWindow" id="window">
     <property name="visible">True</property>
-    <property name="window_position">center</property>
     <property name="default_width">640</property>
     <property name="default_height">480</property>
     <signal name="destroy" handler="on_window_destroy"/>
