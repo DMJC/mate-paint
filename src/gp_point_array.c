@@ -25,7 +25,7 @@ struct _gp_point_array
 gp_point_array *    
 gp_point_array_new ( void )
 {
-    gp_point_array *pa = g_new0(gp_point_array,1);
+    gp_point_array *pa =  g_slice_new(gp_point_array);
     pa->array = g_array_new(FALSE, FALSE, sizeof(GdkPoint)); 
     return pa;
 }
@@ -34,7 +34,7 @@ void
 gp_point_array_free ( gp_point_array *pa )
 {
     g_array_free(pa->array, TRUE);
-    g_free(pa);
+    g_slice_free(gp_point_array, pa);
 }
 
 gint          

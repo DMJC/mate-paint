@@ -11,7 +11,6 @@
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkMenuBar" id="menu">
             <property name="visible">True</property>
@@ -230,7 +229,6 @@
                 <child>
                   <object class="GtkVBox" id="vbox3">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkHBox" id="hbox1">
                         <property name="visible">True</property>
@@ -488,7 +486,6 @@
                         <child>
                           <object class="GtkVBox" id="tab_none">
                             <property name="visible">True</property>
-                            <property name="orientation">vertical</property>
                             <child>
                               <placeholder/>
                             </child>
@@ -500,7 +497,6 @@
                         <child>
                           <object class="GtkVBox" id="tab_selection">
                             <property name="visible">True</property>
-                            <property name="orientation">vertical</property>
                             <child>
                               <object class="GtkFrame" id="frame1">
                                 <property name="visible">True</property>
@@ -555,7 +551,6 @@
                         <child>
                           <object class="GtkVBox" id="tab_rect_line">
                             <property name="visible">True</property>
-                            <property name="orientation">vertical</property>
                             <child>
                               <object class="GtkFrame" id="frame_rect">
                                 <property name="border_width">2</property>
@@ -700,7 +695,6 @@
                         <child>
                           <object class="GtkVBox" id="tab_erase">
                             <property name="visible">True</property>
-                            <property name="orientation">vertical</property>
                             <child>
                               <object class="GtkFrame" id="frame7">
                                 <property name="visible">True</property>
@@ -774,7 +768,6 @@
                         <child>
                           <object class="GtkVBox" id="tab_zoom">
                             <property name="visible">True</property>
-                            <property name="orientation">vertical</property>
                             <child>
                               <object class="GtkFrame" id="frame33">
                                 <property name="visible">True</property>
@@ -844,7 +837,6 @@
                         <child>
                           <object class="GtkVBox" id="tab_brush">
                             <property name="visible">True</property>
-                            <property name="orientation">vertical</property>
                             <child>
                               <object class="GtkFrame" id="frame34">
                                 <property name="visible">True</property>
@@ -854,7 +846,6 @@
                                 <child>
                                   <object class="GtkVBox" id="vbox4">
                                     <property name="visible">True</property>
-                                    <property name="orientation">vertical</property>
                                     <child>
                                       <object class="GtkToolbar" id="tb_brush0">
                                         <property name="show_arrow">False</property>
@@ -1044,7 +1035,6 @@
                         <child>
                           <object class="GtkVBox" id="tab_spray">
                             <property name="visible">True</property>
-                            <property name="orientation">vertical</property>
                             <child>
                               <object class="GtkFrame" id="frame35">
                                 <property name="visible">True</property>
@@ -1121,7 +1111,6 @@
             <child>
               <object class="GtkVBox" id="vbox2">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scl_wnd">
                     <property name="can_focus">True</property>
@@ -1403,6 +1392,7 @@
                                     <property name="shadow_type">in</property>
                                     <child>
                                       <object class="GtkDrawingArea" id="25_color_palette_entry">
+                                        <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="events">GDK_EXPOSURE_MASK | GDK_POINTER_MOTION_MASK | GDK_BUTTON_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON2_MOTION_MASK | GDK_BUTTON3_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK</property>
                                         <property name="extension_events">all</property>
@@ -2180,7 +2170,6 @@
                 <child>
                   <object class="GtkVSeparator" id="vseparator1">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2207,7 +2196,6 @@
                 <child>
                   <object class="GtkVSeparator" id="vseparator3">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2233,7 +2221,6 @@
                 <child>
                   <object class="GtkVSeparator" id="vseparator2">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>

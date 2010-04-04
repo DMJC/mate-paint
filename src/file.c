@@ -26,6 +26,7 @@
 #include "file.h"
 #include "pixbuf-file-chooser.h"
 #include "cv_drawing.h"
+#include "undo.h"
 
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
@@ -147,6 +148,7 @@ file_open ( const gchar * filename )
 			orientation_changed_pixbuf	=	gdk_pixbuf_apply_embedded_orientation (pixbuf);
 			cv_set_pixbuf	( orientation_changed_pixbuf );
 			g_object_unref	( orientation_changed_pixbuf );
+            undo_clear ();
 			ok	=	TRUE;
 			if (gdk_pixbuf_format_is_writable (format))
 			{

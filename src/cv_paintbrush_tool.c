@@ -23,6 +23,8 @@
 
 #include "cv_paintbrush_tool.h"
 #include "file.h"
+#include "gp-image.h"
+#include "toolbar.h"
 
 #define BRUSH_WIDTH		17
 #define BRUSH_HEIGHT	17
@@ -103,6 +105,7 @@ typedef struct {
 	gp_canvas *		cv;
 	GdkGC *			gc;
 	gint 			x0,y0;
+	gint			x_min,y_min,x_max,y_max;
 	guint			button;
 	gboolean 		is_draw;
 	double			spacing;        
@@ -111,16 +114,57 @@ typedef struct {
     DrawBrushFunc	*draw_brush;
     GPBrushType		brush_type;
     gint			width, height; /* Brush width & height */
+    GdkPixmap *		bg_pixmap;
 } private_data;
 
 static private_data		*m_priv = NULL;
+
+static void
+destroy_background ( void )
+{
+    if (m_priv->bg_pixmap != NULL) 
+    {
+        g_object_unref (m_priv->bg_pixmap);
+        m_priv->bg_pixmap = NULL;
+    }
+}
+
+static void
+save_background ( void )
+{
+	gint w,h;
+    destroy_background ();
+	gdk_drawable_get_size ( m_priv->cv->pixmap, &w, &h );
+	m_priv->bg_pixmap = gdk_pixmap_new ( m_priv->cv->drawing, w, h, -1);
+	gdk_draw_drawable (	m_priv->bg_pixmap,
+		            	m_priv->cv->gc_fg,
+			            m_priv->cv->pixmap,
+			            0, 0,
+			            0, 0,
+			            w, h );
+}
+
+static void
+restore_background ( void )
+{
+    if ( m_priv->bg_pixmap != NULL )
+    {
+	    gdk_draw_drawable (	m_priv->cv->pixmap,
+		                	m_priv->cv->gc_fg,
+			                m_priv->bg_pixmap,
+			                0, 0,
+			                0, 0,
+			                -1, -1 );
+        destroy_background ();
+    }    
+}
 
 static void
 create_private_data( void )
 {
 	if (m_priv == NULL)
 	{
-		m_priv = g_new0 (private_data,1);
+		m_priv = g_slice_new0 (private_data);
 		m_priv->cv			=	NULL;
 		m_priv->gc			=	NULL;
 		m_priv->button		=	0;
@@ -129,6 +173,7 @@ create_private_data( void )
 		m_priv->brush_type	=	GP_BRUSH_TYPE_ROUND; /* Rogerio: change type here to test other brushes */
 		m_priv->width		=	BRUSH_WIDTH;
 		m_priv->height		=	BRUSH_HEIGHT;
+        m_priv->bg_pixmap   =   NULL;
 		
 		switch(m_priv->brush_type)
 		{
@@ -165,7 +210,8 @@ create_private_data( void )
 static void
 destroy_private_data( void )
 {
-	g_free (m_priv);
+    destroy_background ();
+	g_slice_free (private_data, m_priv);
 	m_priv = NULL;
 }
 
@@ -201,12 +247,21 @@ button_press ( GdkEventButton *event )
 		if( m_priv->is_draw )
 		{
 			m_priv->button = event->button;
+            save_background();
 		}
+        else
+        {
+            restore_background ();
+        }
 		m_priv->drag.x = (gint)event->x;
 		m_priv->drag.y = (gint)event->y;
 		m_priv->x0 = m_priv->drag.x;
 		m_priv->y0 = m_priv->drag.y;
-		
+        m_priv->x_min = G_MAXINT;
+        m_priv->x_max = G_MININT;
+		m_priv->y_min = G_MAXINT;
+        m_priv->y_max = G_MININT;
+
 		if( !m_priv->is_draw )
 		{
 			gtk_widget_queue_draw ( m_priv->cv->widget );
@@ -225,6 +280,7 @@ button_release ( GdkEventButton *event )
 			if( m_priv->is_draw )
 			{
 				draw_in_pixmap (m_priv->cv->pixmap);
+                save_undo ();
 				file_set_unsave ();
 			}
 			gtk_widget_queue_draw ( m_priv->cv->widget );
@@ -253,7 +309,6 @@ button_motion ( GdkEventMotion *event )
 			y = event->y;
 			state = event->state;
 		}
-		
 		m_priv->x0 = x;
 		m_priv->y0 = y;
 		gtk_widget_queue_draw ( m_priv->cv->widget );
@@ -369,6 +424,11 @@ brush_interpolate(GdkDrawable *drawable, DrawBrushFunc *draw_brush_func, int x, 
 			x = (int)(m_priv->drag.x + percent * dx);
 			y = (int)(m_priv->drag.y + percent * dy);
 
+		    if (m_priv->x_min>x)m_priv->x_min=x;
+		    if (m_priv->x_max<x)m_priv->x_max=x;
+		    if (m_priv->y_min>y)m_priv->y_min=y;
+		    if (m_priv->y_max<y)m_priv->y_max=y;
+            
 			draw_brush_func(drawable, x, y);
 		}
 	 }
@@ -514,6 +574,30 @@ static GdkCursor *create_brush_cursor(GPBrushType type)
 	return cursor;
 }
 
+static void     
+save_undo ( void )
+{
+
+	gint w,h;
+	GdkRectangle rect;
+	
+	rect.x		=	m_priv->x_min - m_priv->width/2;
+	rect.y		=	m_priv->y_min - m_priv->height/2;
+	rect.width	=	m_priv->x_max - m_priv->x_min + m_priv->width;
+	rect.height	=	m_priv->y_max - m_priv->y_min + m_priv->height;
+
+	if (rect.x<0) rect.x = 0;
+	if (rect.y<0) rect.y = 0;
+	gdk_drawable_get_size ( m_priv->cv->pixmap, &w, &h );
+	if (rect.width>w) rect.width=w;
+	if (rect.height>h) rect.height=h;
+
+    undo_add ( &rect, NULL, m_priv->bg_pixmap, TOOL_PAINTBRUSH);
+
+	
+	g_print ("save_undo\n");
+	
+}
 
 
 

@@ -69,7 +69,9 @@ gnome_paint_SOURCES = \
 	cv_rounded_rectangle_tool.c  \
 	cv_rounded_rectangle_tool.h  \
 	cv_airbrush_tool.c  \
-	cv_airbrush_tool.h
+	cv_airbrush_tool.h  \
+	cv_curve_tool.c  \
+	cv_curve_tool.h
 
 gnome_paint_CFLAGS = \
 	-DG_DISABLE_DEPRECATED\

@@ -31,10 +31,12 @@ void undo_create_mask   ( gint        width,
                           GdkGC       **gc_mask );
 
 void undo_add           ( GdkRectangle  *rect, 
-                          GdkBitmap     *mask, 
+                          GdkBitmap     *mask,
+                          GdkPixmap     *background,
                           gp_tool_enum  tool );
 
 void undo_add_resize    ( gint width, gint height );
+void undo_clear          ( void );
 
 
 /* GUI CallBack */

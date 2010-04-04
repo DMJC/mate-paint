@@ -70,6 +70,12 @@ gint			gp_image_get_height			( GpImage *image );
 gboolean		gp_image_get_has_alpha		( GpImage *image );
 GdkBitmap *		gp_image_get_mask			( GpImage *image );
 
+void			gp_image_set_diff_pixmap	( GpImage *image, 
+				                              GdkPixmap* pixmap, 
+				                              guint x_offset, 
+				                              guint y_offset );
+
+
 G_END_DECLS
 
 #endif /* _GP_IMAGE_H_ */

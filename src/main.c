@@ -32,9 +32,9 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
-#define UI_FILE PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "gnome-paint" G_DIR_SEPARATOR_S "ui" G_DIR_SEPARATOR_S "gnome_paint.ui"
+#define UI_FILE		PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "gnome-paint" G_DIR_SEPARATOR_S "ui" G_DIR_SEPARATOR_S "gnome_paint.ui"
+#define ICON_DIR	PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "gnome-paint" G_DIR_SEPARATOR_S "icons"
 
-//static GdkScreen	*main_screen = NULL;
 
 GtkWidget	*create_window		(   void	);
 void		on_window_destroy   (   GtkObject   *object, 
@@ -62,15 +62,11 @@ main (int argc, char *argv[])
 	gtk_init (&argc, &argv);
 
 	/* Add application specific icons to search path */
-	gtk_icon_theme_append_search_path (gtk_icon_theme_get_default (),
-                                           PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "gnome-paint" G_DIR_SEPARATOR_S "icons");
-
+	gtk_icon_theme_append_search_path (gtk_icon_theme_get_default (), ICON_DIR);
 	gtk_window_set_default_icon_name ("gp");
-
 	window = create_window ();
 	gnome_paint_init (argc, argv);
 	gtk_widget_show (window);
-
 
 	gtk_main ();
 
@@ -83,9 +79,6 @@ main (int argc, char *argv[])
 void
 gnome_paint_init	( int argc, char *argv[] )
 {
-	g_print (argv[0]);
-	g_print (" \n");
-
 	if (argc > 1)
 	{
 		if( argc > 2 )
@@ -95,12 +88,10 @@ gnome_paint_init	( int argc, char *argv[] )
 			n = argc - 1;
 			new_argv[0] = argv[0];
 			new_argv[n] = NULL;
-
 			for (i=1; i < n ; i++)
 			{
 				new_argv[i] = argv[i+1];
 			}
-
 			g_spawn_async_with_pipes ( NULL,
 				                  	   new_argv,
 			                           NULL,
@@ -131,13 +122,14 @@ GtkWidget*
 create_window (void)
 {
 	GtkWidget		*window;
+	GtkWidget		*widget;
 	GtkBuilder		*builder;
 
 	builder = gtk_builder_new ();
     gtk_builder_add_from_file (builder, UI_FILE, NULL);
     window = GTK_WIDGET (gtk_builder_get_object (builder, "window"));
 	g_assert ( window );
-	file_set_parent_window ( GTK_WINDOW(window) );
+	file_set_parent_window ( GTK_WINDOW(window) );	
     gtk_builder_connect_signals (builder, NULL);          
     g_object_unref (G_OBJECT (builder));	
 	

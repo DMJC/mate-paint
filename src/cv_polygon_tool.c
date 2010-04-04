@@ -267,7 +267,7 @@ save_undo ( void )
         gdk_draw_polygon ( mask, gc_mask, TRUE, points, n_points);
     }
 
-    undo_add ( &rect, mask, TOOL_POLYGON );
+    undo_add ( &rect, mask, NULL, TOOL_POLYGON );
 
     gp_point_array_free ( pa );
     g_object_unref (gc_mask);

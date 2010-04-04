@@ -232,6 +232,81 @@ gp_image_get_pixbuf ( GpImage *image )
 	return  gdk_pixbuf_copy ( image->priv->pixbuf );
 }
 
+
+typedef union 
+{
+	guint8  ui8[4];
+	guint32 ui32;
+} pixel_union;
+
+void 
+gp_image_set_diff_pixmap ( GpImage *image, GdkPixmap* pixmap, guint x_offset, guint y_offset )
+{
+	GdkPixbuf *pixbuf;
+	GdkPixbuf *m_pixbuf;
+	guchar *pixels, *m_pixels;
+	guchar *p, *m_p;
+	gint w, h;
+	gint n_channels, rowstride;
+
+	g_return_if_fail ( GP_IS_IMAGE (image) );
+	
+
+	pixbuf		=   image->priv->pixbuf;
+	if(!gdk_pixbuf_get_has_alpha ( pixbuf ) )
+	{  /*add alpha*/
+		GdkPixbuf *tmp ;
+		tmp = gdk_pixbuf_add_alpha(pixbuf, FALSE, 0, 0, 0);
+		g_object_unref(pixbuf);
+		pixbuf = tmp;
+	}
+	m_pixbuf	=   gdk_pixbuf_copy ( pixbuf );
+	
+	w			=   gdk_pixbuf_get_width		( pixbuf );
+	h			=   gdk_pixbuf_get_height		( pixbuf );
+
+	gdk_pixbuf_get_from_drawable (  m_pixbuf, 
+               						pixmap,
+               						gdk_drawable_get_colormap (pixmap),
+               						x_offset,y_offset,
+               						0,0,
+              						w,h);
+	
+	n_channels  =   gdk_pixbuf_get_n_channels   ( pixbuf );
+	rowstride   =   gdk_pixbuf_get_rowstride	( pixbuf );
+	pixels		=   gdk_pixbuf_get_pixels		( pixbuf );
+	m_pixels	=   gdk_pixbuf_get_pixels		( m_pixbuf );
+	while (h--) 
+	{
+		guint   i = w;
+		p   = pixels;
+		m_p = m_pixels;
+		while (i--) 
+		{
+			pixel_union *pu, *m_pu;
+
+			pu = (pixel_union *)p;
+			m_pu = (pixel_union *)m_p;
+				
+			if(pu->ui32 == m_pu->ui32)
+			{
+				p[0] = 0; 
+				p[1] = 0; 
+				p[2] = 0; 
+				p[3] = 0; 
+			}
+			p   += n_channels;
+			m_p += n_channels;
+		}
+		pixels		+= rowstride;
+		m_pixels	+= rowstride;
+	}
+	g_object_unref (m_pixbuf);
+
+	
+}
+
+
 void		
 gp_image_set_mask ( GpImage *image, GdkBitmap *mask )
 {

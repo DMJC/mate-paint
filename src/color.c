@@ -112,7 +112,7 @@ on_color_palette_entry_realize (GtkWidget *widget, gpointer user_data)
 {
 	const gchar *name;
 	guint palette;
-	name = gtk_widget_get_name ( widget );
+	name = gtk_buildable_get_name ( widget );
 	palette = ( (guint)(name[0] - '0') * 10 ) + (guint)(name[1] - '0');
 	g_return_if_fail( palette < NUM_PALETTES );
 	pallete_widgets[palette]		= widget;
@@ -156,7 +156,7 @@ on_color_palette_entry_button_press_event ( GtkWidget	   *widget,
 {
 	const gchar *name;
 	guint i;
-	name = gtk_widget_get_name ( widget );
+	name = gtk_buildable_get_name ( widget );
 	i = ( (guint)(name[0] - '0') * 10 ) + (guint)(name[1] - '0');
 	
 	if ( event->type == GDK_2BUTTON_PRESS )

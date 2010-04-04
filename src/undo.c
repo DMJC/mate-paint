@@ -77,6 +77,8 @@ static void			undo_free	        ( GpUndo *undo );
 static GpUndo *     draw_undo           ( GpUndo *undo );
 static GpImage *    get_redo_image      ( const GpImage *image, gint x, gint y );
 static void         free_redo_queue     ( void );
+static void         free_undo_queue     ( void );
+
 
 /* CODE */
 
@@ -101,19 +103,28 @@ undo_create_mask ( gint width, gint height, GdkBitmap **mask, GdkGC **gc_mask )
 }
 
 void
-undo_add (GdkRectangle *rect, GdkBitmap * mask, gp_tool_enum  tool )
+undo_add (GdkRectangle *rect, GdkBitmap * mask, GdkPixmap *background, gp_tool_enum  tool )
 {
 	GpUndo		*undo;
 	GpImage     *image;
-    gboolean    has_alpha;
 	gp_canvas	*cv	    = cv_get_canvas();
 
-    has_alpha   =   (mask != NULL);
-    image = gp_image_new_from_pixmap ( cv->pixmap, rect, has_alpha );
-    if (has_alpha)
+    if (mask != NULL)
     {
+        image = gp_image_new_from_pixmap ( cv->pixmap, rect, TRUE );
         gp_image_set_mask ( image, mask );
     }
+    else
+    if ( background != NULL )
+    {
+        image = gp_image_new_from_pixmap ( background, rect, TRUE );
+        gp_image_set_diff_pixmap ( image, cv->pixmap, rect->x, rect->y );
+    }
+    else
+    {
+        image = gp_image_new_from_pixmap ( cv->pixmap, rect, FALSE );        
+    }
+
     
 	undo	=	undo_image_new (image, rect->x, rect->y, tool );
 	g_queue_push_head	( undo_queue, undo );
@@ -129,6 +140,13 @@ undo_add_resize ( gint width, gint height )
     undo	=	undo_resize_new ( cv, width, height );
 	g_queue_push_head	( undo_queue, undo );
     free_redo_queue ();
+}
+
+void 
+undo_clear ( void )
+{
+    free_redo_queue ();
+    free_undo_queue ();
 }
 
 /* GUI CallBack */
@@ -271,6 +289,16 @@ free_redo_queue ( void )
     g_queue_clear (redo_queue);
 }
 
+static void         
+free_undo_queue ( void )
+{
+	GpUndo		*undo;
+    while ( ( undo = g_queue_pop_head ( undo_queue ) ) != NULL )
+    {
+        undo_free ( undo );
+    }
+    g_queue_clear (undo_queue);
+}
 
 static GpImage *
 get_redo_image ( const GpImage *image, gint x, gint y )

@@ -59,7 +59,7 @@ create_private_data( void )
 {
 	if (m_priv == NULL)
 	{
-		m_priv = g_new0 (private_data,1);
+		m_priv = g_slice_new0 (private_data);
 		m_priv->cv		=	NULL;
 		m_priv->gc		=	NULL;
 		m_priv->button	=	0;
@@ -70,7 +70,7 @@ create_private_data( void )
 static void
 destroy_private_data( void )
 {
-	g_free (m_priv);
+	g_slice_free (private_data, m_priv);
 	m_priv = NULL;
 }
 
@@ -128,7 +128,6 @@ button_release ( GdkEventButton *event )
                 save_undo ();
 				gdk_draw_line ( m_priv->cv->pixmap, m_priv->gc, m_priv->x0, m_priv->y0, m_priv->x1, m_priv->y1 );
 				file_set_unsave ();
-
     		}
 			gtk_widget_queue_draw ( m_priv->cv->widget );
 			m_priv->is_draw = FALSE;
@@ -192,7 +191,7 @@ save_undo ( void )
     gdk_draw_line ( mask, gc_mask, 
                     m_priv->x0 - rect.x, m_priv->y0 - rect.y,
                     m_priv->x1 - rect.x, m_priv->y1 - rect.y );
-    undo_add ( &rect, mask, TOOL_LINE );
+    undo_add ( &rect, mask, NULL, TOOL_LINE );
 
     gp_point_array_free (pa);
     g_object_unref (gc_mask);

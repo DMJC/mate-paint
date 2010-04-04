@@ -39,6 +39,8 @@ void		cv_set_pixbuf			(const GdkPixbuf *pixbuf);
 GdkPixbuf *	cv_get_pixbuf			( void );
 gp_canvas * cv_get_canvas			( void );
 void        cv_get_rect_size        ( GdkRectangle *rectangle );
+void        cv_redraw               ( void );
+
 
 
 /* GUI CallBacks */

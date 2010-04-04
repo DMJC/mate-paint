@@ -35,6 +35,7 @@
 #include "cv_paintbrush_tool.h"
 #include "cv_rounded_rectangle_tool.h"
 #include "cv_airbrush_tool.h"
+#include "cv_curve_tool.h"
 #include "undo.h"
 
 #include <glib/gi18n.h>
@@ -59,6 +60,13 @@ static gint			x_pos,y_pos;
 /*
  *   CODE
  */
+
+
+void
+cv_redraw ( void )
+{
+    gtk_widget_queue_draw (cv.widget);
+}
 
 void
 cv_set_color_bg	( GdkColor *color )
@@ -153,7 +161,7 @@ cv_set_tool ( gp_tool_enum tool )
             cv_tool = tool_ellipse_init ( &cv );
             break;
         case TOOL_CURVE:
-	        cv_tool = NULL;
+	        cv_tool = tool_curve_init ( &cv );
             break;
         case TOOL_POLYGON:
             cv_tool = tool_polygon_init ( &cv );
@@ -188,16 +196,20 @@ cv_set_pixbuf	(const GdkPixbuf	*pixbuf)
 {
 	if (pixbuf != NULL)
 	{
+	    GdkPixbuf *tmp ;
+	    tmp = gdk_pixbuf_add_alpha(pixbuf, FALSE, 0, 0, 0);
 		gint width	=	gdk_pixbuf_get_width (pixbuf);
 		gint height	=	gdk_pixbuf_get_height (pixbuf);
 		cv_create_pixmap (width, height, FALSE);
-		gdk_draw_pixbuf	(cv.pixmap,
-					     cv.gc_fg,
-						 pixbuf,
-						 0, 0,
-						 0, 0,
-						 width, height,
-					     GDK_RGB_DITHER_NORMAL, 0, 0);
+		gdk_draw_pixbuf	(   cv.pixmap,
+					        cv.gc_fg,
+						    tmp,//pixbuf,
+						    0, 0,
+						    0, 0,
+						    width, height,
+					        GDK_RGB_DITHER_NORMAL,
+                            0, 0);
+        g_object_unref(tmp);
 		gtk_widget_queue_draw (cv.widget);
 	}	
 }
@@ -342,7 +354,7 @@ on_cv_drawing_expose_event	(   GtkWidget	   *widget,
                					gpointer       user_data )
 {
     gdk_draw_drawable (	widget->window,
-                    	widget->style->fg_gc[GTK_WIDGET_STATE(widget)],
+                    	widget->style->fg_gc[gtk_widget_get_state(widget)],
     	                cv.pixmap,
     	                event->area.x, event->area.y,
     	                event->area.x, event->area.y,
@@ -372,6 +384,13 @@ cv_create_new_gc ( char * name )
 	return gc;
 }
 
+
+void  destroy_pixmap ( gpointer data )
+{
+    g_object_unref ( data );
+    g_print ("destroy pixmap\n");
+}
+
 static void
 cv_create_pixmap ( gint width, gint height, gboolean b_resize )
 {
@@ -399,7 +418,7 @@ cv_create_pixmap ( gint width, gint height, gboolean b_resize )
 	/*set new data to be destroyed and destroy old data*/
 	g_object_set_data_full (	G_OBJECT(cv.widget), "cv_pixmap", 
 	                       		(gpointer)px, 
-	                        	(GDestroyNotify)g_object_unref );
+	                        	(GDestroyNotify)destroy_pixmap );
 	cv.pixmap	=	px;
 
 	gtk_widget_set_size_request ( cv.widget, width, height );
