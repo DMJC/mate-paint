@@ -303,6 +303,7 @@ key_press (GtkWidget   *invisible,
       g_signal_handlers_disconnect_by_func (invisible,
 					    key_press,
 					    data);
+	  g_signal_emit ( data, picker_signals[RELEASED], 0);
       
       return TRUE;
 
