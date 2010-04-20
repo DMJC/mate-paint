@@ -37,6 +37,8 @@
 #include "cv_airbrush_tool.h"
 #include "cv_curve_tool.h"
 #include "undo.h"
+#include "color-picker.h"
+
 
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
@@ -131,7 +133,8 @@ cv_set_tool ( gp_tool_enum tool )
 	        cv_tool = NULL;
             break;
         case TOOL_COLOR_PICKER:
-        	cv_tool = tool_color_pick_init ( &cv );
+        	//cv_tool = tool_color_pick_init ( &cv );
+            cv_tool = NULL;
             break;
         case TOOL_PENCIL:
             cv_tool = tool_pencil_init ( &cv );

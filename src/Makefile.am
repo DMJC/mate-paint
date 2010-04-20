@@ -71,7 +71,9 @@ gnome_paint_SOURCES = \
 	cv_airbrush_tool.c  \
 	cv_airbrush_tool.h  \
 	cv_curve_tool.c  \
-	cv_curve_tool.h
+	cv_curve_tool.h  \
+	color-picker.c  \
+	color-picker.h
 
 gnome_paint_CFLAGS = \
 	-DG_DISABLE_DEPRECATED\

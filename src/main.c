@@ -27,6 +27,7 @@
 #include "cv_drawing.h"
 #include "file.h"
 #include "undo.h"
+#include "color-picker.h"
 
 
 #include <glib/gi18n.h>
@@ -46,11 +47,25 @@ on_menu_new_activate( GtkMenuItem *menuitem, gpointer user_data)
 	g_spawn_command_line_async (g_get_prgname(), NULL);
 }
 
+void main_color_changed	(ColorPicker *color_picker, gpointer user_data)
+{
+	GdkColor *color;
+	color = color_picker_get_color (color_picker);
+	foreground_set_color ( color );
+}
+
+void color_picker_released (ColorPicker *color_picker, gpointer user_data)
+{
+	toolbar_go_to_previous_tool ();
+}
+
+
 int
 main (int argc, char *argv[])
 {
 
  	GtkWidget   *window;
+	ColorPicker *color_picker;
 
 //	g_mem_set_vtable (glib_mem_profiler_table);
 
@@ -68,6 +83,14 @@ main (int argc, char *argv[])
 	gnome_paint_init (argc, argv);
 	gtk_widget_show (window);
 
+	color_picker = color_picker_new ();
+	toolbar_set_color_picker ( color_picker );
+	g_signal_connect (color_picker, "color-changed",
+		            G_CALLBACK (main_color_changed), NULL);
+
+	g_signal_connect (color_picker, "released",
+		            G_CALLBACK (color_picker_released), NULL);
+	
 	gtk_main ();
 
 //	g_mem_profile ();

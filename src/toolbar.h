@@ -27,6 +27,8 @@
 
 #include <gtk/gtk.h>
 
+#include "color-picker.h"
+
 typedef enum {
     TOOL_NONE,
     TOOL_FREE_SELECT,
@@ -47,7 +49,15 @@ typedef enum {
     TOOL_ROUNDED_RECTANGLE
 } gp_tool_enum;
 
+
+void toolbar_set_color_picker       ( ColorPicker *color_picker);
+void toolbar_go_to_previous_tool    ( void );
+
+
 /* GUI CallBack */
+
+
+void on_tool_pencil_realize				(GtkToggleToolButton *button, gpointer user_data);
 
 /*Toolbar toggled functions*/
 void on_tool_free_select_toggled		(GtkToggleToolButton *button, gpointer user_data);

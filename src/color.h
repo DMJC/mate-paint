@@ -19,6 +19,7 @@
 
 #include <gtk/gtk.h>
 
+void foreground_set_color			( GdkColor *color );
 void foreground_set_color_from_rgb  ( guint color );
 
 /* GUI CallBack */

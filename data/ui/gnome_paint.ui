@@ -281,10 +281,11 @@
                             </child>
                             <child>
                               <object class="GtkRadioToolButton" id="tool-pencil">
-                                <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="icon_name">stock-tool-pencil</property>
+                                <property name="active">True</property>
                                 <property name="group">tool-free-select</property>
+                                <signal name="realize" handler="on_tool_pencil_realize"/>
                                 <signal name="toggled" handler="on_tool_pencil_toggled"/>
                               </object>
                               <packing>

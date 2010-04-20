@@ -71,6 +71,15 @@ static void pallete_show						( guint palette );
  *   CODE
  */
 
+void foreground_set_color  ( GdkColor *color )
+{
+	foreground_color.red	=   color->red;
+	foreground_color.green	=   color->green;
+	foreground_color.blue	=   color->blue;
+	foreground_show ();
+}
+
+
 void foreground_set_color_from_rgb  ( guint color )
 {
    foreground_color.red   = getr(color);

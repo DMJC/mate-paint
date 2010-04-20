@@ -71,7 +71,10 @@ typedef enum {
 /* private data */
 static GtkNotebook	*notebook			= NULL;
 static GtkFrame		*frame_rect			= NULL;
-static gboolean		frame_rect_show		= FALSE;	
+static gboolean		frame_rect_show		= FALSE;
+static ColorPicker  *m_color_picker     = NULL;
+static GtkToggleToolButton  *previous_button = NULL;
+static GtkToggleToolButton  *current_button = NULL;
 
 /* private functions */
 static GtkWidget *	get_gtk_image( GtkWidget *widget, gchar** xpm );
@@ -79,6 +82,30 @@ static void			show_frame_rect	( gboolean show );
 static void         tool_toggled ( GtkToggleToolButton *button, gp_tool_enum tool );
 
 /* CODE */
+
+void 
+toolbar_go_to_previous_tool ( void )
+{
+    if ( previous_button != NULL )
+    {
+        gtk_toggle_tool_button_set_active ( previous_button, TRUE );
+    }
+}
+
+
+void 
+toolbar_set_color_picker ( ColorPicker *color_picker)
+{
+    m_color_picker = color_picker;
+}
+
+
+void 
+on_tool_pencil_realize (GtkToggleToolButton *button, gpointer user_data)
+{
+    current_button = button;
+    gtk_toggle_tool_button_set_active ( button, TRUE );
+}
 
 void
 on_tool_free_select_toggled	(GtkToggleToolButton *button, gpointer user_data)
@@ -468,6 +495,8 @@ tool_toggled ( GtkToggleToolButton *button, gp_tool_enum tool )
 {
 	if ( gtk_toggle_tool_button_get_active ( button ) )
 	{
+        previous_button =   current_button;
+        current_button  =   button;
 		/*show tool options */
 		g_return_if_fail( notebook != NULL );
         switch ( tool )
@@ -503,6 +532,8 @@ tool_toggled ( GtkToggleToolButton *button, gp_tool_enum tool )
                 gtk_notebook_set_current_page ( notebook, TAB_BRUSH );
                 break;
             case TOOL_COLOR_PICKER:
+                color_picker_get_screen_color ( m_color_picker, GTK_WIDGET(button) );
+                break;
             case TOOL_BUCKET_FILL:
             case TOOL_PENCIL:
             default:
