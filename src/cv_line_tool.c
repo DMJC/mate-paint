@@ -153,7 +153,7 @@ draw ( void )
 {
 	if ( m_priv->is_draw )
 	{
-		gdk_draw_line ( m_priv->cv->drawing, m_priv->gc, m_priv->x0, m_priv->y0, m_priv->x1, m_priv->y1 );
+        gdk_draw_line ( m_priv->cv->drawing, m_priv->gc, m_priv->x0, m_priv->y0, m_priv->x1, m_priv->y1 );
 	}
 }
 

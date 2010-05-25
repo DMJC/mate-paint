@@ -36,6 +36,7 @@
 #include "cv_rounded_rectangle_tool.h"
 #include "cv_airbrush_tool.h"
 #include "cv_curve_tool.h"
+#include "cv_rect_select.h"
 #include "undo.h"
 #include "color-picker.h"
 
@@ -127,7 +128,7 @@ cv_set_tool ( gp_tool_enum tool )
 	        cv_tool = NULL;
             break;
         case TOOL_RECT_SELECT:
-	        cv_tool = NULL;
+	        cv_tool = tool_rect_select_init ( &cv );
             break;
         case TOOL_ERASER:
 	        cv_tool = NULL;

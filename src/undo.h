@@ -40,7 +40,6 @@ void undo_clear          ( void );
 
 
 /* GUI CallBack */
-
 void on_menu_undo_activate		( GtkMenuItem *menuitem, gpointer user_data );
 void on_menu_redo_activate		( GtkMenuItem *menuitem, gpointer user_data );
 

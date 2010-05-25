@@ -66,7 +66,9 @@ am_gnome_paint_OBJECTS = gnome_paint-color.$(OBJEXT) \
 	gnome_paint-cv_rounded_rectangle_tool.$(OBJEXT) \
 	gnome_paint-cv_airbrush_tool.$(OBJEXT) \
 	gnome_paint-cv_curve_tool.$(OBJEXT) \
-	gnome_paint-color-picker.$(OBJEXT)
+	gnome_paint-color-picker.$(OBJEXT) \
+	gnome_paint-clipboard.$(OBJEXT) \
+	gnome_paint-cv_rect_select.$(OBJEXT)
 gnome_paint_OBJECTS = $(am_gnome_paint_OBJECTS)
 am__DEPENDENCIES_1 =
 gnome_paint_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -296,7 +298,11 @@ gnome_paint_SOURCES = \
 	cv_curve_tool.c  \
 	cv_curve_tool.h  \
 	color-picker.c  \
-	color-picker.h
+	color-picker.h  \
+	clipboard.c  \
+	clipboard.h  \
+	cv_rect_select.c  \
+	cv_rect_select.h
 
 gnome_paint_CFLAGS = \
 	-DG_DISABLE_DEPRECATED\
@@ -399,6 +405,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-clipboard.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-color-picker.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-color.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_airbrush_tool.Po@am__quote@
@@ -411,6 +418,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_paintbrush_tool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_pencil_tool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_polygon_tool.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_rect_select.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_rectangle_tool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_resize.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-cv_rounded_rectangle_tool.Po@am__quote@
@@ -765,6 +773,34 @@ gnome_paint-color-picker.obj: color-picker.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='color-picker.c' object='gnome_paint-color-picker.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-color-picker.obj `if test -f 'color-picker.c'; then $(CYGPATH_W) 'color-picker.c'; else $(CYGPATH_W) '$(srcdir)/color-picker.c'; fi`
+
+gnome_paint-clipboard.o: clipboard.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-clipboard.o -MD -MP -MF $(DEPDIR)/gnome_paint-clipboard.Tpo -c -o gnome_paint-clipboard.o `test -f 'clipboard.c' || echo '$(srcdir)/'`clipboard.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-clipboard.Tpo $(DEPDIR)/gnome_paint-clipboard.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='clipboard.c' object='gnome_paint-clipboard.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-clipboard.o `test -f 'clipboard.c' || echo '$(srcdir)/'`clipboard.c
+
+gnome_paint-clipboard.obj: clipboard.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-clipboard.obj -MD -MP -MF $(DEPDIR)/gnome_paint-clipboard.Tpo -c -o gnome_paint-clipboard.obj `if test -f 'clipboard.c'; then $(CYGPATH_W) 'clipboard.c'; else $(CYGPATH_W) '$(srcdir)/clipboard.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-clipboard.Tpo $(DEPDIR)/gnome_paint-clipboard.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='clipboard.c' object='gnome_paint-clipboard.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-clipboard.obj `if test -f 'clipboard.c'; then $(CYGPATH_W) 'clipboard.c'; else $(CYGPATH_W) '$(srcdir)/clipboard.c'; fi`
+
+gnome_paint-cv_rect_select.o: cv_rect_select.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-cv_rect_select.o -MD -MP -MF $(DEPDIR)/gnome_paint-cv_rect_select.Tpo -c -o gnome_paint-cv_rect_select.o `test -f 'cv_rect_select.c' || echo '$(srcdir)/'`cv_rect_select.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-cv_rect_select.Tpo $(DEPDIR)/gnome_paint-cv_rect_select.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cv_rect_select.c' object='gnome_paint-cv_rect_select.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-cv_rect_select.o `test -f 'cv_rect_select.c' || echo '$(srcdir)/'`cv_rect_select.c
+
+gnome_paint-cv_rect_select.obj: cv_rect_select.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-cv_rect_select.obj -MD -MP -MF $(DEPDIR)/gnome_paint-cv_rect_select.Tpo -c -o gnome_paint-cv_rect_select.obj `if test -f 'cv_rect_select.c'; then $(CYGPATH_W) 'cv_rect_select.c'; else $(CYGPATH_W) '$(srcdir)/cv_rect_select.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-cv_rect_select.Tpo $(DEPDIR)/gnome_paint-cv_rect_select.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cv_rect_select.c' object='gnome_paint-cv_rect_select.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-cv_rect_select.obj `if test -f 'cv_rect_select.c'; then $(CYGPATH_W) 'cv_rect_select.c'; else $(CYGPATH_W) '$(srcdir)/cv_rect_select.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

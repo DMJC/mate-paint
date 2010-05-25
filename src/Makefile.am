@@ -73,7 +73,11 @@ gnome_paint_SOURCES = \
 	cv_curve_tool.c  \
 	cv_curve_tool.h  \
 	color-picker.c  \
-	color-picker.h
+	color-picker.h  \
+	clipboard.c  \
+	clipboard.h  \
+	cv_rect_select.c  \
+	cv_rect_select.h
 
 gnome_paint_CFLAGS = \
 	-DG_DISABLE_DEPRECATED\
