@@ -38,14 +38,27 @@ static void		reset			( void );
 static void		destroy			( gpointer data  );
 static void		draw_in_pixmap	( GdkDrawable *drawable );
 static void     save_undo       ( void );
+static void     set_cursor      ( GdkCursorType cursor_type );
+
 
 
 /*private data*/
+typedef enum
+{
+	SEL_NONE,
+    SEL_WAITING,
+	SEL_DRAWING,
+    SEL_RESIZING,
+	SEL_MOVING
+} gp_sel_state;
+
 typedef struct {
 	gp_tool			tool;
-	gp_canvas *		cv;
+	gp_canvas       *cv;
     gp_point_array  *pa;
-	gboolean 		b_selecting;
+    gp_sel_state    state;
+    gp_sel_state    command;
+    GdkPoint        p_drag;
 } private_data;
 
 static private_data		*m_priv = NULL;
@@ -56,9 +69,10 @@ create_private_data( void )
 	if (m_priv == NULL)
 	{
 		m_priv = g_new0 (private_data,1);
-		m_priv->cv		=	NULL;
-        m_priv->pa      =   gp_point_array_new();
-        m_priv->b_selecting     =   FALSE;
+		m_priv->cv		    =	NULL;
+        m_priv->pa          =   gp_point_array_new();
+        m_priv->state       =   SEL_NONE;
+        m_priv->command     =   SEL_NONE;
 	}
 }
 
@@ -89,12 +103,22 @@ button_press ( GdkEventButton *event )
 {
 	if ( event->type == GDK_BUTTON_PRESS )
 	{
-        gp_point_array_clear ( m_priv->pa );
-		/*add two point*/
-        gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
-        gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
-        m_priv->b_selecting =   TRUE;      
+        if ( m_priv->command == SEL_NONE )
+        {
+            gp_point_array_clear ( m_priv->pa );
+		    /*add two point*/
+            gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
+            gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
+            m_priv->state   =   SEL_DRAWING;
+        }
+        else
+        {
+            m_priv->p_drag.x    =   (gint)event->x;
+            m_priv->p_drag.y    =   (gint)event->y;
+            m_priv->state       =   m_priv->command;
+        }
 		gtk_widget_queue_draw ( m_priv->cv->widget );
+        
 	}
 	return TRUE;
 }
@@ -104,8 +128,16 @@ button_release ( GdkEventButton *event )
 {
 	if ( event->type == GDK_BUTTON_RELEASE )
 	{
-        m_priv->b_selecting =   FALSE;
-        gp_point_array_set ( m_priv->pa, 1, (gint)event->x, (gint)event->y );
+        if ( m_priv->state == SEL_DRAWING )
+        {
+            m_priv->state = SEL_WAITING;
+            gp_point_array_set ( m_priv->pa, 1, (gint)event->x, (gint)event->y );
+        }
+        else
+        if ( m_priv->state == SEL_MOVING )
+        {
+            m_priv->state = SEL_WAITING;
+        }
         gtk_widget_queue_draw ( m_priv->cv->widget );
 	}
 	return TRUE;
@@ -114,9 +146,44 @@ button_release ( GdkEventButton *event )
 static gboolean
 button_motion ( GdkEventMotion *event )
 {
-	if ( m_priv->b_selecting )
+	if ( m_priv->state == SEL_DRAWING )
     {
         gp_point_array_set ( m_priv->pa, 1, (gint)event->x, (gint)event->y );
+        gtk_widget_queue_draw ( m_priv->cv->widget );
+    }
+    else
+    if ( m_priv->state == SEL_WAITING )
+    {
+        gint    x0,y0,x1,y1;
+        GdkPoint    *p;
+        p   =   gp_point_array_data (m_priv->pa);
+        x0 = MIN(p[0].x,p[1].x);
+	    y0 = MIN(p[0].y,p[1].y);
+        x1 = MAX(p[0].x,p[1].x);
+	    y1 = MAX(p[0].y,p[1].y);
+        
+        if (    event->x > x0 && 
+                event->x < x1 && 
+                event->y > y0 && 
+                event->y < y1 )
+        {
+            set_cursor ( GDK_FLEUR );
+            m_priv->command = SEL_MOVING;
+        }
+        else
+        {
+            m_priv->command = SEL_NONE;
+            set_cursor ( GDK_DOTBOX );
+        }
+    }
+    else
+    if ( m_priv->state == SEL_MOVING )
+    {
+        gint dx = event->x - m_priv->p_drag.x;
+        gint dy = event->y - m_priv->p_drag.y;
+        gp_point_array_offset ( m_priv->pa, dx, dy );
+        m_priv->p_drag.x += dx;
+        m_priv->p_drag.y += dy;
         gtk_widget_queue_draw ( m_priv->cv->widget );
     }
 	return TRUE;
@@ -156,14 +223,23 @@ draw ( void )
     }
 }
 
+
+static void 
+set_cursor ( GdkCursorType cursor_type )
+{
+    if ( cursor_type != GDK_LAST_CURSOR )
+    {
+        GdkCursor *cursor = gdk_cursor_new ( cursor_type);
+	    g_assert(cursor);
+	    gdk_window_set_cursor ( m_priv->cv->drawing, cursor );
+	    gdk_cursor_unref( cursor );
+    }
+}
+
 static void 
 reset ( void )
 {
-    GdkCursor *cursor = gdk_cursor_new ( GDK_DOTBOX );
-	g_assert(cursor);
-	gdk_window_set_cursor ( m_priv->cv->drawing, cursor );
-	gdk_cursor_unref( cursor );
-	m_priv->b_selecting = FALSE;
+    set_cursor ( GDK_DOTBOX );
 }
 
 static void 
