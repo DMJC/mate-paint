@@ -37,10 +37,13 @@
 #define ICON_DIR	PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "gnome-paint" G_DIR_SEPARATOR_S "icons"
 
 
-GtkWidget	*create_window		(   void	);
-void		on_window_destroy   (   GtkObject   *object, 
-									gpointer	user_data   );
-void		gnome_paint_init	( int argc, char *argv[] );
+GtkWidget	*create_window			( void );
+void		gnome_paint_init		( int argc, char *argv[] );
+void		on_window_destroy		( GtkObject *object, gpointer user_data );
+void		on_menu_about_activate  ( GtkMenuItem *menuitem, gpointer user_data );
+
+
+
 void		
 on_menu_new_activate( GtkMenuItem *menuitem, gpointer user_data)
 {
@@ -162,3 +165,36 @@ create_window (void)
 
 	return window;
 }
+
+void 
+on_menu_about_activate ( GtkMenuItem *menuitem, gpointer user_data )
+{
+	const gchar *authors[] = { "Rogério Ferro do Nascimento",
+							   "Juan Balderas",
+							   NULL };
+	GtkAboutDialog *dlg;
+	
+	dlg = GTK_ABOUT_DIALOG ( gtk_about_dialog_new () ); 
+	gtk_about_dialog_set_name ( dlg, "gnome-paint" );
+	gtk_about_dialog_set_version ( dlg, "0.3"); 
+	gtk_about_dialog_set_copyright ( dlg, 
+									"(c) Rogério Ferro do Nascimento");
+	gtk_about_dialog_set_comments ( dlg, 
+									_("gnome-paint is a simple, easy to use paint program for GNOME.") );
+	gtk_about_dialog_set_license ( dlg, 
+								_( "This program is free software;"
+								   " you may redistribute it and/or modify it"
+								   " under the terms of the GNU General Public License"
+								   " as published by the Free Software Foundation, "
+								   "either version 3, or (at your opinion) any later version.\n") );
+	gtk_about_dialog_set_wrap_license ( dlg, TRUE );
+	gtk_about_dialog_set_authors ( dlg, authors );
+	gtk_about_dialog_set_website ( dlg, 
+									"http://code.google.com/p/gnome-paint/");
+	//gtk_about_dialog_set_logo ( dlg, pixbuf);
+	gtk_dialog_run ( dlg );
+	gtk_widget_destroy (dlg);
+}
+
+
+
