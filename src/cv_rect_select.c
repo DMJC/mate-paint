@@ -29,18 +29,6 @@
 #include "undo.h"
 #include "gp_point_array.h"
 
-/*Member functions*/
-static gboolean	button_press	( GdkEventButton *event );
-static gboolean	button_release	( GdkEventButton *event );
-static gboolean	button_motion	( GdkEventMotion *event );
-static void		draw			( void );
-static void		reset			( void );
-static void		destroy			( gpointer data  );
-static void		draw_in_pixmap	( GdkDrawable *drawable );
-static void     save_undo       ( void );
-static void     set_cursor      ( GdkCursorType cursor_type );
-
-
 
 /*private data*/
 typedef enum
@@ -48,9 +36,36 @@ typedef enum
 	SEL_NONE,
     SEL_WAITING,
 	SEL_DRAWING,
-    SEL_RESIZING,
+    SEL_RESIZING_TL,
+    SEL_RESIZING_TM,
+    SEL_RESIZING_TR,
+    SEL_RESIZING_ML,
+    SEL_RESIZING_MR,
+    SEL_RESIZING_BL,
+    SEL_RESIZING_BM,
+    SEL_RESIZING_BR,
 	SEL_MOVING
 } gp_sel_state;
+
+typedef enum {
+    SEL_TOP_LEFT,
+    SEL_TOP_MID,
+    SEL_TOP_RIGHT,
+    SEL_MID_LEFT,
+    SEL_MID_RIGHT,
+    SEL_BOTTOM_LEFT,
+    SEL_BOTTOM_MID,
+    SEL_BOTTOM_RIGHT,
+    SEL_N_BORDERS
+} gp_sel_border;
+
+typedef struct {
+    gint x0;
+    gint y0;
+    gint x1;
+    gint y1;
+} gp_sel_rect;
+
 
 typedef struct {
 	gp_tool			tool;
@@ -58,8 +73,29 @@ typedef struct {
     gp_point_array  *pa;
     gp_sel_state    state;
     gp_sel_state    command;
+    gp_sel_rect     r_sel;
+    gp_sel_rect     r_borders[SEL_N_BORDERS];
     GdkPoint        p_drag;
 } private_data;
+
+
+/*Member functions*/
+static gboolean	button_press	( GdkEventButton *event );
+static gboolean	button_release	( GdkEventButton *event );
+static gboolean	button_motion	( GdkEventMotion *event );
+static void		draw			( void );
+static void		reset			( void );
+static void		destroy			( gpointer data  );
+static void     set_cursor      ( GdkCursorType cursor_type );
+static void     set_point       ( gint x, gint y );
+static gboolean point_in        ( GdkPoint *point, gp_sel_rect *rect);
+static void     update_sel      ( void );
+static void     change_cursor   ( GdkPoint *p );
+static void     set_sel_rect    ( gp_sel_rect *rect, gint x0, gint y0, gint x1, gint y1 );
+static void     draw_sel_area   ( cairo_t *cr, GdkRectangle *rect );
+static void     draw_sel_borders( cairo_t *cr, GdkRectangle *rect );
+static void     do_command      ( gint dx, gint dy );
+
 
 static private_data		*m_priv = NULL;
 	
@@ -123,6 +159,7 @@ button_press ( GdkEventButton *event )
 	return TRUE;
 }
 
+
 static gboolean
 button_release ( GdkEventButton *event )
 {
@@ -130,14 +167,10 @@ button_release ( GdkEventButton *event )
 	{
         if ( m_priv->state == SEL_DRAWING )
         {
-            m_priv->state = SEL_WAITING;
-            gp_point_array_set ( m_priv->pa, 1, (gint)event->x, (gint)event->y );
+            set_point ( (gint)event->x, (gint)event->y );
         }
-        else
-        if ( m_priv->state == SEL_MOVING )
-        {
-            m_priv->state = SEL_WAITING;
-        }
+        m_priv->state = SEL_WAITING;
+        update_sel ();
         gtk_widget_queue_draw ( m_priv->cv->widget );
 	}
 	return TRUE;
@@ -146,93 +179,64 @@ button_release ( GdkEventButton *event )
 static gboolean
 button_motion ( GdkEventMotion *event )
 {
-	if ( m_priv->state == SEL_DRAWING )
+    switch ( m_priv->state )
     {
-        gp_point_array_set ( m_priv->pa, 1, (gint)event->x, (gint)event->y );
-        gtk_widget_queue_draw ( m_priv->cv->widget );
-    }
-    else
-    if ( m_priv->state == SEL_WAITING )
-    {
-        gint    x0,y0,x1,y1;
-        GdkPoint    *p;
-        p   =   gp_point_array_data (m_priv->pa);
-        x0 = MIN(p[0].x,p[1].x);
-	    y0 = MIN(p[0].y,p[1].y);
-        x1 = MAX(p[0].x,p[1].x);
-	    y1 = MAX(p[0].y,p[1].y);
-        
-        if (    event->x > x0 && 
-                event->x < x1 && 
-                event->y > y0 && 
-                event->y < y1 )
+        case SEL_DRAWING:
         {
-            set_cursor ( GDK_FLEUR );
-            m_priv->command = SEL_MOVING;
+            set_point ( (gint)event->x, (gint)event->y );
+            gtk_widget_queue_draw ( m_priv->cv->widget );
+            break;
         }
-        else
+        case SEL_WAITING:
         {
-            m_priv->command = SEL_NONE;
-            set_cursor ( GDK_DOTBOX );
+            GdkPoint p;
+            p.x = event->x;
+            p.y = event->y;
+            change_cursor ( &p );
+            break;
+        }
+        case SEL_MOVING:
+        case SEL_RESIZING_TL:
+        case SEL_RESIZING_TM:
+        case SEL_RESIZING_TR:
+        case SEL_RESIZING_ML:
+        case SEL_RESIZING_MR:
+        case SEL_RESIZING_BL:
+        case SEL_RESIZING_BM:
+        case SEL_RESIZING_BR:
+        {
+            gint dx = event->x - m_priv->p_drag.x;
+            gint dy = event->y - m_priv->p_drag.y;
+            do_command ( dx, dy );
+            m_priv->p_drag.x += dx;
+            m_priv->p_drag.y += dy;
+            gtk_widget_queue_draw ( m_priv->cv->widget );
+            break;
         }
     }
-    else
-    if ( m_priv->state == SEL_MOVING )
-    {
-        gint dx = event->x - m_priv->p_drag.x;
-        gint dy = event->y - m_priv->p_drag.y;
-        gp_point_array_offset ( m_priv->pa, dx, dy );
-        m_priv->p_drag.x += dx;
-        m_priv->p_drag.y += dy;
-        gtk_widget_queue_draw ( m_priv->cv->widget );
-    }
-	return TRUE;
+    return TRUE;
 }
+
 
 static void	
 draw ( void )
 {
 	if ( gp_point_array_size (m_priv->pa) == 2 )
     {
-        gint        x,y,w,h;
+        GdkRectangle    rect;
         cairo_t     *cr;
-        GdkPoint    *p;
-        gdouble     dashes[2];
-        p   =   gp_point_array_data (m_priv->pa);
         cr  =   gdk_cairo_create ( m_priv->cv->drawing );
-
-	    x = MIN(p[0].x,p[1].x);
-	    y = MIN(p[0].y,p[1].y);
-	    w = ABS(p[1].x-p[0].x);
-	    h = ABS(p[1].y-p[0].y);
-        
-        cairo_set_line_width (cr, 1.0);
-        cairo_set_source_rgba (cr, 0.7, 0.9, 1, 0.2);
-        cairo_rectangle (cr, x, y, w+1, h+1);
-        cairo_fill (cr);
-        cairo_set_antialias ( cr, CAIRO_ANTIALIAS_NONE );
-        cairo_set_line_join ( cr, CAIRO_LINE_JOIN_ROUND );
-        cairo_set_line_cap ( cr, CAIRO_LINE_CAP_ROUND );
-        dashes[0] = 3;
-        dashes[1] = 3;
-        cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1.0);
-        cairo_set_dash ( cr, &dashes, 2, 1 );
-        cairo_rectangle (cr, x, y, w, h);
-        cairo_stroke (cr);
+        gp_point_array_get_clipbox ( m_priv->pa, &rect, 0, NULL );
+            
+        if ( rect.width != 0 &&  rect.height != 0 )
+        {
+            draw_sel_area (cr, &rect );
+            if ( m_priv->state == SEL_WAITING )
+            {
+                draw_sel_borders (cr, &rect );
+            }
+        }
         cairo_destroy (cr);
-    }
-}
-
-
-static void 
-set_cursor ( GdkCursorType cursor_type )
-{
-    if ( cursor_type != GDK_LAST_CURSOR )
-    {
-        GdkCursor *cursor = gdk_cursor_new ( cursor_type);
-	    g_assert(cursor);
-	    gdk_window_set_cursor ( m_priv->cv->drawing, cursor );
-	    gdk_cursor_unref( cursor );
     }
 }
 
@@ -247,5 +251,240 @@ destroy ( gpointer data  )
 {
     gtk_widget_queue_draw ( m_priv->cv->widget );
 	destroy_private_data ();
-	g_print("rectangle tool destroy\n");
+	g_print("rect select tool destroy\n");
+}
+
+
+static void 
+set_cursor ( GdkCursorType cursor_type )
+{
+    static GdkCursorType last_cursor = GDK_LAST_CURSOR;
+    if ( cursor_type != last_cursor )
+    {
+        GdkCursor *cursor = gdk_cursor_new ( cursor_type );
+	    g_assert(cursor);
+	    gdk_window_set_cursor ( m_priv->cv->drawing, cursor );
+	    gdk_cursor_unref( cursor );
+        last_cursor = cursor_type;
+    }
+}
+
+static void     
+update_sel ( void )
+{
+    GdkPoint    *p;
+    p   =   gp_point_array_data (m_priv->pa);
+    m_priv->r_sel.x0 = MIN(p[0].x,p[1].x);
+    m_priv->r_sel.y0 = MIN(p[0].y,p[1].y);
+    m_priv->r_sel.x1 = MAX(p[0].x,p[1].x);
+    m_priv->r_sel.y1 = MAX(p[0].y,p[1].y);
+    p[0].x = m_priv->r_sel.x0;
+    p[0].y = m_priv->r_sel.y0;
+    p[1].x = m_priv->r_sel.x1;
+    p[1].y = m_priv->r_sel.y1;
+}
+
+static gboolean 
+point_in ( GdkPoint *point,  gp_sel_rect *rect)
+{
+    if (    point->x >= rect->x0 && 
+            point->x <= rect->x1 && 
+            point->y >= rect->y0 && 
+            point->y <= rect->y1 )
+    {
+        return TRUE;
+    }
+    else
+    {
+        return FALSE;
+    }
+}
+
+static void set_point ( gint x, gint y )
+{
+    gint x1,y1;
+    GdkRectangle rect;
+    cv_get_rect_size ( &rect);
+    x1 = rect.width - 1;
+    y1 = rect.height - 1;
+    if ( x < 0 ) x = 0;
+    else if ( x > x1 ) x = x1;
+    if ( y < 0 ) y = 0;
+    else if ( y > y1 ) y = y1;
+    gp_point_array_set ( m_priv->pa, 1, x, y);
+}
+
+static void 
+change_cursor ( GdkPoint *p )
+{
+    if ( point_in (p, &m_priv->r_borders[SEL_TOP_LEFT] ) )
+    {
+        set_cursor ( GDK_TOP_LEFT_CORNER );
+        m_priv->command = SEL_RESIZING_TL;
+    }
+    else
+    if ( point_in (p, &m_priv->r_borders[SEL_TOP_MID] ) )
+    {
+        set_cursor ( GDK_TOP_SIDE );
+        m_priv->command = SEL_RESIZING_TM;
+    }
+    else
+    if ( point_in (p, &m_priv->r_borders[SEL_TOP_RIGHT] ) )
+    {
+        set_cursor ( GDK_TOP_RIGHT_CORNER );
+        m_priv->command = SEL_RESIZING_TR;
+    }
+    else
+    if ( point_in (p, &m_priv->r_borders[SEL_MID_LEFT] ) )
+    {
+        set_cursor ( GDK_LEFT_SIDE );
+        m_priv->command = SEL_RESIZING_ML;
+    }
+    else
+    if ( point_in (p, &m_priv->r_borders[SEL_MID_RIGHT] ) )
+    {
+        set_cursor ( GDK_RIGHT_SIDE );
+        m_priv->command = SEL_RESIZING_MR;
+    }
+    else
+    if ( point_in (p, &m_priv->r_borders[SEL_BOTTOM_LEFT] ) )
+    {
+        set_cursor ( GDK_BOTTOM_LEFT_CORNER );
+        m_priv->command = SEL_RESIZING_BL;
+    }
+    else
+    if ( point_in (p, &m_priv->r_borders[SEL_BOTTOM_MID] ) )
+    {
+        set_cursor ( GDK_BOTTOM_SIDE );
+        m_priv->command = SEL_RESIZING_BM;
+    }
+    else
+    if ( point_in (p, &m_priv->r_borders[SEL_BOTTOM_RIGHT] ) )
+    {
+        set_cursor ( GDK_BOTTOM_RIGHT_CORNER );
+        m_priv->command = SEL_RESIZING_BR;
+    }
+    else
+    if ( point_in (p, &m_priv->r_sel ) )
+    {
+        set_cursor ( GDK_FLEUR );
+        m_priv->command = SEL_MOVING;
+    }
+    else
+    {
+        m_priv->command = SEL_NONE;
+        set_cursor ( GDK_DOTBOX );
+    }
+}
+
+static void
+draw_sel_area ( cairo_t *cr, GdkRectangle *rect )
+{
+   
+    cairo_set_line_width (cr, 1.0);
+    cairo_set_source_rgba (cr, 0.7, 0.9, 1.0, 0.2);
+    cairo_rectangle (cr, rect->x, rect->y, rect->width, rect->height);
+    cairo_fill (cr);
+    cairo_set_antialias ( cr, CAIRO_ANTIALIAS_NONE );
+    cairo_set_line_join ( cr, CAIRO_LINE_JOIN_ROUND );
+    cairo_set_line_cap ( cr, CAIRO_LINE_CAP_ROUND );
+
+    cairo_set_source_rgba (cr, 0.7, 0.9, 1.0, 1.0);
+    {
+        const double dashes[2] = {3,3};
+        cairo_set_dash ( cr, dashes, 2, 1 );
+    }
+    cairo_rectangle (cr, rect->x, rect->y, rect->width-1, rect->height-1);
+    cairo_stroke (cr);
+}
+
+static void 
+draw_sel_rect ( cairo_t *cr, gp_sel_rect *rect )
+{
+    double x,y,w,h;
+    x = (double)rect->x0;
+    y = (double)rect->y0;
+    w = (double)(rect->x1 - rect->x0 + 1);
+    h = (double)(rect->y1 - rect->y0 + 1);
+    cairo_rectangle (cr, x, y, w, h );
+    cairo_fill (cr);
+}
+
+static void 
+set_sel_rect ( gp_sel_rect *rect, gint x0, gint y0, gint x1, gint y1 )
+{
+    rect->x0 = x0;
+    rect->y0 = y0;
+    rect->x1 = x1;
+    rect->y1 = y1;
+}
+
+static void
+draw_sel_borders ( cairo_t *cr, GdkRectangle *rect )
+{
+    const gint s = 4;
+    gint i;
+    gint xl = rect->x;
+    gint xm = rect->x + (rect->width - 1)/2;
+    gint xr = rect->x + (rect->width - 1);
+    gint yt = rect->y;
+    gint ym = rect->y + (rect->height - 1)/2;
+    gint yb = rect->y + (rect->height - 1);
+
+    set_sel_rect ( &m_priv->r_borders[SEL_TOP_LEFT],
+                   xl,yt,xl+s,yt+s);
+    set_sel_rect ( &m_priv->r_borders[SEL_TOP_MID],
+                   xm-s/2,yt,xm+s/2,yt+s);
+    set_sel_rect ( &m_priv->r_borders[SEL_TOP_RIGHT],
+                   xr-s,yt,xr,yt+s);
+    set_sel_rect ( &m_priv->r_borders[SEL_MID_LEFT],
+                   xl,ym-s/2,xl+s,ym+s/2);
+    set_sel_rect ( &m_priv->r_borders[SEL_MID_RIGHT],
+                   xr-s,ym-s/2,xr,ym+s/2);
+    set_sel_rect ( &m_priv->r_borders[SEL_BOTTOM_LEFT],
+                   xl,yb-s,xl+s,yb);
+    set_sel_rect ( &m_priv->r_borders[SEL_BOTTOM_MID],
+                   xm-s/2,yb-s,xm+s/2,yb);
+    set_sel_rect ( &m_priv->r_borders[SEL_BOTTOM_RIGHT],
+                   xr-s,yb-s,xr,yb);
+    for ( i = 0; i < SEL_N_BORDERS; i++ )
+    {
+        draw_sel_rect ( cr, &m_priv->r_borders[i]);
+    }
+}
+
+static void
+do_command ( gint dx, gint dy )
+{
+    GdkPoint *p = gp_point_array_data ( m_priv->pa );
+    switch ( m_priv->state )
+    {
+        case SEL_MOVING:
+            gp_point_array_offset ( m_priv->pa, dx, dy );
+            break;
+        case SEL_RESIZING_TL:
+            p[0].y  += dy;
+        case SEL_RESIZING_ML:
+            p[0].x  += dx;
+            break;
+        case SEL_RESIZING_TM:
+            p[0].y  += dy;
+            break;
+        case SEL_RESIZING_TR:
+            p[0].y  += dy;
+            p[1].x  += dx;
+            break;
+        case SEL_RESIZING_BL:
+            p[1].y  += dy;
+            p[0].x  += dx;
+            break;
+        case SEL_RESIZING_BM:
+            p[1].y  += dy;
+            break;
+        case SEL_RESIZING_BR:
+            p[1].y  += dy;
+        case SEL_RESIZING_MR:
+            p[1].x  += dx;
+            break;
+    }
 }
