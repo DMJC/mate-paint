@@ -15,6 +15,7 @@
  */
 
 #include "gp_point_array.h"
+#include <string.h>
 
 struct _gp_point_array
 {

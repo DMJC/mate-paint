@@ -69,13 +69,13 @@ GQueue	*redo_queue	=	&_redo_queue;
 
 GpUndo  *undo_saved =   NULL;
 
-static GpUndo * 	undo_image_new	   	( const GpImage *image,
+static GpUndo * 	undo_image_new	   	( GpImage *image,
                                           gint x, gint y, 
                                           gp_tool_enum  tool );
 static GpUndo *     undo_resize_new     ( gp_canvas	*cv, gint width, gint height );
 static void			undo_free	        ( GpUndo *undo );
 static GpUndo *     draw_undo           ( GpUndo *undo );
-static GpImage *    get_redo_image      ( const GpImage *image, gint x, gint y );
+static GpImage *    get_redo_image      ( GpImage *image, gint x, gint y );
 static void         free_redo_queue     ( void );
 static void         free_undo_queue     ( void );
 
@@ -178,7 +178,7 @@ on_menu_redo_activate ( GtkMenuItem *menuitem, gpointer user_data)
 
 /*private*/
 static GpUndo * 
-undo_image_new ( const GpImage *image, 
+undo_image_new ( GpImage *image, 
                   gint x, gint y, 
                   gp_tool_enum  tool )
 {
@@ -301,7 +301,7 @@ free_undo_queue ( void )
 }
 
 static GpImage *
-get_redo_image ( const GpImage *image, gint x, gint y )
+get_redo_image ( GpImage *image, gint x, gint y )
 {
 	gp_canvas       *cv = cv_get_canvas();
   	GpImage         *ret_image;

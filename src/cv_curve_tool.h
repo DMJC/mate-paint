@@ -3,7 +3,7 @@
  *
  *  Thu Set 10 22:35:13 2009
  *  Copyright  2009  rogerio
- *  <rogerio@<host>>
+ *  <rogerioferro@gmail.com>
  *  by Jacson
  ****************************************************************************/
 

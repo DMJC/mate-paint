@@ -34,16 +34,6 @@ gnome_paint_SOURCES = \
 	file.h  \
 	pixbuf-file-chooser.c  \
 	pixbuf-file-chooser.h  \
-	pixmaps/line_0.xpm  \
-	pixmaps/line_1.xpm  \
-	pixmaps/line_2.xpm  \
-	pixmaps/line_3.xpm  \
-	pixmaps/line_4.xpm  \
-	pixmaps/rect0.xpm  \
-	pixmaps/rect1.xpm  \
-	pixmaps/rect2.xpm  \
-	pixmaps/sel1.xpm  \
-	pixmaps/sel2.xpm  \
 	cv_rectangle_tool.c  \
 	cv_rectangle_tool.h  \
 	cv_pencil_tool.c  \
@@ -92,6 +82,10 @@ gnome_paint_LDFLAGS = \
 
 gnome_paint_LDADD = \
 	$(GNOME_PAINT_LIBS)
+
+SUBDIRS = \
+	pixmaps\
+	pixmaps
 
 # Remove glade directory on uninstall
 uninstall-local:
