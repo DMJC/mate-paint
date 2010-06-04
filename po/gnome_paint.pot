@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-01-01 17:23-0200\n"
+"POT-Creation-Date: 2010-06-04 11:10-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -52,46 +52,60 @@ msgstr ""
 msgid "_View"
 msgstr ""
 
-#: ../src/color.c:120
+#: ../src/color.c:142
 msgid "Select Background Color"
 msgstr ""
 
-#: ../src/color.c:133
+#: ../src/color.c:155
 msgid "Select Foreground Color"
 msgstr ""
 
-#: ../src/color.c:191
+#: ../src/color.c:214
 msgid "Select Color"
 msgstr ""
 
-#: ../src/file.c:84
+#: ../src/file.c:98
 #, c-format
-msgid ""
-"Do you want to save the changes you made to \"%s\"?\n"
-"Your changes will be lost if you don't save them."
+msgid "Do you want to save the changes you made to \"%s\"?"
 msgstr ""
 
-#: ../src/file.c:153
+#: ../src/file.c:102
+msgid "Your changes will be lost if you don't save them."
+msgstr ""
+
+#: ../src/file.c:175
 #, c-format
 msgid "Error loading file \"%s\""
 msgstr ""
 
-#: ../src/file.c:250
+#: ../src/file.c:272
 #, c-format
 msgid "%s - gnome-paint"
 msgstr ""
 
-#: ../src/file.c:291
+#: ../src/file.c:313
 msgid "untitled"
 msgstr ""
 
-#: ../src/file.c:304
+#: ../src/file.c:326
 #, c-format
 msgid "Error saving file \"%s\""
 msgstr ""
 
-#: ../src/file.c:318
+#: ../src/file.c:340
 msgid "unknown error"
+msgstr ""
+
+#: ../src/main.c:183
+msgid "gnome-paint is a simple, easy to use paint program for GNOME."
+msgstr ""
+
+#: ../src/main.c:185
+msgid ""
+"This program is free software; you may redistribute it and/or modify it "
+"under the terms of the GNU General Public License as published by the Free "
+"Software Foundation, either version 3, or (at your opinion) any later "
+"version.\n"
 msgstr ""
 
 #: ../src/pixbuf-file-chooser.c:234
