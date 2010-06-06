@@ -51,11 +51,11 @@ typedef enum {
     SEL_TOP_LEFT,
     SEL_TOP_MID,
     SEL_TOP_RIGHT,
-    SEL_MID_LEFT,
     SEL_MID_RIGHT,
-    SEL_BOTTOM_LEFT,
-    SEL_BOTTOM_MID,
     SEL_BOTTOM_RIGHT,
+    SEL_BOTTOM_MID,
+    SEL_BOTTOM_LEFT,
+    SEL_MID_LEFT,
     SEL_N_BORDERS
 } gp_sel_border;
 
@@ -92,8 +92,8 @@ static gboolean point_in        ( GdkPoint *point, gp_sel_rect *rect);
 static void     update_sel      ( void );
 static void     change_cursor   ( GdkPoint *p );
 static void     set_sel_rect    ( gp_sel_rect *rect, gint x0, gint y0, gint x1, gint y1 );
-static void     draw_sel_area   ( cairo_t *cr, GdkRectangle *rect );
-static void     draw_sel_borders( cairo_t *cr, GdkRectangle *rect );
+static void     draw_sel_area   ( cairo_t *cr, GdkGC *gc, GdkRectangle *rect );
+static void     draw_sel_borders( cairo_t *cr, GdkGC *gc, GdkRectangle *rect );
 static void     do_command      ( gint dx, gint dy );
 
 
@@ -224,19 +224,32 @@ draw ( void )
 	if ( gp_point_array_size (m_priv->pa) == 2 )
     {
         GdkRectangle    rect;
-        cairo_t     *cr;
-        cr  =   gdk_cairo_create ( m_priv->cv->drawing );
         gp_point_array_get_clipbox ( m_priv->pa, &rect, 0, NULL );
-            
-        if ( rect.width != 0 &&  rect.height != 0 )
+
+        if ( rect.width != 1 &&  rect.height != 1 )
         {
-            draw_sel_area (cr, &rect );
+         	gint8 dash_list[]	=	{ 3, 3 };
+	        GdkGC *gc	=	gdk_gc_new ( m_priv->cv->widget->window );
+            cairo_t     *cr;
+            cr  =   gdk_cairo_create ( m_priv->cv->drawing );
+	        gdk_gc_set_function ( gc, GDK_INVERT );
+	        gdk_gc_set_dashes ( gc, 0, dash_list, 2 );
+	        gdk_gc_set_line_attributes ( gc, 1, GDK_LINE_ON_OFF_DASH,
+	                                     GDK_CAP_NOT_LAST, GDK_JOIN_ROUND );
+
+            draw_sel_area (cr, gc, &rect );
             if ( m_priv->state == SEL_WAITING )
             {
-                draw_sel_borders (cr, &rect );
+                draw_sel_borders (cr, gc, &rect );
             }
+            else
+            {
+                gdk_draw_rectangle ( m_priv->cv->drawing, gc, FALSE, 
+                                    rect.x, rect.y, rect.width-1, rect.height-1);
+            }
+            cairo_destroy (cr);
+            g_object_unref ( gc );
         }
-        cairo_destroy (cr);
     }
 }
 
@@ -377,37 +390,33 @@ change_cursor ( GdkPoint *p )
     }
 }
 
+
 static void
-draw_sel_area ( cairo_t *cr, GdkRectangle *rect )
+draw_sel_area ( cairo_t *cr, GdkGC *gc, GdkRectangle *rect )
 {
-   
     cairo_set_line_width (cr, 1.0);
     cairo_set_source_rgba (cr, 0.7, 0.9, 1.0, 0.2);
     cairo_rectangle (cr, rect->x, rect->y, rect->width, rect->height);
     cairo_fill (cr);
-    cairo_set_antialias ( cr, CAIRO_ANTIALIAS_NONE );
-    cairo_set_line_join ( cr, CAIRO_LINE_JOIN_ROUND );
-    cairo_set_line_cap ( cr, CAIRO_LINE_CAP_ROUND );
 
-    cairo_set_source_rgba (cr, 0.7, 0.9, 1.0, 1.0);
-    {
-        const double dashes[2] = {3,3};
-        cairo_set_dash ( cr, dashes, 2, 1 );
-    }
-    cairo_rectangle (cr, rect->x, rect->y, rect->width-1, rect->height-1);
-    cairo_stroke (cr);
+//    cairo_set_source_rgba (cr, 0.7, 0.9, 1.0, 1.0);
+//    cairo_set_operator ( cr, CAIRO_OPERATOR_HSL_LUMINOSITY );
+ //   cairo_rectangle (cr, 0, 0, 30, 0);
+ //   cairo_fill (cr);
+    
+        
 }
 
 static void 
-draw_sel_rect ( cairo_t *cr, gp_sel_rect *rect )
+draw_sel_rect ( cairo_t *cr, GdkGC *gc, gp_sel_rect *rect )
 {
-    double x,y,w,h;
-    x = (double)rect->x0;
-    y = (double)rect->y0;
-    w = (double)(rect->x1 - rect->x0 + 1);
-    h = (double)(rect->y1 - rect->y0 + 1);
-    cairo_rectangle (cr, x, y, w, h );
-    cairo_fill (cr);
+    gint x,y,w,h;
+    x = rect->x0;
+    y = rect->y0;
+    w = (rect->x1 - rect->x0 + 1);
+    h = (rect->y1 - rect->y0 + 1);
+    gdk_draw_rectangle ( m_priv->cv->drawing, gc, TRUE, 
+                         x, y, w, h);
 }
 
 static void 
@@ -420,7 +429,7 @@ set_sel_rect ( gp_sel_rect *rect, gint x0, gint y0, gint x1, gint y1 )
 }
 
 static void
-draw_sel_borders ( cairo_t *cr, GdkRectangle *rect )
+draw_sel_borders ( cairo_t *cr, GdkGC *gc, GdkRectangle *rect )
 {
     const gint s = 4;
     gint i;
@@ -447,10 +456,40 @@ draw_sel_borders ( cairo_t *cr, GdkRectangle *rect )
                    xm-s/2,yb-s,xm+s/2,yb);
     set_sel_rect ( &m_priv->r_borders[SEL_BOTTOM_RIGHT],
                    xr-s,yb-s,xr,yb);
+
+    
     for ( i = 0; i < SEL_N_BORDERS; i++ )
     {
-        draw_sel_rect ( cr, &m_priv->r_borders[i]);
+        draw_sel_rect ( cr, gc, &m_priv->r_borders[i]);
     }
+
+    gdk_draw_line ( m_priv->cv->drawing, gc, 
+                    m_priv->r_borders[0].x1+1,m_priv->r_borders[0].y0,
+                    m_priv->r_borders[1].x0-1,m_priv->r_borders[1].y0);
+    gdk_draw_line ( m_priv->cv->drawing, gc, 
+                    m_priv->r_borders[1].x1+1,m_priv->r_borders[1].y0,
+                    m_priv->r_borders[2].x0-1,m_priv->r_borders[2].y0);
+
+    gdk_draw_line ( m_priv->cv->drawing, gc, 
+                    m_priv->r_borders[2].x1,m_priv->r_borders[2].y1+1,
+                    m_priv->r_borders[3].x1,m_priv->r_borders[3].y0-1);
+    gdk_draw_line ( m_priv->cv->drawing, gc, 
+                    m_priv->r_borders[3].x1,m_priv->r_borders[3].y1+1,
+                    m_priv->r_borders[4].x1,m_priv->r_borders[4].y0-1);
+
+    gdk_draw_line ( m_priv->cv->drawing, gc, 
+                    m_priv->r_borders[4].x0-1,m_priv->r_borders[4].y1,
+                    m_priv->r_borders[5].x1+1,m_priv->r_borders[5].y1);
+    gdk_draw_line ( m_priv->cv->drawing, gc, 
+                    m_priv->r_borders[5].x0-1,m_priv->r_borders[5].y1,
+                    m_priv->r_borders[6].x1+1,m_priv->r_borders[6].y1);
+
+    gdk_draw_line ( m_priv->cv->drawing, gc, 
+                    m_priv->r_borders[6].x0,m_priv->r_borders[6].y0-1,
+                    m_priv->r_borders[7].x0,m_priv->r_borders[7].y1+1);
+    gdk_draw_line ( m_priv->cv->drawing, gc, 
+                    m_priv->r_borders[7].x0,m_priv->r_borders[7].y0-1,
+                    m_priv->r_borders[0].x0,m_priv->r_borders[0].y1+1);
 }
 
 static void
