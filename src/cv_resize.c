@@ -58,6 +58,7 @@ static gint			y_res			=	0;
  *   CODE
  */
 
+
 void
 cv_resize_set_canvas ( gp_canvas * canvas )
 {
@@ -107,8 +108,8 @@ void
 on_cv_ev_box_realize (GtkWidget *widget, gpointer user_data)
 {
 	gint8 dash_list[]	=	{ 1, 1 };
-	cv_ev_box	=	widget;	
-	gc_resize	=	gdk_gc_new ( widget->window );
+	cv_ev_box	        =	widget;	
+	gc_resize	        =	gdk_gc_new ( widget->window );
 	g_assert( gc_resize );
 	/*set data to be destroyed*/
 	g_object_set_data_full (	G_OBJECT(widget), "gc_resize", 

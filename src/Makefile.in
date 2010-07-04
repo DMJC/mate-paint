@@ -68,7 +68,8 @@ am_gnome_paint_OBJECTS = gnome_paint-color.$(OBJEXT) \
 	gnome_paint-cv_curve_tool.$(OBJEXT) \
 	gnome_paint-color-picker.$(OBJEXT) \
 	gnome_paint-clipboard.$(OBJEXT) \
-	gnome_paint-cv_rect_select.$(OBJEXT)
+	gnome_paint-cv_rect_select.$(OBJEXT) \
+	gnome_paint-selection.$(OBJEXT)
 gnome_paint_OBJECTS = $(am_gnome_paint_OBJECTS)
 am__DEPENDENCIES_1 =
 gnome_paint_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -330,7 +331,9 @@ gnome_paint_SOURCES = \
 	clipboard.c  \
 	clipboard.h  \
 	cv_rect_select.c  \
-	cv_rect_select.h
+	cv_rect_select.h  \
+	selection.c  \
+	selection.h
 
 gnome_paint_CFLAGS = \
 	-DG_DISABLE_DEPRECATED\
@@ -460,6 +463,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-pixbuf-file-chooser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-pixbuf_util.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-selection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-toolbar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnome_paint-undo.Po@am__quote@
 
@@ -833,6 +837,20 @@ gnome_paint-cv_rect_select.obj: cv_rect_select.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cv_rect_select.c' object='gnome_paint-cv_rect_select.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-cv_rect_select.obj `if test -f 'cv_rect_select.c'; then $(CYGPATH_W) 'cv_rect_select.c'; else $(CYGPATH_W) '$(srcdir)/cv_rect_select.c'; fi`
+
+gnome_paint-selection.o: selection.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-selection.o -MD -MP -MF $(DEPDIR)/gnome_paint-selection.Tpo -c -o gnome_paint-selection.o `test -f 'selection.c' || echo '$(srcdir)/'`selection.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-selection.Tpo $(DEPDIR)/gnome_paint-selection.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='selection.c' object='gnome_paint-selection.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-selection.o `test -f 'selection.c' || echo '$(srcdir)/'`selection.c
+
+gnome_paint-selection.obj: selection.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -MT gnome_paint-selection.obj -MD -MP -MF $(DEPDIR)/gnome_paint-selection.Tpo -c -o gnome_paint-selection.obj `if test -f 'selection.c'; then $(CYGPATH_W) 'selection.c'; else $(CYGPATH_W) '$(srcdir)/selection.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gnome_paint-selection.Tpo $(DEPDIR)/gnome_paint-selection.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='selection.c' object='gnome_paint-selection.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gnome_paint_CFLAGS) $(CFLAGS) -c -o gnome_paint-selection.obj `if test -f 'selection.c'; then $(CYGPATH_W) 'selection.c'; else $(CYGPATH_W) '$(srcdir)/selection.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

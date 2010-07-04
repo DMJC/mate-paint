@@ -64,7 +64,8 @@ void			gp_image_data_free			( GpImageData *data );
 void			gp_image_draw				( GpImage *image, 
 							                  GdkDrawable *drawable,
 							                  GdkGC *gc,
-							                  gint x, gint y );
+							                  gint x, gint y,
+							                  gint width, gint height );
 gint			gp_image_get_width			( GpImage *image );
 gint			gp_image_get_height			( GpImage *image );
 gboolean		gp_image_get_has_alpha		( GpImage *image );

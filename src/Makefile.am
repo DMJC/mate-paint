@@ -67,7 +67,9 @@ gnome_paint_SOURCES = \
 	clipboard.c  \
 	clipboard.h  \
 	cv_rect_select.c  \
-	cv_rect_select.h
+	cv_rect_select.h  \
+	selection.c  \
+	selection.h
 
 gnome_paint_CFLAGS = \
 	-DG_DISABLE_DEPRECATED\
