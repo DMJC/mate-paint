@@ -12,8 +12,10 @@
 #define getg(x) (((x >> 8) & 0x0FF))
 #define getb(x) ((x & 0x0FF))
 
-void fill_draw(GdkDrawable *drawable, GdkGC *gc, guint fill_color, guint x, guint y);
-gboolean get_pixel_from_pixbuf(GdkPixbuf *pixbuf, guint *color, guint x, guint y);
+GdkRectangle fill_draw(GdkDrawable *drawable, GdkGC *gc, guint fill_color,
+					   guint x, guint y);
+gboolean get_pixel_from_pixbuf(GdkPixbuf *pixbuf, guint *color,
+                               guint x, guint y);
 
 
 #endif

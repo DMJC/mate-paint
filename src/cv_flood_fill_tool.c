@@ -24,6 +24,7 @@
 #include "file.h"
 #include "cv_drawing.h"
 #include "pixbuf_util.h"
+#include "undo.h"
 //#include "color.h"
 
 guint get_fg_color_from_gc(GdkGC *gc);
@@ -35,6 +36,7 @@ static gboolean	button_motion	( GdkEventMotion *event );
 static void		draw			( void );
 static void		reset			( void );
 static void		destroy			( gpointer data  );
+static void		save_undo		( void );
 
 /*private data*/
 typedef struct {
@@ -45,6 +47,8 @@ typedef struct {
 	guint			button;
 	gboolean 		is_draw;
 	guint			fill_color;
+	GdkRectangle	rect;
+	GdkPixmap *		pixmap;
 } private_data;
 
 static private_data		*m_priv = NULL;
@@ -114,6 +118,7 @@ gboolean
 button_release ( GdkEventButton *event )
 {
 	GdkPixbuf *pixbuf;
+	gint width, height;
 
 	if ( event->type == GDK_BUTTON_RELEASE )
 	{
@@ -132,7 +137,18 @@ button_release ( GdkEventButton *event )
 						pixbuf = tmp;
 					}
 
-					fill_draw( GDK_DRAWABLE( m_priv->cv->pixmap ), 
+					gdk_drawable_get_size(GDK_DRAWABLE( m_priv->cv->pixmap ),
+                                                         &width,
+                                                         &height);
+					/* Pixbuf before changes */
+					m_priv->pixmap = gdk_pixmap_new(GDK_DRAWABLE( m_priv->cv->pixmap ),
+                                                         width,
+                                                         height,
+                                                         -1);
+					gdk_draw_pixbuf(m_priv->pixmap, m_priv->gc, pixbuf, 0, 0, 0, 0,
+                                    -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
+					
+					m_priv->rect = fill_draw( GDK_DRAWABLE( m_priv->cv->pixmap ), 
 				    	      m_priv->gc, 
 				    	      m_priv->fill_color, 
 				    	      m_priv->x0, 
@@ -140,6 +156,9 @@ button_release ( GdkEventButton *event )
 					
 					g_object_unref(pixbuf);
 
+					save_undo ();
+					g_object_unref(m_priv->pixmap);
+					
 					file_set_unsave ();
 				}
 			}
@@ -231,4 +250,8 @@ guint get_fg_color_from_gc(GdkGC *gc)
 	return color;
 }
 
-
+static void     
+save_undo ( void )
+{
+	undo_add ( &m_priv->rect, NULL, m_priv->pixmap, TOOL_BUCKET_FILL );
+}
