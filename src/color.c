@@ -180,6 +180,7 @@ on_color_palette_entry_button_press_event ( GtkWidget	   *widget,
 	else if ( event->button == RIGHT_BUTTON )
 	{
 		background_set_color_from_palette ( i );
+		notify_eraser_of_bg_color_change();
 	}
 
 	

@@ -29,6 +29,7 @@
 #include "undo.h"
 #include "color-picker.h"
 
+#include "cv_eraser_tool.h"
 
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
@@ -42,7 +43,7 @@ void		gnome_paint_init		( int argc, char *argv[] );
 void		on_window_destroy		( GtkObject *object, gpointer user_data );
 void		on_menu_about_activate  ( GtkMenuItem *menuitem, gpointer user_data );
 
-
+static void		init_eraser				(GtkBuilder *builder);
 
 void		
 on_menu_new_activate( GtkMenuItem *menuitem, gpointer user_data)
@@ -68,7 +69,7 @@ main (int argc, char *argv[])
 {
 
  	GtkWidget   *window;
-	ColorPicker *color_picker;
+	ColorPicker *color_picker; 
 
 //	g_mem_set_vtable (glib_mem_profiler_table);
 
@@ -157,6 +158,9 @@ create_window (void)
 	g_assert ( window );
 	file_set_parent_window ( GTK_WINDOW(window) );	
     gtk_builder_connect_signals (builder, NULL);          
+
+	init_eraser(builder);
+
     g_object_unref (G_OBJECT (builder));	
 	
 	/* To show all widget that is set invisible on Glade */
@@ -196,5 +200,32 @@ on_menu_about_activate ( GtkMenuItem *menuitem, gpointer user_data )
 	gtk_widget_destroy ( GTK_WIDGET(dlg) );
 }
 
-
+static void init_eraser(GtkBuilder *builder)
+{
+	GtkWidget *erase;
+	gchar name[20];
+	gint i;
+	static gint size[4] = {
+							GP_ERASER_RECT_TINY,
+							GP_ERASER_RECT_SMALL,
+							GP_ERASER_RECT_MEDIUM,
+							GP_ERASER_RECT_LARGE
+						};
+	
+	if(NULL == builder){
+		return;
+	}
+	
+	for(i = 0; i < 4; i++)
+	{
+		sprintf(name, "erase%d", i);
+		erase = GTK_WIDGET (gtk_builder_get_object (builder, name));
+		if(!GTK_IS_WIDGET(erase))
+		{
+			printf("DEBUG: init_eraser() !GTK_IS_WIDGET(erase)\n");
+		}
+		g_signal_connect (erase, "toggled",
+		            G_CALLBACK (on_eraser_size_toggled), (gpointer)&(size[i]));
+	}
+}
 
