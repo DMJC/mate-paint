@@ -30,6 +30,7 @@
 #include "color-picker.h"
 
 #include "cv_eraser_tool.h"
+#include "cv_paintbrush_tool.h"
 
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
@@ -43,7 +44,8 @@ void		gnome_paint_init		( int argc, char *argv[] );
 void		on_window_destroy		( GtkObject *object, gpointer user_data );
 void		on_menu_about_activate  ( GtkMenuItem *menuitem, gpointer user_data );
 
-static void		init_eraser				(GtkBuilder *builder);
+static void init_eraser				(GtkBuilder *builder);
+static void init_paint_brush		(GtkBuilder *builder);
 
 void		
 on_menu_new_activate( GtkMenuItem *menuitem, gpointer user_data)
@@ -159,7 +161,8 @@ create_window (void)
 	file_set_parent_window ( GTK_WINDOW(window) );	
     gtk_builder_connect_signals (builder, NULL);          
 
-	init_eraser(builder);
+	init_eraser (builder);
+	init_paint_brush (builder);
 
     g_object_unref (G_OBJECT (builder));	
 	
@@ -229,3 +232,39 @@ static void init_eraser(GtkBuilder *builder)
 	}
 }
 
+static void init_paint_brush(GtkBuilder *builder)
+{
+	GtkWidget *brush;
+	gchar name[20];
+	gint i;
+	static gint size[12] = {
+							GP_BRUSH_RECT_LARGE,
+							GP_BRUSH_RECT_MEDIUM,
+							GP_BRUSH_RECT_SMALL,
+							GP_BRUSH_ROUND_LARGE,
+							GP_BRUSH_ROUND_MEDIUM,
+							GP_BRUSH_ROUND_SMALL,
+							GP_BRUSH_FWRD_LARGE,
+							GP_BRUSH_FWRD_MEDIUM,
+							GP_BRUSH_FWRD_SMALL,
+							GP_BRUSH_BACK_LARGE,
+							GP_BRUSH_BACK_MEDIUM,
+							GP_BRUSH_BACK_SMALL,
+						};
+	
+	if(NULL == builder){
+		return;
+	}
+	
+	for(i = 0; i < GP_BRUSH_MAX; i++)
+	{
+		sprintf(name, "brush%d", i);
+		brush = GTK_WIDGET (gtk_builder_get_object (builder, name));
+		if(!GTK_IS_WIDGET(brush))
+		{
+			printf("DEBUG: init_eraser() !GTK_IS_WIDGET(erase)\n");
+		}
+		g_signal_connect (brush, "toggled",
+		            G_CALLBACK (on_brush_size_toggled), (gpointer)&(size[i]));
+	}
+}

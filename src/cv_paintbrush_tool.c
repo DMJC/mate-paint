@@ -41,6 +41,10 @@ typedef void (DrawBrushFunc)(GdkDrawable *drawable, int x, int y);
 
 static const double EPSILON = 0.00001;
 
+/* TODO: These should be part of gp_canvas */
+static gint g_prev_brush_size = GP_BRUSH_ROUND_LARGE;
+static gint g_brush_type = GP_BRUSH_TYPE_ROUND;
+
 /* Test XPM for pixbuf brush */
 const char * happyface_xpm[] = {
 "30 30 3 1",
@@ -81,6 +85,11 @@ static GdkPixbuf *g_pixbuf = NULL;
 
 static void brush_interpolate(GdkDrawable *drawable, DrawBrushFunc *draw_brush_func, int x, int y);
 static GdkCursor *create_brush_cursor(GPBrushType type);
+static void set_brush_values(GPBrushType type, GPBrushSize size);
+static void set_brush_size(GPBrushSize size);
+static GdkGC *color_for_alphaing(GtkWidget *widget, GdkGC *fg, GdkGC *bg);
+static void brush_set_pixel(GdkPixbuf *pixbuf, gint color, gint x, gint y);
+static void draw_crosshair(GdkPixbuf *pixbuf, GPBrushType type);
 
 /* Private drawing functions */
 static void draw_round_brush(GdkDrawable *drawable, int x, int y);
@@ -170,40 +179,12 @@ create_private_data( void )
 		m_priv->button		=	0;
 		m_priv->is_draw		=	FALSE;
 		m_priv->distance	=	0;
-		m_priv->brush_type	=	GP_BRUSH_TYPE_ROUND; /* Rogerio: change type here to test other brushes */
+		m_priv->brush_type	=	g_brush_type; /* change type here to test other brushes */
 		m_priv->width		=	BRUSH_WIDTH;
 		m_priv->height		=	BRUSH_HEIGHT;
         m_priv->bg_pixmap   =   NULL;
-		
-		switch(m_priv->brush_type)
-		{
-			case GP_BRUSH_TYPE_ROUND:
-				m_priv->draw_brush	=	draw_round_brush;
-				m_priv->spacing 	=	2.0;
-				break;
-			case GP_BRUSH_TYPE_RECTANGLE:
-				m_priv->draw_brush	=	draw_rectangular_brush;
-				m_priv->spacing 	=	2.0;
-				break;
-			case GP_BRUSH_TYPE_FWRD_SLASH:
-				m_priv->draw_brush	=	draw_fwd_slash_brush;
-				m_priv->spacing 	=	1.0;
-				break;
-			case GP_BRUSH_TYPE_BACK_SLASH:
-				m_priv->draw_brush	=	draw_back_slash_brush;
-				m_priv->spacing 	=	1.0;
-				break;
-			case GP_BRUSH_TYPE_PIXBUF:
-				g_pixbuf = gdk_pixbuf_new_from_xpm_data(happyface_xpm);
-				m_priv->draw_brush	=	draw_pixbuf_brush;
-				m_priv->spacing 	=	gdk_pixbuf_get_width(g_pixbuf);
-				m_priv->width		=	gdk_pixbuf_get_width(g_pixbuf);
-				m_priv->height		=	gdk_pixbuf_get_height(g_pixbuf);
-				break;
-			default:
-				printf("Debug: brush create_private_data unknown brush type %d\n", m_priv->brush_type);
-				break;
-		}
+
+		set_brush_values(m_priv->brush_type, g_prev_brush_size);
 	}
 }
 
@@ -435,7 +416,7 @@ brush_interpolate(GdkDrawable *drawable, DrawBrushFunc *draw_brush_func, int x, 
 	 m_priv->distance = final;
 }
 
-/* Rogerio: m_priv->spacing = 2.0 is best for this brush */
+/* m_priv->spacing = 2.0 is best for this brush */
 static void draw_round_brush(GdkDrawable *drawable, int x, int y)
 {
 	x -= (m_priv->width / 2);
@@ -444,7 +425,7 @@ static void draw_round_brush(GdkDrawable *drawable, int x, int y)
 	gdk_draw_arc( drawable, m_priv->gc, TRUE, x, y, m_priv->width, m_priv->height, 0, 360 * 64);
 }
 
-/* Rogerio: m_priv->spacing = 2.0 is best for this brush */
+/* m_priv->spacing = 2.0 is best for this brush */
 static void draw_rectangular_brush(GdkDrawable *drawable, int x, int y)
 {
 	x -= (m_priv->width / 2);
@@ -453,29 +434,39 @@ static void draw_rectangular_brush(GdkDrawable *drawable, int x, int y)
 	gdk_draw_rectangle( drawable, m_priv->gc, TRUE, x, y, m_priv->width, m_priv->height);
 }
 
-/* Rogerio: m_priv->spacing = 1.0 is best for this brush */
+/* m_priv->spacing = 1.0 is best for this brush */
 static void draw_back_slash_brush(GdkDrawable *drawable, int x, int y)
 {
-	x -= (m_priv->width / 2);
-	y -= (m_priv->height / 2);
+    gint w, h;
+   
+    w = m_priv->width - 1;
+    h = m_priv->height - 1;
+   
+    x -= (m_priv->width / 2);
+    y -= (m_priv->height / 2);
 
-	gdk_draw_line(drawable, m_priv->gc, x, y, x + m_priv->width, y + m_priv->height);
-	/* Draw another line to fill in gaps */
-	gdk_draw_line(drawable, m_priv->gc, x + 1, y, x + 1 + m_priv->width, y + m_priv->height);
+    gdk_draw_line(drawable, m_priv->gc, x, y, x + w, y + h);
+    /* Draw another line to fill in gaps */
+    gdk_draw_line(drawable, m_priv->gc, x + 1, y, x + w, y + h - 1);
 }
 
-/* Rogerio: m_priv->spacing = 1.0 is best for this brush */
+/* m_priv->spacing = 1.0 is best for this brush */
 static void draw_fwd_slash_brush(GdkDrawable *drawable, int x, int y)
 {
-	x -= (m_priv->width / 2);
-	y -= (m_priv->height / 2);
-	
-	gdk_draw_line(drawable, m_priv->gc, x , y + m_priv->height, x + m_priv->width, y);
-	/* Draw another line to fill in gaps */
-	gdk_draw_line(drawable, m_priv->gc, x + 1 , y + m_priv->height, x + m_priv->width, y + 1);
+    gint w, h;
+   
+    w = m_priv->width - 1;
+    h = m_priv->height - 1;
+   
+    x -= (m_priv->width / 2);
+    y -= (m_priv->height / 2);
+   
+    gdk_draw_line(drawable, m_priv->gc, x , y + h, x + w, y);
+    /* Draw another line to fill in gaps */
+    gdk_draw_line(drawable, m_priv->gc, x + 1 , y + h, x + w, y + 1);
 }
 
-/* Rogerio: m_priv->spacing = gdk_get_pixbuf_width() and you get nice tiling effect */
+/* m_priv->spacing = gdk_get_pixbuf_width() and you get nice tiling effect */
 static void draw_pixbuf_brush(GdkDrawable *drawable, int x, int y)
 {
 	x -= (m_priv->width / 2);
@@ -485,46 +476,85 @@ static void draw_pixbuf_brush(GdkDrawable *drawable, int x, int y)
 					-1, -1, GDK_RGB_DITHER_NONE, 0, 0);
 }
 
+/* TODO: Finish up GP_BRUSH_TYPE_PIXBUF cursor */
+#define MIN_CURSOR_WIDTH	19
+#define MIN_CURSOR_HEIGHT	MIN_CURSOR_WIDTH
+#define CENTERED(a,b)	(((a)/(2))-((b)/(2)))
 static GdkCursor *create_brush_cursor(GPBrushType type)
 {
 	GdkCursor *cursor = NULL;
 	GdkPixmap *pixmap;
 	GdkPixbuf *pixbuf, *tmp;
+	GdkGCValues bgvalues, fgvalues;
+	GdkColor color, fgcolor;
+	GdkGC *gc;
+	/* No cursor is less than 19 pixels ie. w & h of crosshair */
+	gint wcur = MIN_CURSOR_WIDTH;
+	gint hcur = MIN_CURSOR_HEIGHT;
 
-	pixmap = gdk_pixmap_new(m_priv->cv->widget->window, m_priv->width, m_priv->height, -1);
+	if(m_priv->width > wcur){
+		wcur = m_priv->width;
+	}
+
+	if(m_priv->height > hcur){
+		hcur = m_priv->height;
+	}
+
+	pixmap = gdk_pixmap_new(m_priv->cv->widget->window, wcur, hcur, -1);
 	if(!GDK_IS_PIXMAP(pixmap))
 	{
 		printf("Debug: create_brush_cursor() !GDK_IS_PIXMAP(pixmap)\n");
 		goto CURSOR_CLEANUP;
 	}
 
-	/* Fill with background with white */
-	gdk_draw_rectangle(pixmap, m_priv->cv->widget->style->white_gc,
-					   TRUE, 0, 0, m_priv->width, m_priv->height);
+	/* Fill with background color. See if fg & bg are different */
+	gc = color_for_alphaing(m_priv->cv->widget, m_priv->cv->gc_fg_pencil, m_priv->cv->gc_bg_pencil);
+	if(GDK_IS_GC(gc)){
+		gdk_draw_rectangle(pixmap, gc, TRUE, 0, 0, wcur, hcur);
+		gdk_gc_get_values(gc, &bgvalues);
+		gdk_colormap_query_color (gtk_widget_get_colormap(m_priv->cv->widget), 
+	                          bgvalues.foreground.pixel, 
+	                          &color);
+		bgvalues.foreground = color;
+		gdk_gc_unref(gc);
+	}
+	else{
+		gdk_draw_rectangle(pixmap, m_priv->cv->gc_bg_pencil, TRUE, 0, 0, wcur, hcur);
+		gdk_gc_get_values(m_priv->cv->gc_bg_pencil, &bgvalues);
+		gdk_colormap_query_color (gtk_widget_get_colormap(m_priv->cv->widget), 
+	                          bgvalues.background.pixel, 
+	                          &color);
+		bgvalues.foreground = color;
+	}
 	
-	/* Draw crosshair onto pixmap */
-	/*gdk_draw_line(pixmap, m_priv->cv->gc_fg_pencil, 0 , m_priv->height / 2, m_priv->width, m_priv->height / 2);
-	gdk_draw_line(pixmap, m_priv->cv->gc_fg_pencil, m_priv->width / 2, 0, m_priv->width / 2, m_priv->height);
-	*/
 
-	/* Draw brush onto pixmap with fore color */
+	/* Draw brush shape centered onto pixmap with fore color */
 	switch(type)
 	{
 		case GP_BRUSH_TYPE_ROUND:
-			gdk_draw_arc( pixmap, m_priv->cv->gc_fg_pencil, TRUE, 0, 0,
-						  m_priv->width, m_priv->height, 0, 360 * 64 );
+			gdk_draw_arc( pixmap, m_priv->cv->gc_fg_pencil, TRUE, CENTERED(wcur, m_priv->width),
+						    CENTERED(hcur, m_priv->height),
+						  m_priv->width - 1, m_priv->height - 1, 0, 360 * 64 );
+			/* Draw twice because gdk has a bug where circles don't look round! */
+			gdk_draw_arc( pixmap, m_priv->cv->gc_fg_pencil, FALSE, CENTERED(wcur, m_priv->width),
+						    CENTERED(hcur, m_priv->height),
+						  m_priv->width - 1, m_priv->height - 1, 0, 360 * 64 );
 			break;
 		case GP_BRUSH_TYPE_RECTANGLE:
-			gdk_draw_rectangle( pixmap, m_priv->cv->gc_fg_pencil, TRUE, 0, 0,
-								m_priv->width, m_priv->height );
+			gdk_draw_rectangle( pixmap, m_priv->cv->gc_fg_pencil, TRUE, CENTERED(wcur, m_priv->width),
+						    CENTERED(hcur, m_priv->height),
+								m_priv->width, m_priv->height);
 			break;
 		case GP_BRUSH_TYPE_FWRD_SLASH:
-			gdk_draw_line( pixmap, m_priv->cv->gc_fg_pencil, 0 ,
-						   m_priv->height, m_priv->width, 0 );
+			gdk_draw_line( pixmap, m_priv->cv->gc_fg_pencil, wcur / 2 +  m_priv->width / 2,
+						   CENTERED(hcur, m_priv->height), CENTERED(wcur, m_priv->width),
+						   hcur / 2 +  m_priv->height / 2);
 			break;
 		case GP_BRUSH_TYPE_BACK_SLASH:
-			gdk_draw_line( pixmap, m_priv->cv->gc_fg_pencil, 0, 0,
-							m_priv->width, m_priv->height );
+			gdk_draw_line( pixmap, m_priv->cv->gc_fg_pencil, CENTERED(wcur, m_priv->width),
+						    CENTERED(hcur, m_priv->height),
+							wcur / 2 +  m_priv->width / 2, 
+							hcur / 2 +  m_priv->height / 2 );
 			break;
 		case GP_BRUSH_TYPE_PIXBUF:
 			gdk_draw_pixbuf( pixmap, m_priv->cv->gc_fg_pencil, g_pixbuf,
@@ -536,7 +566,7 @@ static GdkCursor *create_brush_cursor(GPBrushType type)
 	}
 	
 	/* Create pixbuf without aplha, will add alpha in next steps */
-	pixbuf =  gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, m_priv->width, m_priv->height);
+	pixbuf =  gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, wcur, hcur);
 	if(!GDK_IS_PIXBUF(pixbuf))
 	{
 		printf("Debug: create_brush_cursor() !GDK_IS_PIXBUF(pixbuf)\n");
@@ -544,21 +574,33 @@ static GdkCursor *create_brush_cursor(GPBrushType type)
 	}
 	
 	/* Copy pixmap data to pixbuf */
-	gdk_pixbuf_get_from_drawable(pixbuf, pixmap, NULL, 0, 0, 0, 0, m_priv->width, m_priv->height);
+	gdk_pixbuf_get_from_drawable(pixbuf, pixmap, NULL, 0, 0, 0, 0, wcur, hcur);
+	
+	color = bgvalues.foreground;
+	
+	bgvalues.foreground.red /= 256;
+	bgvalues.foreground.green /= 256;
+	bgvalues.foreground.blue /= 256;
+	
 	
 	/* Make background pixels transparent. */
-	tmp = gdk_pixbuf_add_alpha(pixbuf, TRUE, 0xFF, 0xFF, 0xFF);
+	tmp = gdk_pixbuf_add_alpha(pixbuf, TRUE, bgvalues.foreground.red,
+											 bgvalues.foreground.green,
+											 bgvalues.foreground.blue);
+	
 	if(!GDK_IS_PIXBUF(tmp))
 	{
 		printf("Debug: create_brush_cursor() !GDK_IS_PIXBUF(tmp)\n");
 		goto CURSOR_CLEANUP;
 	}
+	
+	draw_crosshair(tmp, type);
 
 	g_object_unref(pixbuf);
 	pixbuf = tmp;
 	
 	cursor = gdk_cursor_new_from_pixbuf ( gdk_display_get_default (), pixbuf,
-										  m_priv->width / 2, m_priv->height / 2 );
+										  wcur / 2, hcur / 2 );
 	
 	CURSOR_CLEANUP: {}
 
@@ -599,10 +641,237 @@ save_undo ( void )
 	
 }
 
+void on_brush_size_toggled(GtkWidget *widget, gpointer data)
+{
+	static gint size;
+	GdkCursor *cursor;
+ 
+	if(NULL != data)
+	{
+		size = *((gint *)data);
+		if(g_prev_brush_size != size)
+		{
+			if((size >= GP_BRUSH_RECT_LARGE) && (size <= GP_BRUSH_RECT_SMALL))
+			{
+				set_brush_values(GP_BRUSH_TYPE_ROUND, size);
+			}
+			else if((size >= GP_BRUSH_ROUND_LARGE) && (size <= GP_BRUSH_ROUND_SMALL))
+			{
+				set_brush_values(GP_BRUSH_TYPE_RECTANGLE, size);
+			}
+			else if((size >= GP_BRUSH_FWRD_LARGE) && (size <= GP_BRUSH_FWRD_SMALL))
+			{
+				set_brush_values(GP_BRUSH_TYPE_FWRD_SLASH, size);
+			}
+			else if((size >= GP_BRUSH_BACK_LARGE) && (size <= GP_BRUSH_BACK_SMALL))
+			{
+				set_brush_values(GP_BRUSH_TYPE_BACK_SLASH, size);
+			}
+			else
+			{
+				return;
+			}
+ 
+			g_prev_brush_size = *((gint *)data);
+	
+			cursor = create_brush_cursor(m_priv->brush_type);
+	
+			if(!cursor)
+			{
+				cursor = gdk_cursor_new ( GDK_CROSSHAIR );
+				g_assert(cursor);
+			}
+			gdk_window_set_cursor ( m_priv->cv->drawing, cursor );
+			gdk_cursor_unref( cursor );
+		}
+		
+	}
+}
+ 
+static void set_brush_values(GPBrushType type, GPBrushSize size)
+{
+	switch(type)
+		{
+			case GP_BRUSH_TYPE_ROUND:
+				m_priv->brush_type  =   type;
+				m_priv->draw_brush	=	draw_round_brush;
+				m_priv->spacing 	=	2.0;
+				set_brush_size(size);
+				break;
+			case GP_BRUSH_TYPE_RECTANGLE:
+				m_priv->brush_type  =   type;
+				m_priv->draw_brush	=	draw_rectangular_brush;
+				m_priv->spacing 	=	2.0;
+				set_brush_size(size);
+				break;
+			case GP_BRUSH_TYPE_FWRD_SLASH:
+				m_priv->brush_type  =   type;
+				m_priv->draw_brush	=	draw_fwd_slash_brush;
+				m_priv->spacing 	=	1.0;
+				set_brush_size(size);
+				break;
+			case GP_BRUSH_TYPE_BACK_SLASH:
+				m_priv->brush_type  =   type;
+				m_priv->draw_brush	=	draw_back_slash_brush;
+				m_priv->spacing 	=	1.0;
+				set_brush_size(size);
+				break;
+			case GP_BRUSH_TYPE_PIXBUF:
+				m_priv->brush_type  =   type;
+				g_pixbuf = gdk_pixbuf_new_from_xpm_data(happyface_xpm);
+				m_priv->draw_brush	=	draw_pixbuf_brush;
+				m_priv->spacing 	=	gdk_pixbuf_get_width(g_pixbuf);
+				m_priv->width		=	gdk_pixbuf_get_width(g_pixbuf);
+				m_priv->height		=	gdk_pixbuf_get_height(g_pixbuf);
+				break;
+			default:
+				printf("Debug: brush set_brush_values() unknown brush type %d\n", m_priv->brush_type);
+				break;
+		}
 
+	g_brush_type = type;
+}
 
+static void set_brush_size(GPBrushSize size)
+{
+	switch(size)
+		{
+			case GP_BRUSH_RECT_LARGE:	/* Fall through*/
+			case GP_BRUSH_ROUND_LARGE:	/* Fall through*/
+			case GP_BRUSH_FWRD_LARGE:	/* Fall through*/
+			case GP_BRUSH_BACK_LARGE:
+				m_priv->width  = BRUSH_WIDTH;
+				m_priv->height = BRUSH_HEIGHT;
+				break;
+			case GP_BRUSH_RECT_MEDIUM:	/* Fall through*/
+			case GP_BRUSH_ROUND_MEDIUM:	/* Fall through*/
+			case GP_BRUSH_FWRD_MEDIUM:	/* Fall through*/
+			case GP_BRUSH_BACK_MEDIUM:
+				m_priv->width = BRUSH_WIDTH / 2;
+				m_priv->height = BRUSH_WIDTH / 2;
+				break;
+			case GP_BRUSH_RECT_SMALL:	/* Fall through*/
+			case GP_BRUSH_ROUND_SMALL:	/* Fall through*/
+			case GP_BRUSH_FWRD_SMALL:	/* Fall through*/
+			case GP_BRUSH_BACK_SMALL:	/* Fall through*/
+				m_priv->width = BRUSH_WIDTH / 4;
+				m_priv->height = BRUSH_WIDTH / 4;
+				break;
+			default:
+				return;
+		}
+		
+	/* Favor odd sized brush sizes. They look better */
+	if(0 == m_priv->width % 2){
+		m_priv->width++;
+	}
+	if(0 == m_priv->height % 2){
+		m_priv->height++;
+	}
+}
 
+/* Create a gc if the current fore and back colors are the same
+ */
+static GdkGC *color_for_alphaing(GtkWidget *widget, GdkGC *fg, GdkGC *bg)
+{
+	GdkGC *gc = NULL;
+	GdkGCValues fgvalues, bgvalues;
+	gint i;
 
+	gdk_gc_get_values(fg, &fgvalues);
+	gdk_gc_get_values(bg, &bgvalues);
 
+	/* Create a gc if the colors are the same */
+	if(fgvalues.foreground.pixel == bgvalues.background.pixel)
+	{
+		/* Create a color different from the fore color */
+		bgvalues.background.red   = 0;
+		bgvalues.background.green = 0;
+		bgvalues.background.blue  = 0;
 
+		for(i = 0; i < 255; i++)
+		{
+			bgvalues.background.pixel = i;
+			bgvalues.background.red   = i * 256;
+			
+			/* Create the gc and set the new color */
+			if(fgvalues.foreground.pixel != bgvalues.background.pixel)
+			{
+				gc = gdk_gc_new(widget->window);
 
+				gdk_gc_set_rgb_bg_color(gc, &bgvalues.background);
+				gdk_gc_set_rgb_fg_color(gc, &bgvalues.background);
+
+				gdk_gc_get_values(gc, &bgvalues);
+
+				return gc;
+			}
+		}
+	}
+	
+	/* Return NULL gc if not */
+	return gc;
+}
+
+/* This func should go in another module */
+static void draw_crosshair(GdkPixbuf *pixbuf, GPBrushType type)
+{
+	int width, height, rowstride, n_channels;
+	guint color = 0x00000000;
+
+	/* Ignore pixbuf brushes */
+	if(GP_BRUSH_TYPE_PIXBUF == type){ return; }
+	
+	n_channels = gdk_pixbuf_get_n_channels (pixbuf);
+	g_assert (gdk_pixbuf_get_colorspace (pixbuf) == GDK_COLORSPACE_RGB);
+	g_assert (gdk_pixbuf_get_bits_per_sample (pixbuf) == 8);
+	g_assert (gdk_pixbuf_get_has_alpha (pixbuf));
+	g_assert (n_channels == 4);
+
+	width = gdk_pixbuf_get_width (pixbuf);
+	height = gdk_pixbuf_get_height (pixbuf);
+
+	{
+		int j, i, npix = 19;
+		int center; /* Center of pixbuf in both x & y */
+		
+		center = width / 2;
+		color = 0;
+
+		for(i = center - npix / 2, j = npix - 1; i < 8; i++, j--){
+			brush_set_pixel(pixbuf, color, center, i);
+			brush_set_pixel(pixbuf, color, center, j);
+			brush_set_pixel(pixbuf, color, i, center);
+			brush_set_pixel(pixbuf, color, j, center);
+			color = ~color;
+		}
+	}
+}
+
+/* This func should go in another module */
+#define getr(x) ((((x)>>(16))&(0x0FF)))
+#define getg(x) ((((x)>>(8))&(0x0FF)))
+#define getb(x) (((x)&(0x0FF)))
+static void brush_set_pixel(GdkPixbuf *pixbuf, gint color, gint x, gint y)
+{
+	guchar *pixels, *p;
+	int width, height, rowstride, n_channels;
+
+	n_channels = gdk_pixbuf_get_n_channels (pixbuf);
+	width = gdk_pixbuf_get_width (pixbuf);
+	height = gdk_pixbuf_get_height (pixbuf);
+	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
+	pixels = gdk_pixbuf_get_pixels (pixbuf);
+	
+	if((x >= 0) && (x <= width))
+	{
+		if((y >= 0) && (y <= height))
+		{
+			p = pixels + (y * rowstride + x * n_channels);
+			p[0] = getr(color);/*red*/
+			p[1] = getg(color);/*green*/
+			p[2] = getb(color);/*blue*/
+			p[3] = 0xFF;
+		}
+	}	
+}

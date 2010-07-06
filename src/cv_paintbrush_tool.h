@@ -23,7 +23,25 @@
 
 #include "common.h"
 
+typedef enum{
+	GP_BRUSH_RECT_LARGE,
+	GP_BRUSH_RECT_MEDIUM,
+	GP_BRUSH_RECT_SMALL,
+	GP_BRUSH_ROUND_LARGE,
+	GP_BRUSH_ROUND_MEDIUM,
+	GP_BRUSH_ROUND_SMALL,
+	GP_BRUSH_FWRD_LARGE,
+	GP_BRUSH_FWRD_MEDIUM,
+	GP_BRUSH_FWRD_SMALL,
+	GP_BRUSH_BACK_LARGE,
+	GP_BRUSH_BACK_MEDIUM,
+	GP_BRUSH_BACK_SMALL,
+	GP_BRUSH_MAX
+}GPBrushSize;
+
 gp_tool * tool_paintbrush_init ( gp_canvas * canvas );
 void notify_brush_of_fg_color_change(void);
+
+void on_brush_size_toggled(GtkWidget *widget, gpointer data);
 
 #endif
