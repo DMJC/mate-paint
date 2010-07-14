@@ -30,6 +30,7 @@
 #include "gp_point_array.h"
 #include "undo.h"
 #include "file.h"
+#include "toolbar.h"
 
 
 /* mspaint's airbrushes widths are 25, 17, 9 */
@@ -49,6 +50,8 @@ static void draw_airbrush(GdkDrawable *drawable);
 static gboolean timer_func(gpointer data);
 static gint pt_in_circle(gint center_x, gint center_y, gint radius, gint x, gint y);
 
+static GdkPixmap *copy_pixmap(GdkPixmap *pixmap);
+
 /*Member functions*/
 static gboolean	button_press	( GdkEventButton *event );
 static gboolean	button_release	( GdkEventButton *event );
@@ -65,13 +68,14 @@ typedef struct {
 	gp_tool			tool;
 	gp_canvas *		cv;
 	GdkGC *			gc;
-    gp_point_array  *pa;
-	guint			button;
+    guint			button;
 	gboolean 		is_draw;
     GdkPoint		pt;		/* Location of mouse */
     gboolean		ret;	/* Variable to control timer function */
 	gint			diam;	/* Diameter of brush circle */
     gint			rad;	/* Radius of brush circle */
+    gint			x_min,y_min,x_max,y_max;
+    GdkPixmap *		pixmap;
 } private_data;
 
 static private_data		*m_priv = NULL;
@@ -85,8 +89,7 @@ create_private_data( void )
 		m_priv->cv		=	NULL;
 		m_priv->gc		=	NULL;
 		m_priv->button	=	NONE_BUTTON;
-        m_priv->pa      =   gp_point_array_new();
-		m_priv->is_draw	=	FALSE;
+        m_priv->is_draw	=	FALSE;
 		m_priv->diam	=	DIAMETER;
 		m_priv->rad		=	RADIUS;
 	}
@@ -95,8 +98,13 @@ create_private_data( void )
 static void
 destroy_private_data( void )
 {
-    gp_point_array_free( m_priv->pa );
-	g_free (m_priv);
+    if(GDK_IS_PIXMAP(m_priv->pixmap))
+	{
+		g_object_unref(m_priv->pixmap);
+		m_priv->pixmap = NULL;
+	}
+
+    g_free (m_priv);
 	m_priv = NULL;
 }
 
@@ -118,6 +126,7 @@ tool_airbrush_init ( gp_canvas * canvas )
 static gboolean
 button_press ( GdkEventButton *event )
 {
+	
 	if ( event->type == GDK_BUTTON_PRESS )
 	{
 		if ( event->button == LEFT_BUTTON )
@@ -131,21 +140,31 @@ button_press ( GdkEventButton *event )
 		m_priv->is_draw = !m_priv->is_draw;
 		if( m_priv->is_draw ) m_priv->button = event->button;
 
-        gp_point_array_clear ( m_priv->pa );
-        gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
-		m_priv->pt.x = (gint)event->x;
+        m_priv->pt.x = (gint)event->x;
 		m_priv->pt.y = (gint)event->y;
 	
 		/* Offset so we draw right under mouse pointer */
 		m_priv->pt.x -= m_priv->rad;
 		m_priv->pt.y -= m_priv->rad;
-	
+		
+		m_priv->x_min = m_priv->x_max = m_priv->pt.x;
+		m_priv->y_min = m_priv->y_max = m_priv->pt.y;
+		
+		if(GDK_IS_PIXMAP(m_priv->pixmap))
+		{
+			g_object_unref(m_priv->pixmap);
+			m_priv->pixmap = NULL;
+		}
+
+		/* Copy pixbuf before changes */
+		m_priv->pixmap = copy_pixmap(m_priv->cv->pixmap);
+
 		draw_airbrush(m_priv->cv->pixmap);
 	
 		m_priv->ret = TRUE;
 		g_timeout_add(125, timer_func, NULL);
 		
-		printf("airbrush button_press\n");
+		//printf("airbrush button_press\n");
 
 		if( !m_priv->is_draw ) gtk_widget_queue_draw ( m_priv->cv->widget );
 	}
@@ -164,14 +183,12 @@ button_release ( GdkEventButton *event )
 		{
 			if( m_priv->is_draw )
 			{
-                gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
-                save_undo ();
 				draw_in_pixmap (m_priv->cv->pixmap);
+                save_undo ();
 				file_set_unsave ();
 			}
 			gtk_widget_queue_draw ( m_priv->cv->widget );
 			m_priv->is_draw = FALSE;
-            // gp_point_array_clear ( m_priv->pa );
 		}
 	}
 	
@@ -204,8 +221,7 @@ button_motion ( GdkEventMotion *event )
 		m_priv->pt.x -= m_priv->rad;
 		m_priv->pt.y -= m_priv->rad;
 		
-        gp_point_array_append ( m_priv->pa, (gint)event->x, (gint)event->y );
-		gtk_widget_queue_draw ( m_priv->cv->widget );
+        gtk_widget_queue_draw ( m_priv->cv->widget );
 	}
 	return TRUE;
 }
@@ -254,9 +270,6 @@ destroy ( gpointer data  )
 static void
 draw_in_pixmap ( GdkDrawable *drawable )
 {
-	/*GdkPoint *	points		=	gp_point_array_data (m_priv->pa);
-	gint		n_points	=	gp_point_array_size (m_priv->pa);
-	*/
 	draw_airbrush(drawable);
 	//printf("draw_in_pixmap ");
 }
@@ -265,6 +278,15 @@ static void draw_airbrush(GdkDrawable *drawable)
 {
 	gint x, y, i;
 
+	if (m_priv->pt.x <= m_priv->x_min)
+		m_priv->x_min = m_priv->pt.x;
+	if (m_priv->pt.x > m_priv->x_max)
+		m_priv->x_max = m_priv->pt.x;
+	if (m_priv->pt.y <= m_priv->y_min)
+		m_priv->y_min = m_priv->pt.y;
+	if (m_priv->pt.y > m_priv->y_max)
+		m_priv->y_max = m_priv->pt.y;
+	
 	for(i = 0; i < NTIMES; i++)
 	{
 		x = m_priv->pt.x + get_rnum(m_priv->diam);
@@ -284,7 +306,7 @@ static gboolean timer_func(gpointer data)
 	/* Kill it before it draws anything else */
 	if(!m_priv->ret)
 	{
-		printf("Debug: timer_func ");
+		//printf("Debug: timer_func ");
 		return m_priv->ret;
 	}
 	
@@ -307,35 +329,42 @@ static gint pt_in_circle(gint center_x, gint center_y, gint radius, gint x, gint
 static void     
 save_undo ( void )
 {
-/********
-    GdkRectangle    rect;
-    GdkRectangle    rect_max;
-    GdkBitmap       *mask;
-    GdkGC	        *gc_mask;
-    gp_point_array  *pa;
-    GdkPoint        *points;
-    gint	        n_points;
+	gint w,h;
+	GdkRectangle rect;
+	
+	rect.x		=	m_priv->x_min;
+	rect.y		=	m_priv->y_min;
+	rect.width	=	m_priv->x_max - m_priv->x_min + m_priv->diam;
+	rect.height	=	m_priv->y_max - m_priv->y_min + m_priv->diam;
 
-    pa = gp_point_array_new ();
-    gp_point_array_copy ( m_priv->pa, pa );
-    points 		=	gp_point_array_data ( pa );
-    n_points	=	gp_point_array_size ( pa );
+	if (rect.x<0) rect.x = 0;
+	if (rect.y<0) rect.y = 0;
+	gdk_drawable_get_size ( m_priv->cv->pixmap, &w, &h );
+	if (rect.width>w) rect.width=w;
+	if (rect.height>h) rect.height=h;
+    
+    undo_add ( &rect, NULL, m_priv->pixmap, TOOL_AIRBRUSH);
+    
+	
+	g_print ("save_undo\n");
+}
 
-    cv_get_rect_size ( &rect_max );
-    gp_point_array_get_clipbox ( pa, &rect, m_priv->diam, &rect_max );
-    undo_create_mask ( rect.width, rect.height, &mask, &gc_mask );
-    gp_point_array_offset ( pa, -rect.x, -rect.y);
+static GdkPixmap *copy_pixmap(GdkPixmap *pixmap)
+{
+	GdkPixmap *pixmap_copy = NULL;
+	gint w, h;
 
-    printf("Debug: airbrush save_undo\n");
-    gdk_draw_drawable(mask, gc_mask, m_priv->cv->pixmap, rect.x, rect.y,
-    				  0, 0, rect.width, rect.height);
-
-    undo_add ( &rect, mask, NULL);
-
-    gp_point_array_free ( pa );
-    g_object_unref (gc_mask);
-    g_object_unref (mask);
-  **********/
- }
-
-
+	if(!GDK_IS_PIXMAP(pixmap)){
+		return NULL;
+	}
+	
+	gdk_drawable_get_size(GDK_DRAWABLE( pixmap ), &w, &h);
+	pixmap_copy = gdk_pixmap_new(GDK_DRAWABLE( pixmap ), w, h, -1);
+	gdk_draw_drawable (	pixmap_copy,
+		            	m_priv->cv->gc_fg,
+			            pixmap,
+			            0, 0,
+			            0, 0,
+			            w, h );
+	return pixmap_copy;
+}
