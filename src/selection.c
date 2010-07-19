@@ -56,7 +56,6 @@ typedef struct {
     gint            floating : 1;
 } PrivData;
 
-
 /* private data */
 static PrivData *m_priv = NULL;
 
@@ -451,6 +450,81 @@ draw_borders ( GdkDrawable *drawing, GdkGC *gc )
 
 
 void
+gp_selection_draw ( GdkDrawable *gdkd )
+{
+    g_return_if_fail ( m_priv != NULL );
+    if ( m_priv->active )
+    {
+        GpSelBox *clipbox   = &m_priv->boxes[SEL_CLIPBOX];
+        gint x,y,w,h;
+        gp_canvas *cv;
+        gint8 dash_list[]	=	{ 3, 3 };
+        GdkGC *gc;
+
+        cv = cv_get_canvas ();
+        gc	=	gdk_gc_new ( cv->widget->window );
+        gdk_gc_set_function ( gc, GDK_INVERT );
+        gdk_gc_set_dashes ( gc, 0, dash_list, 2 );
+        gdk_gc_set_line_attributes ( gc, 1, GDK_LINE_ON_OFF_DASH,
+                                     GDK_CAP_NOT_LAST, GDK_JOIN_ROUND );
+
+        x = MIN(clipbox->p0.x,clipbox->p1.x);
+        y = MIN(clipbox->p0.y,clipbox->p1.y);
+        w = ABS(clipbox->p1.x - clipbox->p0.x)+1;
+        h = ABS(clipbox->p1.y - clipbox->p0.y)+1;
+
+
+        if ( m_priv->floating )
+        {
+            cairo_t     *cr;
+            cr  =   gdk_cairo_create ( cv->drawing );
+            cairo_set_line_width (cr, 1.0);
+            cairo_set_source_rgba (cr, 0.7, 0.9, 1.0, 0.3);
+            cairo_rectangle ( cr, x, y, w, h); 
+            cairo_fill (cr);
+            cairo_destroy (cr);
+        }
+        else
+        {
+            /* Had to add this here because the selection
+             * was being erased when changing tools. Don't
+             * know if this was by design or not, but just
+             * doesn't seem right. This is just temporary
+             * until we find out.
+             */
+            if(GDK_IS_DRAWABLE(gdkd)){
+            	gp_image_draw ( m_priv->image,
+                            gdkd,
+                            cv->gc_fg,
+                            x,y,w,h );
+            }
+            else{
+            	gp_image_draw ( m_priv->image,
+                            cv->drawing,
+                            cv->gc_fg,
+                            x,y,w,h );
+        	}
+        }
+
+
+        if ( m_priv->show_borders )
+        {
+            draw_borders ( cv->drawing, gc );
+        }
+        else
+        {
+            gdk_draw_rectangle ( cv->drawing, gc, FALSE, 
+                                 x, y, w-1, h-1 );
+        }
+
+        
+        g_object_unref ( gc );
+        
+    }    
+}
+
+/***
+void
 gp_selection_draw ( void )
 {
     g_return_if_fail ( m_priv != NULL );
@@ -487,10 +561,12 @@ gp_selection_draw ( void )
         }
         else
         {
+            printf("gp ");
             gp_image_draw ( m_priv->image,
                             cv->drawing,
                             cv->gc_fg,
                             x,y,w,h );
+        	gx = x; gy = y; gw = w; gh = h;
         }
 
 
@@ -509,4 +585,6 @@ gp_selection_draw ( void )
         
     }    
 }
+
+***/
 

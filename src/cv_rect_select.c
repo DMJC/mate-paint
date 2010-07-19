@@ -189,7 +189,7 @@ button_motion ( GdkEventMotion *event )
 static void	
 draw ( void )
 {
-    gp_selection_draw ();
+    gp_selection_draw (NULL);
 }
 
 static void 
@@ -201,9 +201,10 @@ reset ( void )
 static void 
 destroy ( gpointer data  )
 {
+	g_print("rect select tool destroy\n");
+	gp_selection_draw (m_priv->cv->pixmap);
     gtk_widget_queue_draw ( m_priv->cv->widget );
 	destroy_private_data ();
-	g_print("rect select tool destroy\n");
 }
 
 

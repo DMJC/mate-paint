@@ -243,9 +243,9 @@ guint get_fg_color_from_gc(GdkGC *gc)
 	values.foreground.green /= 256;
 	values.foreground.blue /= 256;
 	
-	color = col((guchar)values.foreground.red,
+	color = col_rgba((guchar)values.foreground.red,
 	            (guchar)values.foreground.green,
-	            (guchar)values.foreground.blue);
+	            (guchar)values.foreground.blue, 0xFF);
 	
 	return color;
 }

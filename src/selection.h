@@ -38,7 +38,7 @@ void            gp_selection_set_floating               ( gboolean floating );
 GdkCursorType   gp_selection_get_cursor                 ( GdkPoint *p );
 gboolean        gp_selection_start_action               ( GdkPoint *p );
 void            gp_selection_do_action                  ( GdkPoint *p );
-void            gp_selection_draw                       ( void );
+void            gp_selection_draw                       ( GdkDrawable *gdkd );
 
 
 #endif /*__SELECTION_H__*/

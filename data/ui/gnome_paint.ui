@@ -161,6 +161,7 @@
                 </child>
               </object>
             </child>
+            <!-- 
             <child>
               <object class="GtkMenuItem" id="menuitem3">
                 <property name="visible">True</property>
@@ -182,6 +183,7 @@
                 <property name="use_underline">True</property>
               </object>
             </child>
+            -->
             <child>
               <object class="GtkMenuItem" id="menuitem_help">
                 <property name="visible">True</property>

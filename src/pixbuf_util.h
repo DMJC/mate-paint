@@ -6,11 +6,15 @@
 					  ((unsigned short) (g) << 8)) | \
 					  (((unsigned int) (unsigned char) (r)) << 16)))
 
-#define col_rgba(r,g,b,a) ( (((guint)(guchar)(a))<<24) | col(r,g,b) )
+#define col_rgba(r,g,b,a) ((guint)(((guchar)(a)| \
+						  ((gushort)(b)<<8))| \
+						  (((guint)(guchar)(g))<<16)| \
+						  (((guint)(guchar)(r))<<24)))
 
-#define getr(x) (((x >> 16) & 0x0FF))
-#define getg(x) (((x >> 8) & 0x0FF))
-#define getb(x) ((x & 0x0FF))
+#define getr(x) (((x >> 24) & 0x0FF))
+#define getg(x) (((x >> 16) & 0x0FF))
+#define getb(x) (((x >> 8) & 0x0FF))
+#define geta(x) ((x & 0x0FF))
 
 GdkRectangle fill_draw(GdkDrawable *drawable, GdkGC *gc, guint fill_color,
 					   guint x, guint y);
