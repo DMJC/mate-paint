@@ -76,6 +76,11 @@ void			gp_image_set_diff_pixmap	( GpImage *image,
 				                              guint x_offset, 
 				                              guint y_offset );
 
+void			gp_image_make_color_transparent		( GpImage *image,
+													  guchar r,
+													  guchar g,
+                                		      		  guchar b,
+                                		      		  guchar a );
 
 G_END_DECLS
 

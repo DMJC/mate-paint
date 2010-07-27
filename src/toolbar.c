@@ -291,6 +291,27 @@ on_rect2_toggled (GtkToggleToolButton *button, gpointer user_data)
 	}
 }
 
+/*********************** TRANSPARENT & OPAQUE BUTTONS ***********************/
+
+void /* Toggle opaque button */
+on_sel1_toggled (GtkToggleToolButton *button, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( button ) )
+	{
+		cv_set_transparent ( FALSE );
+	}
+}
+
+void /* Toggle transparent button */
+on_sel2_toggled (GtkToggleToolButton *button, gpointer user_data)
+{
+	if ( gtk_toggle_tool_button_get_active ( button ) )
+	{
+		cv_set_transparent ( TRUE );
+	}
+}
+/****************************************************************************/
+
 /*Option Bar realize funcitons*/
 void 
 on_notebook_realize   (GtkObject *object, gpointer user_data)

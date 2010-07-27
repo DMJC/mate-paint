@@ -508,6 +508,7 @@
                                       <object class="GtkRadioToolButton" id="sel1">
                                         <property name="active">True</property>
                                         <signal name="realize" handler="on_sel1_realize"/>
+                                        <signal name="toggled" handler="on_sel1_toggled"/>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -518,6 +519,7 @@
                                       <object class="GtkRadioToolButton" id="sel2">
                                         <property name="group">sel1</property>
                                         <signal name="realize" handler="on_sel2_realize"/>
+                                        <signal name="toggled" handler="on_sel2_toggled"/>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>

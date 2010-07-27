@@ -54,7 +54,10 @@ typedef struct {
     gint            active : 1;
     gint            show_borders : 1;
     gint            floating : 1;
+    gboolean		transparent;
 } PrivData;
+
+static gboolean gp_selection_get_bg_color_rgb(guchar *r, guchar *g, guchar *b);
 
 /* private data */
 static PrivData *m_priv = NULL;
@@ -282,6 +285,16 @@ gp_selection_set_floating ( gboolean floating )
             m_priv->image = gp_image_new_from_pixmap ( cv->pixmap, &rect, TRUE );
             gdk_draw_rectangle ( cv->pixmap, cv->gc_bg, TRUE, 
                                      rect.x, rect.y, rect.width, rect.height );        
+        	/* Add transparancy if necessary */
+        	if(cv->transparent)
+        	{
+            	guchar r, g, b;
+
+            	m_priv->transparent = cv->transparent;
+            	gp_selection_get_bg_color_rgb(&r, &g, &b);
+            	gp_image_make_color_transparent( m_priv->image, r, g, b, 0);
+            	
+            }
         }
     }
 }
@@ -486,6 +499,21 @@ gp_selection_draw ( GdkDrawable *gdkd )
         }
         else
         {
+            /* Make transparent/opaque */
+            if(cv->transparent != m_priv->transparent)
+            {
+            	guchar r, g, b, a = 0xFF;
+
+            	m_priv->transparent = cv->transparent;
+            	gp_selection_get_bg_color_rgb ( &r, &g, &b );
+            	if(cv->transparent)
+            	{
+            		a = 0;
+            	}
+            	gp_image_make_color_transparent ( m_priv->image, r, g, b, a );
+            	
+            }
+            
             /* Had to add this here because the selection
              * was being erased when changing tools. Don't
              * know if this was by design or not, but just
@@ -521,6 +549,30 @@ gp_selection_draw ( GdkDrawable *gdkd )
         g_object_unref ( gc );
         
     }    
+}
+
+static gboolean gp_selection_get_bg_color_rgb(guchar *r, guchar *g, guchar *b)
+{
+	gp_canvas *cv;
+	
+	cv = cv_get_canvas ();
+	if((cv) && (r) && (g) && (b))
+	{
+		GdkColor color;
+		GdkGCValues values;
+		GdkColormap* colormap = gdk_colormap_get_system();
+		
+		gdk_gc_get_values (cv->gc_bg, &values);
+		gdk_colormap_query_color(colormap, values.foreground.pixel, &color);
+
+		*r = color.red >>= 8;
+		*g = color.green >>= 8;
+		*b = color.blue >>= 8;
+		
+		return TRUE;
+	}
+	
+	return FALSE;
 }
 
 /***

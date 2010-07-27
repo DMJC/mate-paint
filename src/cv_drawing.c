@@ -113,6 +113,18 @@ cv_set_filled ( gp_filled filled )
 	gdk_window_process_updates (gtk_widget_get_parent_window(cv.widget), FALSE);
 }
 
+/* Set whether or not selections are transparent.
+ * TRUE   - if transparent
+ * FALSE  - if opaque
+ */
+void
+cv_set_transparent ( gboolean transparent)
+{
+	cv.transparent	=	transparent;
+	printf("cv_set_transparent() %d\n", cv.transparent);
+	gtk_widget_queue_draw ( cv.widget );
+	gdk_window_process_updates (gtk_widget_get_parent_window(cv.widget), FALSE);
+}
 
 void
 cv_set_tool ( gp_tool_enum tool )
@@ -276,6 +288,7 @@ on_cv_drawing_realize (GtkWidget *widget, gpointer user_data)
 	                             GDK_CAP_ROUND, GDK_JOIN_ROUND );
     
 	cv_set_filled ( FILLED_NONE );
+	cv_set_transparent ( FALSE );
 	cv_resize_set_canvas ( &cv );
 	cv_create_pixmap ( 320, 200, TRUE);
 }

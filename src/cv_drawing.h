@@ -40,7 +40,7 @@ GdkPixbuf *	cv_get_pixbuf			( void );
 gp_canvas * cv_get_canvas			( void );
 void        cv_get_rect_size        ( GdkRectangle *rectangle );
 void        cv_redraw               ( void );
-
+void        cv_set_transparent      ( gboolean transparent);
 
 
 /* GUI CallBacks */

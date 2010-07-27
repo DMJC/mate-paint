@@ -125,5 +125,8 @@ void on_rect0_toggled					(GtkToggleToolButton *button, gpointer user_data);
 void on_rect1_toggled					(GtkToggleToolButton *button, gpointer user_data);
 void on_rect2_toggled					(GtkToggleToolButton *button, gpointer user_data);
 
+/* Toggle opaque and transparent buttons */
+void on_sel1_toggled					(GtkToggleToolButton *button, gpointer user_data);
+void on_sel2_toggled					(GtkToggleToolButton *button, gpointer user_data);
 
 #endif /*__TOOLBAR_H__*/
