@@ -121,7 +121,7 @@ void
 cv_set_transparent ( gboolean transparent)
 {
 	cv.transparent	=	transparent;
-	printf("cv_set_transparent() %d\n", cv.transparent);
+	//printf("cv_set_transparent() %d\n", cv.transparent);
 	gtk_widget_queue_draw ( cv.widget );
 	gdk_window_process_updates (gtk_widget_get_parent_window(cv.widget), FALSE);
 }
