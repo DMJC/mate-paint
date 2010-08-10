@@ -71,7 +71,9 @@ gnome_paint_SOURCES = \
 	selection.c  \
 	selection.h  \
 	cv_eraser_tool.c  \
-	cv_eraser_tool.h
+	cv_eraser_tool.h  \
+	image_menu.c  \
+	image_menu.h
 
 gnome_paint_CFLAGS = \
 	-DG_DISABLE_DEPRECATED\

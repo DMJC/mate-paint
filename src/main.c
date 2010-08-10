@@ -46,6 +46,7 @@ void		on_menu_about_activate  ( GtkMenuItem *menuitem, gpointer user_data );
 
 static void init_eraser				(GtkBuilder *builder);
 static void init_paint_brush		(GtkBuilder *builder);
+static void save_the_children		(GtkBuilder *builder);
 
 void		
 on_menu_new_activate( GtkMenuItem *menuitem, gpointer user_data)
@@ -152,17 +153,24 @@ create_window (void)
 {
 	GtkWidget		*window;
 	GtkWidget		*widget;
+	GtkWidget		*drawing;
 	GtkBuilder		*builder;
 
 	builder = gtk_builder_new ();
     gtk_builder_add_from_file (builder, UI_FILE, NULL);
     window = GTK_WIDGET (gtk_builder_get_object (builder, "window"));
 	g_assert ( window );
+
+    widget = GTK_WIDGET (gtk_builder_get_object (builder, "flip_roate_dialog"));
+    drawing = GTK_WIDGET (gtk_builder_get_object (builder, "cv_drawing"));
+	g_object_set_data(G_OBJECT(drawing), "flip_roate_dialog", widget);
+
 	file_set_parent_window ( GTK_WINDOW(window) );	
     gtk_builder_connect_signals (builder, NULL);          
 
 	init_eraser (builder);
 	init_paint_brush (builder);
+	save_the_children (builder);
 
     g_object_unref (G_OBJECT (builder));	
 	
@@ -268,3 +276,52 @@ static void init_paint_brush(GtkBuilder *builder)
 		            G_CALLBACK (on_brush_size_toggled), (gpointer)&(size[i]));
 	}
 }
+
+static void save_the_children (GtkBuilder *builder)
+{
+	GtkWidget *child, *drawing;
+
+	drawing = GTK_WIDGET (gtk_builder_get_object (builder, "cv_drawing"));
+	child = GTK_WIDGET (gtk_builder_get_object (builder, "tool-rect-select"));
+	g_object_set_data(G_OBJECT(drawing), "tool-rect-select", (gpointer)child);
+
+	/* Flip rotate dlg radio buttons */
+	child = GTK_WIDGET (gtk_builder_get_object (builder, "radiobutton_rotate"));
+	g_object_set_data(G_OBJECT(drawing), "radiobutton_rotate", (gpointer)child);
+	child = GTK_WIDGET (gtk_builder_get_object (builder, "radiobutton_rotate_90"));
+	g_object_set_data(G_OBJECT(drawing), "radiobutton_rotate_90", (gpointer)child);
+	child = GTK_WIDGET (gtk_builder_get_object (builder, "radiobutton_rotate_180"));
+	g_object_set_data(G_OBJECT(drawing), "radiobutton_rotate_180", (gpointer)child);
+	child = GTK_WIDGET (gtk_builder_get_object (builder, "radiobutton_rotate_270"));
+	g_object_set_data(G_OBJECT(drawing), "radiobutton_rotate_270", (gpointer)child);
+
+	/* Attributes dlg */
+	child = GTK_WIDGET (gtk_builder_get_object (builder, "dialog_attributes"));
+	g_object_set_data(G_OBJECT(drawing), "dialog_attributes", (gpointer)child);
+
+	/* Opaque/transparent buttons */
+	child = GTK_WIDGET (gtk_builder_get_object (builder, "sel1"));
+	g_object_set_data(G_OBJECT(drawing), "sel1", (gpointer)child);
+	child = GTK_WIDGET (gtk_builder_get_object (builder, "sel2"));
+	g_object_set_data(G_OBJECT(drawing), "sel2", (gpointer)child);
+
+	/* Attributes dlg widgets */
+	child = GTK_WIDGET (gtk_builder_get_object (builder, "attributes_entry1"));
+	g_object_set_data(G_OBJECT(drawing), "attributes_entry1", (gpointer)child);
+	child = GTK_WIDGET (gtk_builder_get_object (builder, "attributes_entry2"));
+	g_object_set_data(G_OBJECT(drawing), "attributes_entry2", (gpointer)child);
+	child = GTK_WIDGET (gtk_builder_get_object (builder, "attributes_radiobutton1"));
+	g_object_set_data(G_OBJECT(drawing), "attributes_radiobutton1", (gpointer)child);
+	child = GTK_WIDGET (gtk_builder_get_object (builder, "attributes_radiobutton2"));
+	g_object_set_data(G_OBJECT(drawing), "attributes_radiobutton2", (gpointer)child);
+	
+	child = GTK_WIDGET (gtk_builder_get_object (builder, "attributes_label6"));
+	g_object_set_data(G_OBJECT(drawing), "attributes_label6", (gpointer)child);
+	
+
+	//child = GTK_WIDGET (gtk_builder_get_object (builder, ""));
+	//g_object_set_data(G_OBJECT(drawing), "", (gpointer)child);
+}
+
+
+

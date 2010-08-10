@@ -82,6 +82,15 @@ void			gp_image_make_color_transparent		( GpImage *image,
                                 		      		  guchar b,
                                 		      		  guchar a );
 
+void            gp_image_invert_colors       ( GpImage *image);
+void            gp_image_rotate              ( GpImage *image, gint angle );
+void            gp_image_flip                ( GpImage *image,
+                                               gboolean horizontal );
+
+GpImage *		gp_image_new_from_pixbuf	 ( GdkPixbuf *pixbuf,
+											   gboolean has_alpha  );
+GpImage * 		gp_image_copy				 ( GpImage *image );
+
 G_END_DECLS
 
 #endif /* _GP_IMAGE_H_ */

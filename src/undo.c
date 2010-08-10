@@ -111,21 +111,24 @@ undo_add (GdkRectangle *rect, GdkBitmap * mask, GdkPixmap *background, gp_tool_e
 
     if (mask != NULL)
     {
+        printf("undo_add() line: %d mask: %p\n", __LINE__, mask);
         image = gp_image_new_from_pixmap ( cv->pixmap, rect, TRUE );
         gp_image_set_mask ( image, mask );
     }
     else
     if ( background != NULL )
     {
+        printf("undo_add() line: %d\n", __LINE__);
         image = gp_image_new_from_pixmap ( background, rect, TRUE );
         gp_image_set_diff_pixmap ( image, cv->pixmap, rect->x, rect->y );
     }
     else
     {
+        printf("undo_add() line: %d\n", __LINE__);
         image = gp_image_new_from_pixmap ( cv->pixmap, rect, FALSE );        
     }
 
-    
+    printf("undo_add() line: %d\n", __LINE__);
 	undo	=	undo_image_new (image, rect->x, rect->y, tool );
 	g_queue_push_head	( undo_queue, undo );
 	g_object_unref (image);
@@ -335,6 +338,22 @@ draw_undo ( GpUndo *undo )
 		GpUndoImage	*t_data	=	(GpUndoImage*)undo->t_data;
         GpImage     *image, *redo_image;
         image       =   gp_image_new_from_data ( t_data->im_data );
+
+        /* Need resize canvas on undo rotate.
+         * cv_set_pixbuf() automagically does this for us */
+        if(TOOL_ROTATE_CANVAS == t_data->tool)
+        {
+        	GdkPixbuf *pb = gp_image_get_pixbuf(image);
+        	cv_set_pixbuf(pb);
+        	g_object_unref(pb);
+        }
+        if(TOOL_RECT_SELECT == t_data->tool){
+        	if(gp_selection_query () )
+        	{
+        		/* Don't draw selection. Clear the selection frame */
+        		gp_selection_draw_and_clear ( FALSE );
+        	}
+        }
         redo_image  =   get_redo_image ( image, t_data->x, t_data->y );
         ret_undo	=	undo_image_new (redo_image, t_data->x, t_data->y, t_data->tool );
         g_object_unref (redo_image);

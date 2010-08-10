@@ -58,6 +58,7 @@ typedef struct
 	gp_filled		filled;
 	gint			line_width;
 	gboolean		transparent;
+	GdkPixbuf		*pb_clipboard;
 } gp_canvas;
 
 /* Tool Type*/

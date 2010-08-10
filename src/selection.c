@@ -25,6 +25,7 @@
 #include "selection.h"
 #include "cv_drawing.h"
 #include "gp-image.h"
+#include "undo.h"
 
 typedef enum {
     SEL_TOP_LEFT,
@@ -55,6 +56,7 @@ typedef struct {
     gint            show_borders : 1;
     gint            floating : 1;
     gboolean		transparent;
+    GdkPixbuf		*pb_clipboard;
 } PrivData;
 
 static gboolean gp_selection_get_bg_color_rgb(guchar *r, guchar *g, guchar *b);
@@ -252,6 +254,65 @@ gp_selection_set_borders ( gboolean borders )
     update_borders ();
 }
 
+/* If pixbuf is NULL, a selection is created from the two points
+ * 's' is the top left point of a rectangle and 'e' is the bottom
+ * right. If pixbuf is not NULL a selection is created from the pixbuf
+ * and 's' is the x,y position to place the selection.
+ */
+gboolean gp_selection_create (GdkPoint *s, GdkPoint *e, GdkPixbuf *pixbuf)
+{
+	GdkPoint tmp = {0, 0};
+	gp_canvas *cv;
+	GdkPoint S, E;
+	gint w, h;
+
+	if((NULL == s) || (NULL == e)){
+		return FALSE;
+	}
+	if(NULL == m_priv){
+		return FALSE;
+	}
+	
+	S = *s ; E = *e ;
+	
+	if(GDK_IS_PIXBUF(pixbuf)){
+		m_priv->pb_clipboard = gdk_pixbuf_copy(pixbuf);
+		w = gdk_pixbuf_get_width(m_priv->pb_clipboard);
+		h = gdk_pixbuf_get_height(m_priv->pb_clipboard);
+		if(ABS(S.x - E.x) != w){
+			E.x = S.x + w;
+		}
+		if(ABS(S.y - E.y) != h){
+			E.y = S.y + h;
+		}
+		/* Allow for selection border */
+		E.x-- ; E.y-- ;
+	}
+	
+	gp_selection_set_floating ( TRUE );
+	gp_selection_set_active ( FALSE );
+	gp_selection_clipbox_set_start_point ( &S );
+	gp_selection_clipbox_set_end_point ( &E );
+	gp_selection_set_active ( TRUE );
+
+	tmp.x = ABS(S.x - E.x);
+	tmp.y = ABS(S.y - E.y);
+
+	gp_selection_start_action ( &tmp );
+
+	gp_selection_set_floating ( FALSE );
+
+	gp_selection_set_borders ( TRUE );
+	cv = cv_get_canvas ();
+    gtk_widget_queue_draw ( cv->widget );
+
+	return TRUE;
+}
+
+/* button press ---+----gp_selection_set_active ( FALSE );
+ *					`+--gp_selection_set_active ( TRUE );
+ * double click -> gp_selection_set_floating ( FALSE );
+ */
 void
 gp_selection_set_floating ( gboolean floating )
 {
@@ -269,6 +330,7 @@ gp_selection_set_floating ( gboolean floating )
         rect.height = ABS(clipbox->p1.y - clipbox->p0.y)+1;
         if ( m_priv->floating )
         {
+            printf("gp_selection_set_floating() TRUE\n");
             if ( m_priv->image != NULL )
             {
                 gp_image_draw ( m_priv->image,
@@ -281,10 +343,45 @@ gp_selection_set_floating ( gboolean floating )
         }
         else
         {
+            printf("gp_selection_set_floating() FALSE\n");
             destroy_image ();
-            m_priv->image = gp_image_new_from_pixmap ( cv->pixmap, &rect, TRUE );
-            gdk_draw_rectangle ( cv->pixmap, cv->gc_bg, TRUE, 
-                                     rect.x, rect.y, rect.width, rect.height );        
+            /* Create selection from a pixbuf */
+            if(GDK_IS_PIXBUF(m_priv->pb_clipboard))
+            {
+            	GdkPixmap *pm;
+            	gint w, h;
+
+            	w = gdk_pixbuf_get_width(m_priv->pb_clipboard);
+				h = gdk_pixbuf_get_height(m_priv->pb_clipboard);
+            	
+            	pm = gdk_pixmap_new (cv->widget->window, w, h, -1);
+            	gdk_draw_pixbuf (pm, cv->gc_fg, m_priv->pb_clipboard, 0, 0,
+								 0, 0, w, h, GDK_RGB_DITHER_NONE, 0, 0);
+				
+				m_priv->image = gp_image_new_from_pixmap ( pm, &rect, TRUE );
+            	g_object_unref(pm);
+            	g_object_unref(m_priv->pb_clipboard);
+            	m_priv->pb_clipboard = NULL;
+            }
+            /* Create selection */
+            else
+            {
+            	GdkRectangle undo_area = {0, 0, 0, 0};
+
+            	/* Save all pixmap so redraw where selection was copied from
+            	 * and where sel will be pasted - which we don't know where
+            	 * that will be. */
+            	gdk_drawable_get_size (cv->pixmap, &undo_area.width, &undo_area.height);
+            	undo_add ( &undo_area, NULL, NULL, TOOL_RECT_SELECT);
+
+            	m_priv->image = gp_image_new_from_pixmap ( cv->pixmap, &rect, TRUE );
+            	
+            	printf("   x: %d, y: %d, w: %d, h: %d\n", rect.x, rect.y,
+            											  rect.width, rect.height);
+
+            	gdk_draw_rectangle ( cv->pixmap, cv->gc_bg, TRUE, 
+                                     rect.x, rect.y, rect.width, rect.height ); 
+            }       
         	/* Add transparancy if necessary */
         	if(cv->transparent)
         	{
@@ -551,6 +648,7 @@ gp_selection_draw ( GdkDrawable *gdkd )
     }    
 }
 
+/* Get background color's rgb values */
 static gboolean gp_selection_get_bg_color_rgb(guchar *r, guchar *g, guchar *b)
 {
 	gp_canvas *cv;
@@ -575,68 +673,105 @@ static gboolean gp_selection_get_bg_color_rgb(guchar *r, guchar *g, guchar *b)
 	return FALSE;
 }
 
-/***
-void
-gp_selection_draw ( void )
+/* See if there is a selection image */
+gboolean gp_selection_query(void)
 {
-    g_return_if_fail ( m_priv != NULL );
-    if ( m_priv->active )
-    {
-        GpSelBox *clipbox   = &m_priv->boxes[SEL_CLIPBOX];
-        gint x,y,w,h;
-        gp_canvas *cv;
-        gint8 dash_list[]	=	{ 3, 3 };
-        GdkGC *gc;
-
-        cv = cv_get_canvas ();
-        gc	=	gdk_gc_new ( cv->widget->window );
-        gdk_gc_set_function ( gc, GDK_INVERT );
-        gdk_gc_set_dashes ( gc, 0, dash_list, 2 );
-        gdk_gc_set_line_attributes ( gc, 1, GDK_LINE_ON_OFF_DASH,
-                                     GDK_CAP_NOT_LAST, GDK_JOIN_ROUND );
-
-        x = MIN(clipbox->p0.x,clipbox->p1.x);
-        y = MIN(clipbox->p0.y,clipbox->p1.y);
-        w = ABS(clipbox->p1.x - clipbox->p0.x)+1;
-        h = ABS(clipbox->p1.y - clipbox->p0.y)+1;
-
-
-        if ( m_priv->floating )
-        {
-            cairo_t     *cr;
-            cr  =   gdk_cairo_create ( cv->drawing );
-            cairo_set_line_width (cr, 1.0);
-            cairo_set_source_rgba (cr, 0.7, 0.9, 1.0, 0.3);
-            cairo_rectangle ( cr, x, y, w, h); 
-            cairo_fill (cr);
-            cairo_destroy (cr);
-        }
-        else
-        {
-            printf("gp ");
-            gp_image_draw ( m_priv->image,
-                            cv->drawing,
-                            cv->gc_fg,
-                            x,y,w,h );
-        	gx = x; gy = y; gw = w; gh = h;
-        }
-
-
-        if ( m_priv->show_borders )
-        {
-            draw_borders ( cv->drawing, gc );
-        }
-        else
-        {
-            gdk_draw_rectangle ( cv->drawing, gc, FALSE, 
-                                 x, y, w-1, h-1 );
-        }
-
-        
-        g_object_unref ( gc );
-        
-    }    
+	if(m_priv){
+		if(m_priv->image){
+			return TRUE;
+		}
+	}
+	
+	return FALSE;
 }
 
-***/
+void gp_selection_invert(void)
+{
+	if(m_priv){
+		if(m_priv->image){
+			gp_image_invert_colors ( m_priv->image);
+		}
+	}
+}
 
+void gp_selection_flip(gboolean flip)
+{
+	if(m_priv){
+		if(m_priv->image){
+			gp_image_flip ( m_priv->image, flip );
+		}
+	}
+}
+
+void gp_selection_rotate(GdkPixbufRotation angle)
+{
+	if(m_priv){
+		if(m_priv->image){
+			GdkPixbuf *pixbuf;
+			GdkPoint s, e;
+			GpSelBox *clipbox;
+			GpImage *new_image;
+			gp_canvas *cv = cv_get_canvas ();
+
+			gp_image_rotate ( m_priv->image, angle );
+			pixbuf = gp_image_get_pixbuf(m_priv->image);
+
+			clipbox = &m_priv->boxes[SEL_CLIPBOX];
+			s.x = MIN(clipbox->p0.x,clipbox->p1.x);
+        	s.y = MIN(clipbox->p0.y,clipbox->p1.y);
+        	e.x = gdk_pixbuf_get_width(pixbuf);
+        	e.y = gdk_pixbuf_get_height(pixbuf);
+        	
+        	clipbox->p0.x = s.x;
+        	clipbox->p0.y = s.y;
+        	/* -1 to allow for border width */
+        	clipbox->p1.x = clipbox->p0.x + e.x - 1;
+        	clipbox->p1.y = clipbox->p0.y + e.y - 1;
+
+        	update_borders ( );
+        	
+        	g_object_unref ( m_priv->image );
+			m_priv->image = gp_image_new_from_pixbuf ( pixbuf, TRUE );
+
+			g_object_unref(pixbuf);
+		}
+	}
+}
+
+/* Return a copy of selection's image pixbuf */
+GdkPixbuf *gp_selection_get_pixbuf(void)
+{
+	if(m_priv){
+		if(m_priv->image){
+			return gp_image_get_pixbuf(m_priv->image);
+		}
+	}
+	
+	return NULL;
+}
+
+/* Clear selection. Does not clear
+ * as in destroying m_priv.
+ * draw == TRUE to draw image
+ */
+void gp_selection_draw_and_clear (gboolean draw)
+{
+	GdkPoint pt = {0, 0};
+	gp_canvas *cv = cv_get_canvas ();
+
+	g_return_if_fail( gp_selection_query() );
+	
+	pt.x = m_priv->sp.x - 1;
+	pt.y = pt.x;
+	
+	if(!draw){ g_object_unref (m_priv->image) ; m_priv->image = NULL ; }
+
+	gp_selection_set_floating ( TRUE );
+	gp_selection_set_active ( FALSE );
+	gp_selection_clipbox_set_start_point ( &pt );
+	gp_selection_clipbox_set_end_point ( &pt );
+	gp_selection_set_active ( TRUE );
+
+	gp_selection_set_borders ( FALSE );
+	gtk_widget_queue_draw ( cv->widget );
+}

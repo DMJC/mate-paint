@@ -121,7 +121,6 @@ void
 cv_set_transparent ( gboolean transparent)
 {
 	cv.transparent	=	transparent;
-	//printf("cv_set_transparent() %d\n", cv.transparent);
 	gtk_widget_queue_draw ( cv.widget );
 	gdk_window_process_updates (gtk_widget_get_parent_window(cv.widget), FALSE);
 }
@@ -227,7 +226,7 @@ cv_set_pixbuf	(const GdkPixbuf	*pixbuf)
                             0, 0);
         g_object_unref(tmp);
 		gtk_widget_queue_draw (cv.widget);
-	}	
+	}
 }
 
 GdkPixbuf *
@@ -290,7 +289,9 @@ on_cv_drawing_realize (GtkWidget *widget, gpointer user_data)
 	cv_set_filled ( FILLED_NONE );
 	cv_set_transparent ( FALSE );
 	cv_resize_set_canvas ( &cv );
+	/* TODO: sync width 7 height to attributes dlg */
 	cv_create_pixmap ( 320, 200, TRUE);
+	cv.pb_clipboard = NULL;
 }
 
 void 

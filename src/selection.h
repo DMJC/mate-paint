@@ -27,7 +27,6 @@
 
 #include <gtk/gtk.h>
 
-
 void            gp_selection_init                       ( void );
 void            gp_selection_clear                      ( void );
 void            gp_selection_clipbox_set_start_point    ( GdkPoint *p );
@@ -40,6 +39,11 @@ gboolean        gp_selection_start_action               ( GdkPoint *p );
 void            gp_selection_do_action                  ( GdkPoint *p );
 void            gp_selection_draw                       ( GdkDrawable *gdkd );
 
+gboolean        gp_selection_query                      ( void );
+gboolean		gp_selection_create						( GdkPoint *s,
+														  GdkPoint *e,
+														  GdkPixbuf *pixbuf );
+void			gp_selection_draw_and_clear				( gboolean draw );
 
 #endif /*__SELECTION_H__*/
 
