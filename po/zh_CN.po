@@ -1,0 +1,131 @@
+# Chinese translations for gnome-paint package
+# gnome-paint 杞欢鍖呯殑绠?浣撲腑鏂囩炕璇?.
+# Copyright (C) 2010 Free Software Foundation, Inc.
+# This file is distributed under the same license as the gnome-paint package.
+# Aron Xu <happyaron.xu@gmail.com>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-paint HEAD\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-06-04 20:10-0300\n"
+"PO-Revision-Date: 2010-07-28 03:52+0800\n"
+"Last-Translator: Aron Xu <happyaron.xu@gmail.com>\n"
+"Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../data/desktop/gnome-paint.desktop.in.in.h:1
+msgid "Create and Edit Drawings or Images"
+msgstr "鍒涘缓骞剁紪杈戝浘鍍?"
+
+#: ../data/desktop/gnome-paint.desktop.in.in.h:2
+msgid "Gnome Paint Drawing Editor"
+msgstr "Gnome 鐢诲浘宸ュ叿"
+
+#: ../data/ui/gnome_paint.ui.h:1
+msgid "Free select tool"
+msgstr "鑷敱閫夊彇宸ュ叿"
+
+#: ../data/ui/gnome_paint.ui.h:2
+msgid "_Color"
+msgstr "棰滆壊(_C)"
+
+#: ../data/ui/gnome_paint.ui.h:3
+msgid "_Edit"
+msgstr "缂栬緫(_E)"
+
+#: ../data/ui/gnome_paint.ui.h:4
+msgid "_File"
+msgstr "鏂囦欢(_F)"
+
+#: ../data/ui/gnome_paint.ui.h:5
+msgid "_Help"
+msgstr "甯姪(_H)"
+
+#: ../data/ui/gnome_paint.ui.h:6
+msgid "_Image"
+msgstr "鍥惧儚(_I)"
+
+#: ../data/ui/gnome_paint.ui.h:7
+msgid "_View"
+msgstr "鏌ョ湅(_V)"
+
+#: ../src/color.c:142
+msgid "Select Background Color"
+msgstr "閫夋嫨鑳屾櫙鑹?"
+
+#: ../src/color.c:155
+msgid "Select Foreground Color"
+msgstr "閫夋嫨鍓嶆櫙鑹?"
+
+#: ../src/color.c:214
+msgid "Select Color"
+msgstr "閫夋嫨棰滆壊"
+
+#: ../src/file.c:98
+#, c-format
+msgid "Do you want to save the changes you made to \"%s\"?"
+msgstr "鎮ㄨ淇濆瓨瀵? %s 鍋氱殑鏇存敼鍚楋紵"
+
+#: ../src/file.c:102
+msgid "Your changes will be lost if you don't save them."
+msgstr "濡傛灉涓嶄繚瀛橈紝鎮ㄧ殑鏇存敼灏嗕涪澶便??"
+
+#: ../src/file.c:175
+#, c-format
+msgid "Error loading file \"%s\""
+msgstr "杞藉叆鏂囦欢 %s 鍑洪敊"
+
+#: ../src/file.c:272
+#, c-format
+msgid "%s - gnome-paint"
+msgstr "%s - Gnome 鐢诲浘"
+
+#: ../src/file.c:313
+msgid "untitled"
+msgstr "鏃犳爣棰?"
+
+#: ../src/file.c:326
+#, c-format
+msgid "Error saving file \"%s\""
+msgstr "淇濆瓨鏂囦欢 %s 鍑洪敊"
+
+#: ../src/file.c:340
+msgid "unknown error"
+msgstr "鏈煡閿欒"
+
+#: ../src/main.c:183
+msgid "gnome-paint is a simple, easy to use paint program for GNOME."
+msgstr "gnome-paint 鏄竴涓畝鍗曟槗鐢ㄧ殑 GNOME 鐢诲浘绋嬪簭銆?"
+
+#: ../src/main.c:185
+msgid ""
+"This program is free software; you may redistribute it and/or modify it "
+"under the terms of the GNU General Public License as published by the Free "
+"Software Foundation, either version 3, or (at your opinion) any later "
+"version.\n"
+msgstr ""
+"鏈▼搴忔槸鑷敱杞欢锛涙偍鍙互渚濈収鑷敱杞欢鍩洪噾浼氬彂甯冪殑 GNU 閫氱敤鍏叡璁稿彲璇?(GPL)鐨?"
+"绗笁鐗?(鎴栨洿楂樼増鏈?)涓殑鏉℃瀵硅蒋浠堕噸鏂板彂甯冨拰/鎴栬繘琛屼慨鏀广?俓n"
+
+#: ../src/pixbuf-file-chooser.c:234
+msgid "All Images"
+msgstr "鎵?鏈夊浘鍍?"
+
+#: ../src/pixbuf-file-chooser.c:353
+msgid "All Files"
+msgstr "鎵?鏈夋枃浠?"
+
+#: ../src/pixbuf-file-chooser.c:427
+msgid "Load Image"
+msgstr "杞藉叆鍥惧儚"
+
+#: ../src/pixbuf-file-chooser.c:435
+msgid "Save Image"
+msgstr "淇濆瓨鍥惧儚"
+
+#: ../src/pixbuf-file-chooser.c:443
+msgid "Open Folder"
+msgstr "鎵撳紑鏂囦欢澶?"
