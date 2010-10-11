@@ -1,0 +1,63 @@
+gnome-paint (0.3+bzr73-0lucid1) lucid; urgency=low
+
+  * Test build for lucid.
+
+ -- Aron Xu <happyaron.xu@gmail.com>  Mon, 11 Oct 2010 15:45:59 +0800
+
+gnome-paint (0.3+bzr73-1) unstable; urgency=low
+
+  * New bzr snapshot build:
+    - src/cv_rect_select.c: update rect select code
+    - src/color.c, src/cv_airbrush_tool.h, src/cv_color_pick_tool.h,
+      src/cv_curve_tool.h, src/cv_ellipse_tool.h, src/gp_point_array.c,
+      src/main.c, src/undo.c: cleaned warning message
+    - src/cv_flood_fill_tool.c, src/pixbuf_util.c, src/pixbuf_util.h: 
+        Adds undo for flood fill
+    - src/selection.c, src/selection.h, src/common.h, src/undo.c,
+      src/cv_rect_select.c, src/cv_resize.c, src/cv_resize.h,
+      src/gp-image.c, src/gp-image.h:
+        added first version of selection area with move and resize. 
+    - src/cv_eraser_tool.c, src/cv_eraser_tool.h, src/color.c,
+      src/cv_drawing.c, src/main.c: Add eraser
+    - src/cv_airbrush_tool.c: Adds undo to airbrush. (LP: #592077)
+    - data/ui/gnome_paint.ui, src/cv_flood_fill_tool.c, 
+      src/cv_rect_select.c, src/pixbuf_util.c, src/pixbuf_util.h,
+      src/selection.c, src/selection.h, src/toolbar.c: 
+        Fixed pixbuf_util.* for rgba.
+    - data/ui/gnome_paint.ui, src/common.h, src/cv_drawing.c,
+      src/cv_drawing.h, src/gp-image.c, src/gp-image.h, src/selection.c,
+      src/toolbar.c, src/toolbar.h:
+        Toggle transparency/opaqeness to selection
+    - src/clipboard.c, src/common.h, src/cv_drawing.c, src/main.c,
+      src/cv_rect_select.c, src/gp-image.c, src/gp-image.h,
+      src/selection.c, src/selection.h, src/toolbar.h, src/undo.c,
+      data/ui/gnome_paint.ui:
+        Added copy & paste of selection; Added undo of selections;
+        Added 'Image' menu; 
+        Default size changed to accommodate net-books.
+    - po/es_MX.po: add Spanish translation
+    - po/ru.po: add Russian translation
+    - po/he.po: add Hebrew translation
+    - po/zh_CN: add Simplified Chinese translation
+    - po/fr.po, po/it.po, po/pt_BR.po: 
+        update translations with new translation templates
+    - Enable different size/type brushes
+
+  * debian/control:
+    - Bump std-ver to 3.9.1
+    - Add Vcs-Bzr and Vcs-Browser fields.
+
+ -- Aron Xu <happyaron.xu@gmail.com>  Mon, 11 Oct 2010 15:11:52 +0800
+
+gnome-paint (0.3-2) unstable; urgency=low
+
+  * debian/control: 
+      Add intltool (>= 0.35.0), gettext to build-dep. (Closes: #589047)
+
+ -- Aron Xu <happyaron.xu@gmail.com>  Wed, 14 Jul 2010 16:44:57 +0800
+
+gnome-paint (0.3-1) unstable; urgency=low
+
+  * Initial release (Closes: #585952)
+
+ -- Aron Xu <happyaron.xu@gmail.com>  Tue, 15 Jun 2010 14:20:26 +0800
