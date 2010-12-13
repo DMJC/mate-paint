@@ -191,7 +191,7 @@ on_menu_about_activate ( GtkMenuItem *menuitem, gpointer user_data )
 	
 	dlg = GTK_ABOUT_DIALOG ( gtk_about_dialog_new () ); 
 	gtk_about_dialog_set_name ( dlg, "gnome-paint" );
-	gtk_about_dialog_set_version ( dlg, "0.3"); 
+	gtk_about_dialog_set_version ( dlg, PACKAGE_VERSION); 
 	gtk_about_dialog_set_copyright ( dlg, 
 									"(c) Rogério Ferro do Nascimento");
 	gtk_about_dialog_set_comments ( dlg, 

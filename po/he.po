@@ -7,10 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-paint r36\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-06-04 20:10-0300\n"
+"POT-Creation-Date: 2010-12-13 17:49+0800\n"
 "PO-Revision-Date: 2010-06-02 08:03+0200\n"
 "Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>\n"
 "Language-Team: Gezer <sh.yaron@gmail.com>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -28,32 +29,147 @@ msgid "Gnome Paint Drawing Editor"
 msgstr "עורך האיורים הצייר של Gnome"
 
 #: ../data/ui/gnome_paint.ui.h:1
+msgid "C_m"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:2
+msgid "Co_lors"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:3
+#, fuzzy
+msgid "Colors"
+msgstr "_צבע"
+
+#: ../data/ui/gnome_paint.ui.h:4
+msgid "Defaults"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:5
+msgid "File last saved:"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:6
+msgid "Flip _vertical"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:7
+msgid "Flip and Rotate"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:8
+msgid "Flip or rotate"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:9
 msgid "Free select tool"
 msgstr "כלי בחירה חופשית"
 
-#: ../data/ui/gnome_paint.ui.h:2
-msgid "_Color"
-msgstr "_צבע"
+#: ../data/ui/gnome_paint.ui.h:10
+msgid "Image Attributes"
+msgstr ""
 
-#: ../data/ui/gnome_paint.ui.h:3
+#: ../data/ui/gnome_paint.ui.h:11
+msgid "Not Available"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:12
+msgid "Resolution:"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:13
+msgid "Size on disk:"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:14
+msgid "Units"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:15
+msgid "_180&#xB0;"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:16
+msgid "_270&#xB0;"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:17
+msgid "_90&#xB0;"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:18
+msgid "_Attributes..."
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:19
+msgid "_Black and white"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:20
+#, fuzzy
+msgid "_Clear Image"
+msgstr "ת_מונה"
+
+#: ../data/ui/gnome_paint.ui.h:21
+msgid "_Draw Opaque"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:22
 msgid "_Edit"
 msgstr "ע_ריכה"
 
-#: ../data/ui/gnome_paint.ui.h:4
+#: ../data/ui/gnome_paint.ui.h:23
 msgid "_File"
 msgstr "_קובץ"
 
-#: ../data/ui/gnome_paint.ui.h:5
+#: ../data/ui/gnome_paint.ui.h:24
+msgid "_Flip horizontal"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:25
+msgid "_Flip/Rotate..."
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:26
+msgid "_Height"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:27
 msgid "_Help"
 msgstr "ע_זרה"
 
-#: ../data/ui/gnome_paint.ui.h:6
+#: ../data/ui/gnome_paint.ui.h:28
 msgid "_Image"
 msgstr "ת_מונה"
 
-#: ../data/ui/gnome_paint.ui.h:7
+#: ../data/ui/gnome_paint.ui.h:29
+msgid "_Inches"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:30
+#, fuzzy
+msgid "_Invert Colors"
+msgstr "בחירת צבע"
+
+#: ../data/ui/gnome_paint.ui.h:31
+msgid "_Pixels"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:32
+msgid "_Rotate by angle"
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:33
+msgid "_Stretch/Skew..."
+msgstr ""
+
+#: ../data/ui/gnome_paint.ui.h:34
 msgid "_View"
 msgstr "ת_צוגה"
+
+#: ../data/ui/gnome_paint.ui.h:35
+msgid "_Width"
+msgstr ""
 
 #: ../src/color.c:142
 msgid "Select Background Color"
@@ -63,7 +179,7 @@ msgstr "בחירת צבע הרקע"
 msgid "Select Foreground Color"
 msgstr "בחירת צבע הקידמה"
 
-#: ../src/color.c:214
+#: ../src/color.c:215
 msgid "Select Color"
 msgstr "בחירת צבע"
 
@@ -104,11 +220,11 @@ msgstr "ארעה שגיאה בשמירת הקובץ \"%s\""
 msgid "unknown error"
 msgstr "שגיאה בלתי ידועה"
 
-#: ../src/main.c:183
+#: ../src/main.c:198
 msgid "gnome-paint is a simple, easy to use paint program for GNOME."
 msgstr ""
 
-#: ../src/main.c:185
+#: ../src/main.c:200
 msgid ""
 "This program is free software; you may redistribute it and/or modify it "
 "under the terms of the GNU General Public License as published by the Free "

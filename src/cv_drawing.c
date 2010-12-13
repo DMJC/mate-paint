@@ -371,13 +371,22 @@ on_cv_drawing_expose_event	(   GtkWidget	   *widget,
 								GdkEventExpose *event,
                					gpointer       user_data )
 {
+#if GTK_MAJOR_VERSION >= 2 && GTK_MINOR_VERSION >= 18
     gdk_draw_drawable (	widget->window,
                     	widget->style->fg_gc[gtk_widget_get_state(widget)],
     	                cv.pixmap,
     	                event->area.x, event->area.y,
     	                event->area.x, event->area.y,
     	                event->area.width, event->area.height);	
-	
+#else
+	gdk_draw_drawable (	widget->window,
+                    	widget->style->fg_gc[GTK_WIDGET_STATE(widget)],
+    	                cv.pixmap,
+    	                event->area.x, event->area.y,
+    	                event->area.x, event->area.y,
+    	                event->area.width, event->area.height);
+#endif
+
 	if ( cv_tool != NULL )
 	{
 		cv_tool->draw();

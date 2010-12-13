@@ -87,7 +87,7 @@ gnome_paint_LDFLAGS = \
 	-Wl,--export-dynamic
 
 gnome_paint_LDADD = \
-	$(GNOME_PAINT_LIBS)
+	$(GNOME_PAINT_LIBS) -lX11
 
 SUBDIRS = \
 	pixmaps\

@@ -561,7 +561,7 @@ static void set_eraser_size(GPEraserSize size)
 				m_priv->height = ERASER_HEIGHT / 4;
 				break;
 			default:
-				printf("Debug: set_eraser_size() Unkown eraser size: %d\n", size);
+				printf("Debug: set_eraser_size() Unknown eraser size: %d\n", size);
 				return;
 		}
 }

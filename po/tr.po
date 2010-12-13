@@ -1,87 +1,85 @@
-# Переводы Gnome-Paint на русский язык.
-# Russian translation of Gnome-Paint
-# Copyright (C) 2010 Rogério Ferro do Nascimento
+# Turkish translation for gnome-paint
+# Copyright (c) 2010 Rosetta Contributors and Canonical Ltd 2010
 # This file is distributed under the same license as the gnome-paint package.
-# Sergey Basalaev <sbasalaev@gmail.com>, 2010.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2010.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gnome-paint 0.3\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-12-13 20:23+0800\n"
-"PO-Revision-Date: 2010-09-07 11:49+0000\n"
-"Last-Translator: Sergey Basalaev <SBasalaev@gmail.com>\n"
-"Language-Team: Russian <ru@li.org>\n"
-"Language: ru\n"
+"Project-Id-Version: gnome-paint\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2010-08-10 21:32+0000\n"
+"PO-Revision-Date: 2010-08-31 10:58+0000\n"
+"Last-Translator: Ebru Ersoy <Unknown>\n"
+"Language-Team: Turkish <tr@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2010-12-13 12:04+0000\n"
+"X-Launchpad-Export-Date: 2010-12-13 12:32+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: ../data/desktop/gnome-paint.desktop.in.in.h:1
 msgid "Create and Edit Drawings or Images"
-msgstr "Создание и редактирование рисунков и изображений"
+msgstr "Çizim veya Görüntü Oluşturun ve Düzenleyin"
 
 #: ../data/desktop/gnome-paint.desktop.in.in.h:2
 msgid "Gnome Paint Drawing Editor"
-msgstr "Редактор изображений Gnome Paint"
+msgstr "Gnome Paint Çizim Düzenleyicisi"
 
 #: ../data/ui/gnome_paint.ui.h:1
 msgid "C_m"
-msgstr "С_м"
+msgstr ""
 
 #: ../data/ui/gnome_paint.ui.h:2
 msgid "Co_lors"
-msgstr "_Цвета"
+msgstr "_Renkler"
 
 #: ../data/ui/gnome_paint.ui.h:3
 msgid "Colors"
-msgstr "Цвета"
+msgstr "Renkler"
 
 #: ../data/ui/gnome_paint.ui.h:4
 msgid "Defaults"
-msgstr "По умолчанию"
+msgstr "Öntanımlılar"
 
 #: ../data/ui/gnome_paint.ui.h:5
 msgid "File last saved:"
-msgstr "Последний сохранённый файл:"
+msgstr "Dosyanın son kaydedildiği yer:"
 
 #: ../data/ui/gnome_paint.ui.h:6
 msgid "Flip _vertical"
-msgstr "Отразить по _вертикали"
+msgstr "_Dikey çevir"
 
 #: ../data/ui/gnome_paint.ui.h:7
 msgid "Flip and Rotate"
-msgstr "Отразить и повернуть"
+msgstr "Çevir ve Döndür"
 
 #: ../data/ui/gnome_paint.ui.h:8
 msgid "Flip or rotate"
-msgstr "Отразить или повернуть"
+msgstr "Çevir veya Döndür"
 
 #: ../data/ui/gnome_paint.ui.h:9
 msgid "Free select tool"
-msgstr "Инструмент свободного выделения"
+msgstr "Serbest seçim aracı"
 
 #: ../data/ui/gnome_paint.ui.h:10
 msgid "Image Attributes"
-msgstr "Атрибуты рисунка"
+msgstr "Resim Özellikleri"
 
 #: ../data/ui/gnome_paint.ui.h:11
 msgid "Not Available"
-msgstr "Недоступно"
+msgstr "Uygun Değil"
 
 #: ../data/ui/gnome_paint.ui.h:12
 msgid "Resolution:"
-msgstr "Разрешение:"
+msgstr "Çözünürlük:"
 
 #: ../data/ui/gnome_paint.ui.h:13
 msgid "Size on disk:"
-msgstr "Размер на диске:"
+msgstr "Diskteki boyut:"
 
 #: ../data/ui/gnome_paint.ui.h:14
 msgid "Units"
-msgstr "Единиц"
+msgstr "Birimler"
 
 #: ../data/ui/gnome_paint.ui.h:15
 msgid "_180&#xB0;"
@@ -97,101 +95,101 @@ msgstr "_90&#xB0;"
 
 #: ../data/ui/gnome_paint.ui.h:18
 msgid "_Attributes..."
-msgstr "_Атрибуты..."
+msgstr "_Özellikler..."
 
 #: ../data/ui/gnome_paint.ui.h:19
 msgid "_Black and white"
-msgstr "_Чёрно-белый"
+msgstr "_Siyah-beyaz"
 
 #: ../data/ui/gnome_paint.ui.h:20
 msgid "_Clear Image"
-msgstr "_Очистить изображение"
+msgstr "_Resmi Temizle"
 
 #: ../data/ui/gnome_paint.ui.h:21
 msgid "_Draw Opaque"
-msgstr "_Рисовать непрозрачный"
+msgstr "_Saydamsız Çiz"
 
 #: ../data/ui/gnome_paint.ui.h:22
 msgid "_Edit"
-msgstr "_Правка"
+msgstr "_Düzenle"
 
 #: ../data/ui/gnome_paint.ui.h:23
 msgid "_File"
-msgstr "_Файл"
+msgstr "_Dosya"
 
 #: ../data/ui/gnome_paint.ui.h:24
 msgid "_Flip horizontal"
-msgstr "Отразить по _горизонтали"
+msgstr "_Yatay Çevir"
 
 #: ../data/ui/gnome_paint.ui.h:25
 msgid "_Flip/Rotate..."
-msgstr "_Отразить/повернуть..."
+msgstr "_Çevir/Döndür..."
 
 #: ../data/ui/gnome_paint.ui.h:26
 msgid "_Height"
-msgstr "_Высота"
+msgstr "_Yükseklik"
 
 #: ../data/ui/gnome_paint.ui.h:27
 msgid "_Help"
-msgstr "_Справка"
+msgstr "_Yardım"
 
 #: ../data/ui/gnome_paint.ui.h:28
 msgid "_Image"
-msgstr "_Изображение"
+msgstr "_Görüntü"
 
 #: ../data/ui/gnome_paint.ui.h:29
 msgid "_Inches"
-msgstr "_Дюймы"
+msgstr ""
 
 #: ../data/ui/gnome_paint.ui.h:30
 msgid "_Invert Colors"
-msgstr "Обратить _цвета"
+msgstr "_Renkleri Ters Çevir"
 
 #: ../data/ui/gnome_paint.ui.h:31
 msgid "_Pixels"
-msgstr "_Пикселы"
+msgstr "_Benekler"
 
 #: ../data/ui/gnome_paint.ui.h:32
 msgid "_Rotate by angle"
-msgstr "_Повернуть на угол"
+msgstr ""
 
 #: ../data/ui/gnome_paint.ui.h:33
 msgid "_Stretch/Skew..."
-msgstr "_Растянуть/Наклонить..."
+msgstr "_Esnet/Eğ"
 
 #: ../data/ui/gnome_paint.ui.h:34
 msgid "_View"
-msgstr "_Вид"
+msgstr "_Görünüm"
 
 #: ../data/ui/gnome_paint.ui.h:35
 msgid "_Width"
-msgstr "_Ширина"
+msgstr "_Genişlik"
 
 #: ../src/color.c:142
 msgid "Select Background Color"
-msgstr "Выбор цвета фона"
+msgstr "Artalan Rengini Seç"
 
 #: ../src/color.c:155
 msgid "Select Foreground Color"
-msgstr "Выбор цвета тона"
+msgstr "Önalan Rengini Seçin"
 
 #: ../src/color.c:215
 msgid "Select Color"
-msgstr "Выбор цвета"
+msgstr "Renk Seçin"
 
 #: ../src/file.c:98
 #, c-format
 msgid "Do you want to save the changes you made to \"%s\"?"
-msgstr "Сохранить внесённые изменения в «%s»?"
+msgstr "\"%s\" üzerine yapılan değişiklikleri kaydetmek istiyor musunuz?"
 
 #: ../src/file.c:102
 msgid "Your changes will be lost if you don't save them."
-msgstr "Без сохранения внесённые изменения будут утеряны."
+msgstr "Eğer kaydetmezseniz yaptığınız değişiklikler kaybolacak."
 
 #: ../src/file.c:175
 #, c-format
 msgid "Error loading file \"%s\""
-msgstr "Ошибка загрузки файла «%s»"
+msgstr "\"%s\" dosyasını yüklemede hata"
 
 #: ../src/file.c:272
 #, c-format
@@ -200,20 +198,20 @@ msgstr "%s - gnome-paint"
 
 #: ../src/file.c:313
 msgid "untitled"
-msgstr "без имени"
+msgstr "adsız"
 
 #: ../src/file.c:326
 #, c-format
 msgid "Error saving file \"%s\""
-msgstr "Ошибка сохранения файла «%s»"
+msgstr "\"%s\" dosyasının kaydedilmesinde hata"
 
 #: ../src/file.c:340
 msgid "unknown error"
-msgstr "неизвестная ошибка"
+msgstr "bilinmeyen hata"
 
 #: ../src/main.c:198
 msgid "gnome-paint is a simple, easy to use paint program for GNOME."
-msgstr "gnome-paint — это простое приложение для рисования в среде GNOME"
+msgstr "gnome-paint, GNOME için sade ve kolay bir boyama programıdır."
 
 #: ../src/main.c:200
 msgid ""
@@ -222,30 +220,27 @@ msgid ""
 "Software Foundation, either version 3, or (at your opinion) any later "
 "version.\n"
 msgstr ""
-"Эта программа является свободным программным обеспечением, вы можете "
-"распространять и/или модифицировать её в соответствии с условиями GNU "
-"General Public License, опубликованной Free Software Foundation, версии 3, "
-"либо (на ваше усмотрение) любой более поздней версии.\n"
+"Bu program ücretsiz bir yazılımdır; Özgür Yazılım Vakfı'nın yayınladığı GNU "
+"Genel Kamu Lisansı altında; ya da Lisansın üçüncü sürümü veya (isteğinize "
+"göre) sonraki herhangi bir sürümde, yeniden dağıtabilir ve/veya "
+"değiştirebilirsiniz.\n"
 
 #: ../src/pixbuf-file-chooser.c:234
 msgid "All Images"
-msgstr "Все изображения"
+msgstr "Tüm Görüntüler"
 
 #: ../src/pixbuf-file-chooser.c:353
 msgid "All Files"
-msgstr "Все файлы"
+msgstr "Tüm Dosyalar"
 
 #: ../src/pixbuf-file-chooser.c:427
 msgid "Load Image"
-msgstr "Загрузить изображение"
+msgstr "Görüntü Yükle"
 
 #: ../src/pixbuf-file-chooser.c:435
 msgid "Save Image"
-msgstr "Сохранить изображение"
+msgstr "Görüntüyü Kaydet"
 
 #: ../src/pixbuf-file-chooser.c:443
 msgid "Open Folder"
-msgstr "Открыть папку"
-
-#~ msgid "_Color"
-#~ msgstr "_Цвет"
+msgstr "Klasör Aç"

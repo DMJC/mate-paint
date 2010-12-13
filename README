@@ -1,5 +1,5 @@
 
-                                     GNOME-PAINT
+                                     GNOME-PAINT 0.4.0
 
 Gnome-paint is a simple, easy to use paint program for GNOME. It is inspired by MS-Paint.
 
@@ -13,6 +13,9 @@ Features:
   - Dynamic resize image
   - Multiple Undo
   - Multiple Redo
+  - Flip and Rotate (new)
+  - Invert Colors (new)
+  - Rectangular Selection (new)
 
 Tools:
   - Pencil
@@ -21,7 +24,7 @@ Tools:
   - Ellipses
   - Polygons
   - Color Picker
-  - Four types of brushes
+  - Four types of brushes (new)
        - Round Brush
        - Square Brush
        - Forward Slash
@@ -30,8 +33,8 @@ Tools:
   - Curves
   - Flood Fill
   - Rounded Rectangle
-  - Rectangular Selection
-  - Eraser (Four Sizes)
+  - Rectangular Selection (new)
+  - Eraser (new)
 
 Unimplemented tools:
   - Free Selection
@@ -42,6 +45,20 @@ Unimplemented Features:
   - View Menu
   - Image Menu
   - Color Menu
+
+Fixed/Added since 0.3.0:
+  - Rectangular selection
+  - Undo flood fills
+  - Undo Air brush
+  - Different size/type brushes
+  - Eraser w/different sizes
+  - Flip/Rotate
+  - Color inverting
+  - Transparency/opaque button
+    for selection
+  - Clearing image
+  - Default size changed to accommodate net-books
+  - Added zh_CN.po translation
 
 Compiling:
 Please read the file INSTALL for building and installing from source.

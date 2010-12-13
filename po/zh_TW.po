@@ -1,85 +1,86 @@
-# Gnome-paint.
-# Copyright (C) 2009 Rogério Ferro do Nascimento
-# This file is distributed under the same license as the gnome-paint package.
-# Rogério Ferro do Nascimento <rogerioferro@gmail.com>, 2009.
-# Rogério Ferrp <rogerioferro@gmail.com>, 2009.
+# Traditional Chinese translations for gnome_paint package
+# Copyright (C) 2010 THE gnome_paint'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the gnome_paint package.
+# Cheng-Chia Tseng <pswo1680@gmail.com>, 2010
+#
+
 msgid ""
 msgstr ""
-"Project-Id-Version: gnome-paint-0.2\n"
+"Project-Id-Version: gnome_paint master\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-08-10 21:32+0000\n"
-"PO-Revision-Date: 2010-09-07 16:41+0000\n"
-"Last-Translator: Eulogy <Unknown>\n"
-"Language-Team: Italian\n"
+"POT-Creation-Date: 2010-12-13 18:22+0800\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Cheng-Chia Tseng <pswo10680@gmail.com>\n"
+"Language-Team: chinese-l10n <chinese-l10n@gmail.com>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2010-12-13 12:32+0000\n"
-"X-Generator: Launchpad (build Unknown)\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: ../data/desktop/gnome-paint.desktop.in.in.h:1
 msgid "Create and Edit Drawings or Images"
-msgstr "Crea e modifica immagini o disegni"
+msgstr "建立與編輯繪畫或影像"
 
 #: ../data/desktop/gnome-paint.desktop.in.in.h:2
 msgid "Gnome Paint Drawing Editor"
-msgstr "Editor di disegno Gnome Paint"
+msgstr "Gnome 繪畫編輯器"
 
 #: ../data/ui/gnome_paint.ui.h:1
 msgid "C_m"
-msgstr "C_m"
+msgstr "公分(_M)"
 
 #: ../data/ui/gnome_paint.ui.h:2
 msgid "Co_lors"
-msgstr "Co_lori"
+msgstr "色彩(_L)"
 
 #: ../data/ui/gnome_paint.ui.h:3
 msgid "Colors"
-msgstr "Colori"
+msgstr "色彩"
 
 #: ../data/ui/gnome_paint.ui.h:4
 msgid "Defaults"
-msgstr "Predefiniti"
+msgstr "預設值"
 
 #: ../data/ui/gnome_paint.ui.h:5
 msgid "File last saved:"
-msgstr "Ultimo file salvato:"
+msgstr "上次儲存的檔案："
 
 #: ../data/ui/gnome_paint.ui.h:6
 msgid "Flip _vertical"
-msgstr "Rifletti_verticalmente"
+msgstr "垂直翻轉(_V)"
 
 #: ../data/ui/gnome_paint.ui.h:7
 msgid "Flip and Rotate"
-msgstr "Ribalta e Ruota"
+msgstr "翻轉與旋轉"
 
 #: ../data/ui/gnome_paint.ui.h:8
 msgid "Flip or rotate"
-msgstr "Ribalta o ruota"
+msgstr "翻轉或旋轉"
 
 #: ../data/ui/gnome_paint.ui.h:9
 msgid "Free select tool"
-msgstr "Strumento di selezione libera"
+msgstr "自由選取工具"
 
 #: ../data/ui/gnome_paint.ui.h:10
 msgid "Image Attributes"
-msgstr "Attributi dell'immagine"
+msgstr "影像屬性"
 
 #: ../data/ui/gnome_paint.ui.h:11
 msgid "Not Available"
-msgstr "Non disponibile"
+msgstr "不可用"
 
 #: ../data/ui/gnome_paint.ui.h:12
 msgid "Resolution:"
-msgstr "Risoluzione"
+msgstr "解析度："
 
 #: ../data/ui/gnome_paint.ui.h:13
 msgid "Size on disk:"
-msgstr "Spazio sul disco:"
+msgstr "於磁碟上的大小："
 
 #: ../data/ui/gnome_paint.ui.h:14
 msgid "Units"
-msgstr "Unità"
+msgstr "單位"
 
 #: ../data/ui/gnome_paint.ui.h:15
 msgid "_180&#xB0;"
@@ -95,101 +96,101 @@ msgstr "_90&#xB0;"
 
 #: ../data/ui/gnome_paint.ui.h:18
 msgid "_Attributes..."
-msgstr "_Attributi..."
+msgstr "屬性(_A)..."
 
 #: ../data/ui/gnome_paint.ui.h:19
 msgid "_Black and white"
-msgstr "_Nero e bianco"
+msgstr "黑與白(_B)"
 
 #: ../data/ui/gnome_paint.ui.h:20
 msgid "_Clear Image"
-msgstr "_Pulisci Immagine"
+msgstr "清除影像(_C)"
 
 #: ../data/ui/gnome_paint.ui.h:21
 msgid "_Draw Opaque"
-msgstr "_Disegna Opaco"
+msgstr "白色不透明處理(_D)"
 
 #: ../data/ui/gnome_paint.ui.h:22
 msgid "_Edit"
-msgstr "_Modifica"
+msgstr "編輯(_E)"
 
 #: ../data/ui/gnome_paint.ui.h:23
 msgid "_File"
-msgstr "_File"
+msgstr "檔案(_F)"
 
 #: ../data/ui/gnome_paint.ui.h:24
 msgid "_Flip horizontal"
-msgstr "_Rifletti orizzontalmente"
+msgstr "水平翻轉(_F)"
 
 #: ../data/ui/gnome_paint.ui.h:25
 msgid "_Flip/Rotate..."
-msgstr "_Rifletti/Ruota..."
+msgstr "翻轉/旋轉(_F)..."
 
 #: ../data/ui/gnome_paint.ui.h:26
 msgid "_Height"
-msgstr "_Altezza"
+msgstr "高(_H)"
 
 #: ../data/ui/gnome_paint.ui.h:27
 msgid "_Help"
-msgstr "Ai_uto"
+msgstr "幫助(_H)"
 
 #: ../data/ui/gnome_paint.ui.h:28
 msgid "_Image"
-msgstr "_Immagine"
+msgstr "影像(_I)"
 
 #: ../data/ui/gnome_paint.ui.h:29
 msgid "_Inches"
-msgstr "_Pollici"
+msgstr "英吋(_I)"
 
 #: ../data/ui/gnome_paint.ui.h:30
 msgid "_Invert Colors"
-msgstr "_Inverti Colori"
+msgstr "反轉色彩(_I)"
 
 #: ../data/ui/gnome_paint.ui.h:31
 msgid "_Pixels"
-msgstr "_Pixels"
+msgstr "畫素(_P)"
 
 #: ../data/ui/gnome_paint.ui.h:32
 msgid "_Rotate by angle"
-msgstr "_Ruota dall'angolo"
+msgstr "旋轉某角度(_R)"
 
 #: ../data/ui/gnome_paint.ui.h:33
 msgid "_Stretch/Skew..."
-msgstr ""
+msgstr "延展/傾斜(_S)..."
 
 #: ../data/ui/gnome_paint.ui.h:34
 msgid "_View"
-msgstr "_Visualizza"
+msgstr "檢視(_V)"
 
 #: ../data/ui/gnome_paint.ui.h:35
 msgid "_Width"
-msgstr "_Larghezza"
+msgstr "寬(_W)"
 
 #: ../src/color.c:142
 msgid "Select Background Color"
-msgstr "Seleziona il colore di sfondo"
+msgstr "選取背景色彩"
 
 #: ../src/color.c:155
 msgid "Select Foreground Color"
-msgstr "Seleziona il colore di primo piano"
+msgstr "選取前景色彩"
 
 #: ../src/color.c:215
 msgid "Select Color"
-msgstr "Seleziona un colore"
+msgstr "選取色彩"
 
 #: ../src/file.c:98
 #, c-format
 msgid "Do you want to save the changes you made to \"%s\"?"
-msgstr "Vuo salvare le modifiche effettuate a \"%s\"?"
+msgstr "您想要儲存您對「%s」所做過的變動嗎？"
 
 #: ../src/file.c:102
 msgid "Your changes will be lost if you don't save them."
-msgstr "Le modifiche verranno perse se non saranno salvate."
+msgstr "若您不儲存的話，您將失去所做過的變更。"
 
 #: ../src/file.c:175
 #, c-format
 msgid "Error loading file \"%s\""
-msgstr "Errore caricando il file \"%s\""
+msgstr "載入「%s」檔案時發生錯誤"
 
 #: ../src/file.c:272
 #, c-format
@@ -198,51 +199,42 @@ msgstr "%s - gnome-paint"
 
 #: ../src/file.c:313
 msgid "untitled"
-msgstr "senza titolo"
+msgstr "未命名"
 
 #: ../src/file.c:326
 #, c-format
 msgid "Error saving file \"%s\""
-msgstr "Errore salvando il file \"%s\""
+msgstr "儲存「%s」檔案發生錯誤"
 
 #: ../src/file.c:340
 msgid "unknown error"
-msgstr "errore sconosciuto"
+msgstr "未知錯誤"
 
 #: ../src/main.c:198
 msgid "gnome-paint is a simple, easy to use paint program for GNOME."
-msgstr "gnome-paint è un semplice e facile programma di disegno per GNOME."
+msgstr "gnome-paint 是一套為 GNOME  設計的繪畫程式，簡單且易於使用。"
 
 #: ../src/main.c:200
-msgid ""
-"This program is free software; you may redistribute it and/or modify it "
-"under the terms of the GNU General Public License as published by the Free "
-"Software Foundation, either version 3, or (at your opinion) any later "
-"version.\n"
-msgstr ""
-"Questo programma è gratutio; puoi redistribuirlo e/o modificarlo sotto i "
-"termini della licenza GNU General Public License publicato dalla Free "
-"Software Foundation, versione 3, o (a tua opinione) una versione successiva\n"
+msgid "This program is free software; you may redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3, or (at your opinion) any later version.\n"
+msgstr "本程式是自由軟體；您可以在遵守 Free Software Foundation 所發布的 GNU General Plublic License 條款的情況下對它進行重新散布與/或修改，可以採用第三版或更之後 (您可自由選擇) 的版本。\n"
 
 #: ../src/pixbuf-file-chooser.c:234
 msgid "All Images"
-msgstr "Tutte le immagini"
+msgstr "所有影像"
 
 #: ../src/pixbuf-file-chooser.c:353
 msgid "All Files"
-msgstr "Tutti i file"
+msgstr "所有檔案"
 
 #: ../src/pixbuf-file-chooser.c:427
 msgid "Load Image"
-msgstr "Carica immagine"
+msgstr "載入影像"
 
 #: ../src/pixbuf-file-chooser.c:435
 msgid "Save Image"
-msgstr "Salva immagine"
+msgstr "儲存影像"
 
 #: ../src/pixbuf-file-chooser.c:443
 msgid "Open Folder"
-msgstr "Apri cartella"
+msgstr "開啟資料夾"
 
-#~ msgid "_Color"
-#~ msgstr "_Colore"
