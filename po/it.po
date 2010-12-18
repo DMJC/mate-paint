@@ -7,19 +7,18 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-paint-0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-08-10 21:32+0000\n"
-"PO-Revision-Date: 2010-09-07 16:41+0000\n"
-"Last-Translator: Eulogy <Unknown>\n"
+"POT-Creation-Date: 2010-12-13 17:50+0800\n"
+"PO-Revision-Date: 2010-12-13 21:53+0100\n"
+"Last-Translator: Emanuele Prestifilippo <emanuelep@simple-linux.com>\n"
 "Language-Team: Italian\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2010-12-13 12:32+0000\n"
-"X-Generator: Launchpad (build Unknown)\n"
 
 #: ../data/desktop/gnome-paint.desktop.in.in.h:1
 msgid "Create and Edit Drawings or Images"
-msgstr "Crea e modifica immagini o disegni"
+msgstr "Creare o modificare immagini o disegni"
 
 #: ../data/desktop/gnome-paint.desktop.in.in.h:2
 msgid "Gnome Paint Drawing Editor"
@@ -47,15 +46,15 @@ msgstr "Ultimo file salvato:"
 
 #: ../data/ui/gnome_paint.ui.h:6
 msgid "Flip _vertical"
-msgstr "Rifletti_verticalmente"
+msgstr "Rifletti _verticalmente"
 
 #: ../data/ui/gnome_paint.ui.h:7
 msgid "Flip and Rotate"
-msgstr "Ribalta e Ruota"
+msgstr "Rifletti e Ruota"
 
 #: ../data/ui/gnome_paint.ui.h:8
 msgid "Flip or rotate"
-msgstr "Ribalta o ruota"
+msgstr "Rifletti o ruota"
 
 #: ../data/ui/gnome_paint.ui.h:9
 msgid "Free select tool"
@@ -63,7 +62,7 @@ msgstr "Strumento di selezione libera"
 
 #: ../data/ui/gnome_paint.ui.h:10
 msgid "Image Attributes"
-msgstr "Attributi dell'immagine"
+msgstr "Attributi immagine"
 
 #: ../data/ui/gnome_paint.ui.h:11
 msgid "Not Available"
@@ -71,11 +70,11 @@ msgstr "Non disponibile"
 
 #: ../data/ui/gnome_paint.ui.h:12
 msgid "Resolution:"
-msgstr "Risoluzione"
+msgstr "Risoluzione:"
 
 #: ../data/ui/gnome_paint.ui.h:13
 msgid "Size on disk:"
-msgstr "Spazio sul disco:"
+msgstr "Dimensione sul disco"
 
 #: ../data/ui/gnome_paint.ui.h:14
 msgid "Units"
@@ -99,15 +98,15 @@ msgstr "_Attributi..."
 
 #: ../data/ui/gnome_paint.ui.h:19
 msgid "_Black and white"
-msgstr "_Nero e bianco"
+msgstr "_Bianco e nero"
 
 #: ../data/ui/gnome_paint.ui.h:20
 msgid "_Clear Image"
-msgstr "_Pulisci Immagine"
+msgstr "_Cancella immagine"
 
 #: ../data/ui/gnome_paint.ui.h:21
 msgid "_Draw Opaque"
-msgstr "_Disegna Opaco"
+msgstr "_Disegna opaco"
 
 #: ../data/ui/gnome_paint.ui.h:22
 msgid "_Edit"
@@ -123,11 +122,11 @@ msgstr "_Rifletti orizzontalmente"
 
 #: ../data/ui/gnome_paint.ui.h:25
 msgid "_Flip/Rotate..."
-msgstr "_Rifletti/Ruota..."
+msgstr "Ri_fletti/Ruota..."
 
 #: ../data/ui/gnome_paint.ui.h:26
 msgid "_Height"
-msgstr "_Altezza"
+msgstr "Al_tezza"
 
 #: ../data/ui/gnome_paint.ui.h:27
 msgid "_Help"
@@ -139,23 +138,23 @@ msgstr "_Immagine"
 
 #: ../data/ui/gnome_paint.ui.h:29
 msgid "_Inches"
-msgstr "_Pollici"
+msgstr "Poll_ici"
 
 #: ../data/ui/gnome_paint.ui.h:30
 msgid "_Invert Colors"
-msgstr "_Inverti Colori"
+msgstr "_Inverti i colori"
 
 #: ../data/ui/gnome_paint.ui.h:31
 msgid "_Pixels"
-msgstr "_Pixels"
+msgstr "_Pixel"
 
 #: ../data/ui/gnome_paint.ui.h:32
 msgid "_Rotate by angle"
-msgstr "_Ruota dall'angolo"
+msgstr "_Ruota da un angolo"
 
 #: ../data/ui/gnome_paint.ui.h:33
 msgid "_Stretch/Skew..."
-msgstr ""
+msgstr "Allunga/Inclina..."
 
 #: ../data/ui/gnome_paint.ui.h:34
 msgid "_View"
@@ -163,7 +162,7 @@ msgstr "_Visualizza"
 
 #: ../data/ui/gnome_paint.ui.h:35
 msgid "_Width"
-msgstr "_Larghezza"
+msgstr "Larg_hezza"
 
 #: ../src/color.c:142
 msgid "Select Background Color"
@@ -180,11 +179,11 @@ msgstr "Seleziona un colore"
 #: ../src/file.c:98
 #, c-format
 msgid "Do you want to save the changes you made to \"%s\"?"
-msgstr "Vuo salvare le modifiche effettuate a \"%s\"?"
+msgstr "Salvare le modifiche apportate a \"%s\"?"
 
 #: ../src/file.c:102
 msgid "Your changes will be lost if you don't save them."
-msgstr "Le modifiche verranno perse se non saranno salvate."
+msgstr "Se non salvi, le modifiche andranno perse."
 
 #: ../src/file.c:175
 #, c-format
@@ -211,18 +210,11 @@ msgstr "errore sconosciuto"
 
 #: ../src/main.c:198
 msgid "gnome-paint is a simple, easy to use paint program for GNOME."
-msgstr "gnome-paint è un semplice e facile programma di disegno per GNOME."
+msgstr "gnome-paint è un semplice programma di disegno per GNOME."
 
 #: ../src/main.c:200
-msgid ""
-"This program is free software; you may redistribute it and/or modify it "
-"under the terms of the GNU General Public License as published by the Free "
-"Software Foundation, either version 3, or (at your opinion) any later "
-"version.\n"
-msgstr ""
-"Questo programma è gratutio; puoi redistribuirlo e/o modificarlo sotto i "
-"termini della licenza GNU General Public License publicato dalla Free "
-"Software Foundation, versione 3, o (a tua opinione) una versione successiva\n"
+msgid "This program is free software; you may redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3, or (at your opinion) any later version.\n"
+msgstr "Questo programm è software libero; puoi redistribuirlo e/o modificarlo nei termini della GNU General Public License come pubblicato dalla Free Software Foundation, sia la versione 3 o (a vostro parere) qualunque versione successiva.\n"
 
 #: ../src/pixbuf-file-chooser.c:234
 msgid "All Images"
@@ -244,5 +236,3 @@ msgstr "Salva immagine"
 msgid "Open Folder"
 msgstr "Apri cartella"
 
-#~ msgid "_Color"
-#~ msgstr "_Colore"
