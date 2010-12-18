@@ -186,6 +186,8 @@ on_menu_about_activate ( GtkMenuItem *menuitem, gpointer user_data )
 {
 	const gchar *authors[] = { "Rogério Ferro do Nascimento",
 							   "Juan Balderas",
+							   "Special thanks to:",
+							   "  Aron Xu",
 							   NULL };
 	GtkAboutDialog *dlg;
 	
