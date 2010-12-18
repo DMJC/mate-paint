@@ -1,0 +1,240 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-paint\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-12-13 18:22+0800\n"
+"PO-Revision-Date: 2010-12-17 13:25+0700\n"
+"Last-Translator: Duy Hung Tran <nguyentieuhau@gmail.com>\n"
+"Language-Team: debian-l10n-vietnamese <debian-l10n-vietnamese@lists.debian.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Vietnamese\n"
+"X-Poedit-Country: VIET NAM\n"
+
+#: ../data/desktop/gnome-paint.desktop.in.in.h:1
+msgid "Create and Edit Drawings or Images"
+msgstr "Tạo và chỉnh sửa hình vẽ hay ảnh"
+
+#: ../data/desktop/gnome-paint.desktop.in.in.h:2
+msgid "Gnome Paint Drawing Editor"
+msgstr "Trình soạn thảo hình vẽ Gnome Paint"
+
+#: ../data/ui/gnome_paint.ui.h:1
+msgid "C_m"
+msgstr "C_m"
+
+#: ../data/ui/gnome_paint.ui.h:2
+msgid "Co_lors"
+msgstr "Mà_u sắc"
+
+#: ../data/ui/gnome_paint.ui.h:3
+msgid "Colors"
+msgstr "Màu sắc"
+
+#: ../data/ui/gnome_paint.ui.h:4
+msgid "Defaults"
+msgstr "Mặc định"
+
+#: ../data/ui/gnome_paint.ui.h:5
+msgid "File last saved:"
+msgstr "Tập tin lưu lần cuối:"
+
+#: ../data/ui/gnome_paint.ui.h:6
+msgid "Flip _vertical"
+msgstr "Lật _thẳng đứng"
+
+#: ../data/ui/gnome_paint.ui.h:7
+msgid "Flip and Rotate"
+msgstr "Lật và xoay"
+
+#: ../data/ui/gnome_paint.ui.h:8
+msgid "Flip or rotate"
+msgstr "Lật hay xoay"
+
+#: ../data/ui/gnome_paint.ui.h:9
+msgid "Free select tool"
+msgstr "Công cụ lựa chọn tự do"
+
+#: ../data/ui/gnome_paint.ui.h:10
+msgid "Image Attributes"
+msgstr "Thuộc tính ảnh"
+
+#: ../data/ui/gnome_paint.ui.h:11
+msgid "Not Available"
+msgstr "Không thể dùng được"
+
+#: ../data/ui/gnome_paint.ui.h:12
+msgid "Resolution:"
+msgstr "Độ phân giải:"
+
+#: ../data/ui/gnome_paint.ui.h:13
+msgid "Size on disk:"
+msgstr "Kích thước trên đĩa:"
+
+#: ../data/ui/gnome_paint.ui.h:14
+msgid "Units"
+msgstr "Đơn vị"
+
+#: ../data/ui/gnome_paint.ui.h:15
+msgid "_180&#xB0;"
+msgstr "_180&#xB0;"
+
+#: ../data/ui/gnome_paint.ui.h:16
+msgid "_270&#xB0;"
+msgstr "_270&#xB0;"
+
+#: ../data/ui/gnome_paint.ui.h:17
+msgid "_90&#xB0;"
+msgstr "_90&#xB0;"
+
+#: ../data/ui/gnome_paint.ui.h:18
+msgid "_Attributes..."
+msgstr "T_huộc tính"
+
+#: ../data/ui/gnome_paint.ui.h:19
+msgid "_Black and white"
+msgstr "Đ_en và trắng"
+
+#: ../data/ui/gnome_paint.ui.h:20
+msgid "_Clear Image"
+msgstr "_Xóa ảnh"
+
+#: ../data/ui/gnome_paint.ui.h:21
+msgid "_Draw Opaque"
+msgstr "_Vẽ ảnh mờ"
+
+#: ../data/ui/gnome_paint.ui.h:22
+msgid "_Edit"
+msgstr "_Chỉnh sửa"
+
+#: ../data/ui/gnome_paint.ui.h:23
+msgid "_File"
+msgstr "_Tập tin"
+
+#: ../data/ui/gnome_paint.ui.h:24
+msgid "_Flip horizontal"
+msgstr "Lật _ngang"
+
+#: ../data/ui/gnome_paint.ui.h:25
+msgid "_Flip/Rotate..."
+msgstr "Lật/_xoay"
+
+#: ../data/ui/gnome_paint.ui.h:26
+msgid "_Height"
+msgstr "_Chiều cao"
+
+#: ../data/ui/gnome_paint.ui.h:27
+msgid "_Help"
+msgstr "Trợ _giúp"
+
+#: ../data/ui/gnome_paint.ui.h:28
+msgid "_Image"
+msgstr "_Hình ảnh"
+
+#: ../data/ui/gnome_paint.ui.h:29
+msgid "_Inches"
+msgstr "_Inches"
+
+#: ../data/ui/gnome_paint.ui.h:30
+msgid "_Invert Colors"
+msgstr "Đả_o ngược màu"
+
+#: ../data/ui/gnome_paint.ui.h:31
+msgid "_Pixels"
+msgstr "_Pixels"
+
+#: ../data/ui/gnome_paint.ui.h:32
+msgid "_Rotate by angle"
+msgstr "_Xoay bởi góc"
+
+#: ../data/ui/gnome_paint.ui.h:33
+msgid "_Stretch/Skew..."
+msgstr "_Căng/nghiêng..."
+
+#: ../data/ui/gnome_paint.ui.h:34
+msgid "_View"
+msgstr "_Xem"
+
+#: ../data/ui/gnome_paint.ui.h:35
+msgid "_Width"
+msgstr "Chiều _rộng"
+
+#: ../src/color.c:142
+msgid "Select Background Color"
+msgstr "Chọn màu cho hậu cảnh"
+
+#: ../src/color.c:155
+msgid "Select Foreground Color"
+msgstr "Chọn màu cho tiền cảnh"
+
+#: ../src/color.c:215
+msgid "Select Color"
+msgstr "Chọn màu"
+
+#: ../src/file.c:98
+#, c-format
+msgid "Do you want to save the changes you made to \"%s\"?"
+msgstr "Bạn có muốn lưu những thay đổi bạn đã tạo cho \"%s\"?"
+
+#: ../src/file.c:102
+msgid "Your changes will be lost if you don't save them."
+msgstr "Những thay đổi của bạn sẽ bị mất nếu bạn không lưu chúng."
+
+#: ../src/file.c:175
+#, c-format
+msgid "Error loading file \"%s\""
+msgstr "Lỗi nạp tập tin \"%s\""
+
+#: ../src/file.c:272
+#, c-format
+msgid "%s - gnome-paint"
+msgstr "%s - gnome-paint"
+
+#: ../src/file.c:313
+msgid "untitled"
+msgstr "không tiêu đề"
+
+#: ../src/file.c:326
+#, c-format
+msgid "Error saving file \"%s\""
+msgstr "Lỗi lưu tập tin \"%s\""
+
+#: ../src/file.c:340
+msgid "unknown error"
+msgstr "không rõ lỗi"
+
+#: ../src/main.c:198
+msgid "gnome-paint is a simple, easy to use paint program for GNOME."
+msgstr "gnome-paint là chương trình vẽ đơn giản và dễ sử dụng cho GNOME."
+
+#: ../src/main.c:200
+msgid "This program is free software; you may redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3, or (at your opinion) any later version.\n"
+msgstr "Chương trình này là phần mềm tự do, bạn có thể cung cấp lại và/hoặc chỉnh sửa nó theo những điều khoản của Giấy phép Công cộng của GNU do Tổ chức Phần mềm Tự do công bố, theo phiên bản 3 của Giấy phép, hoặc bất kỳ một phiên bản mới hơn (tùy sự lựa chọn của bạn).\n"
+
+#: ../src/pixbuf-file-chooser.c:234
+msgid "All Images"
+msgstr "Tất cả hình ảnh"
+
+#: ../src/pixbuf-file-chooser.c:353
+msgid "All Files"
+msgstr "Tất cả tập tin"
+
+#: ../src/pixbuf-file-chooser.c:427
+msgid "Load Image"
+msgstr "Nạp ảnh"
+
+#: ../src/pixbuf-file-chooser.c:435
+msgid "Save Image"
+msgstr "Lưu ảnh"
+
+#: ../src/pixbuf-file-chooser.c:443
+msgid "Open Folder"
+msgstr "Mở thư mục"
+
