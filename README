@@ -7,6 +7,37 @@ Home:
         https://launchpad.net/gnome-paint
         http://code.google.com/p/gnome-paint/
 
+
+Fixed/Added since 0.3.0:
+  - Rectangular selection
+  - Undo flood fills
+  - Undo Air brush
+  - Different size/type brushes
+  - Eraser w/different sizes
+  - Flip/Rotate
+  - Color inverting
+  - Transparency/opaque button
+    for selections
+  - Clearing image
+  - Default size changed to accommodate net-books
+  - Translations
+     - Arabic
+     - Czech
+     - Danish
+     - French
+     - German
+     - Hebrew
+     - Italian
+     - Norwegian
+     - Portuguese - Brazilian 
+     - Portuguese - European
+     - Russian
+     - Spanish
+     - Turkish
+     - Vietnamese
+     - Chinese (simplified)
+     - Chinese (traditional)
+
 Features:
   - Open file
   - Save file
@@ -46,19 +77,47 @@ Unimplemented Features:
   - Image Menu
   - Color Menu
 
-Fixed/Added since 0.3.0:
-  - Rectangular selection
-  - Undo flood fills
-  - Undo Air brush
-  - Different size/type brushes
-  - Eraser w/different sizes
-  - Flip/Rotate
-  - Color inverting
-  - Transparency/opaque button
-    for selection
-  - Clearing image
-  - Default size changed to accommodate net-books
-  - Added zh_CN.po translation
+Compiling:
+Please read the file INSTALL for building and installing from source.
+
+Features:
+  - Open file
+  - Save file
+  - Dynamic resize image
+  - Multiple Undo
+  - Multiple Redo
+  - Flip and Rotate (new)
+  - Invert Colors (new)
+  - Rectangular Selection (new)
+
+Tools:
+  - Pencil
+  - Lines
+  - Rectangles
+  - Ellipses
+  - Polygons
+  - Color Picker
+  - Four types of brushes (new)
+       - Round Brush
+       - Square Brush
+       - Forward Slash
+       - Back Slash
+  - Air brush (one size only)
+  - Curves
+  - Flood Fill
+  - Rounded Rectangle
+  - Rectangular Selection (new)
+  - Eraser (new)
+
+Unimplemented tools:
+  - Free Selection
+  - Zoom
+  - Text
+
+Unimplemented Features:
+  - View Menu
+  - Image Menu
+  - Color Menu
 
 Compiling:
 Please read the file INSTALL for building and installing from source.

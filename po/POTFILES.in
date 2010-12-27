@@ -6,3 +6,4 @@ src/cv_drawing.c
 src/file.c
 src/main.c
 src/pixbuf-file-chooser.c
+data/desktop/gnome-paint.desktop.in

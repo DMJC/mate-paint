@@ -90,7 +90,6 @@ gnome_paint_LDADD = \
 	$(GNOME_PAINT_LIBS) -lX11
 
 SUBDIRS = \
-	pixmaps\
 	pixmaps
 
 # Remove glade directory on uninstall
