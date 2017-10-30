@@ -204,10 +204,10 @@ on_cv_other_edge_expose_event	(   GtkWidget	   *widget,
                     0,0,widget->allocation.width,0);
 #else
 	gdk_draw_line ( widget->window,
-                    widget->style->fg_gc[GTK_WIDGET_STATE(widget)],
+                    widget->style->fg_gc[gtk_widget_get_state(widget)],
                     0,0,0,widget->allocation.height);
 	gdk_draw_line ( widget->window,
-                    widget->style->fg_gc[GTK_WIDGET_STATE(widget)],
+                    widget->style->fg_gc[gtk_widget_get_state(widget)],
                     0,0,widget->allocation.width,0);
 #endif
 	return TRUE;
