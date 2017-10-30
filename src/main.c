@@ -207,7 +207,7 @@ on_menu_about_activate ( GtkMenuItem *menuitem, gpointer user_data )
 	gtk_about_dialog_set_wrap_license ( dlg, TRUE );
 	gtk_about_dialog_set_authors ( dlg, authors );
 	gtk_about_dialog_set_website ( dlg, 
-									"http://code.google.com/p/gnome-paint/");
+									"https://launchpad.net/gnome-paint");
 	//gtk_about_dialog_set_logo ( dlg, pixbuf);
 	gtk_dialog_run ( GTK_DIALOG(dlg) );
 	gtk_widget_destroy ( GTK_WIDGET(dlg) );
