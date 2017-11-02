@@ -1,7 +1,7 @@
 /***************************************************************************
  *            toolbar.c
  *
- *  Last update: 2011-05-24
+ *  Last update: 2017-11-02
  *  Copyright (C) Rogério Ferro do Nascimento 2009 
  *  <rogerioferro@gmail.com>
  *  Copyright (C) Juan Balderas 2011 
@@ -605,7 +605,7 @@ static void quick_message (GtkWidget *widget, gchar *message)
 				   GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 				   GTK_MESSAGE_INFO,
 				   GTK_BUTTONS_OK,
-				   message);
+				   "%s", message);
 
     gtk_dialog_run (GTK_DIALOG (dialog));
     gtk_widget_destroy (dialog);
