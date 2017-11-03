@@ -1,16 +1,16 @@
-# Turkish translation for gnome-paint
-# Copyright (c) 2010 Rosetta Contributors and Canonical Ltd 2010
+# English (Australia) translation for gnome-paint
+# Copyright (c) 2013 Rosetta Contributors and Canonical Ltd 2013
 # This file is distributed under the same license as the gnome-paint package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2010.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2013.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: gnome-paint\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2010-06-04 20:10-0300\n"
-"PO-Revision-Date: 2017-11-02 20:38+0000\n"
-"Last-Translator: Dominik <dominik@danelski.pl>\n"
-"Language-Team: Turkish <tr@li.org>\n"
+"PO-Revision-Date: 2013-06-26 00:38+0000\n"
+"Last-Translator: Jackson Doak <noskcaj@ubuntu.com>\n"
+"Language-Team: English (Australia) <en_AU@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,87 +19,87 @@ msgstr ""
 
 #: ../data/desktop/gnome-paint.desktop.in.in.h:1
 msgid "Create and Edit Drawings or Images"
-msgstr "Çizim veya Görüntü Oluşturun ve Düzenleyin"
+msgstr "Create and Edit Drawings or Images"
 
 #: ../data/desktop/gnome-paint.desktop.in.in.h:2
 msgid "Gnome Paint Drawing Editor"
-msgstr "Gnome Paint Çizim Düzenleyicisi"
+msgstr "Gnome Paint Drawing Editor"
 
 #: ../data/ui/gnome_paint.ui.h:1
 msgid "Free select tool"
-msgstr "Serbest seçim aracı"
+msgstr "Free select tool"
 
 #: ../data/ui/gnome_paint.ui.h:2
 msgid "_Color"
-msgstr "_Renk"
+msgstr "_Colour"
 
 #: ../data/ui/gnome_paint.ui.h:3
 msgid "_Edit"
-msgstr "_Düzenle"
+msgstr "_Edit"
 
 #: ../data/ui/gnome_paint.ui.h:4
 msgid "_File"
-msgstr "_Dosya"
+msgstr "_File"
 
 #: ../data/ui/gnome_paint.ui.h:5
 msgid "_Help"
-msgstr "_Yardım"
+msgstr "_Help"
 
 #: ../data/ui/gnome_paint.ui.h:6
 msgid "_Image"
-msgstr "_Görüntü"
+msgstr "_Image"
 
 #: ../data/ui/gnome_paint.ui.h:7
 msgid "_View"
-msgstr "_Görünüm"
+msgstr "_View"
 
 #: ../src/color.c:142
 msgid "Select Background Color"
-msgstr "Artalan Rengini Seç"
+msgstr "Select Background Colour"
 
 #: ../src/color.c:155
 msgid "Select Foreground Color"
-msgstr "Önalan Rengini Seçin"
+msgstr ""
 
 #: ../src/color.c:214
 msgid "Select Color"
-msgstr "Renk Seçin"
+msgstr ""
 
 #: ../src/file.c:98
 #, c-format
 msgid "Do you want to save the changes you made to \"%s\"?"
-msgstr "\"%s\" üzerine yapılan değişiklikleri kaydetmek istiyor musunuz?"
+msgstr ""
 
 #: ../src/file.c:102
 msgid "Your changes will be lost if you don't save them."
-msgstr "Eğer kaydetmezseniz yaptığınız değişiklikler kaybolacak."
+msgstr ""
 
 #: ../src/file.c:175
 #, c-format
 msgid "Error loading file \"%s\""
-msgstr "\"%s\" dosyasını yüklemede hata"
+msgstr ""
 
 #: ../src/file.c:272
 #, c-format
 msgid "%s - gnome-paint"
-msgstr "%s - gnome-paint"
+msgstr ""
 
 #: ../src/file.c:313
 msgid "untitled"
-msgstr "adsız"
+msgstr ""
 
 #: ../src/file.c:326
 #, c-format
 msgid "Error saving file \"%s\""
-msgstr "\"%s\" dosyasının kaydedilmesinde hata"
+msgstr ""
 
 #: ../src/file.c:340
 msgid "unknown error"
-msgstr "bilinmeyen hata"
+msgstr ""
 
 #: ../src/main.c:183
 msgid "gnome-paint is a simple, easy to use paint program for GNOME."
-msgstr "gnome-paint, GNOME için sade ve kolay bir boyama programıdır."
+msgstr ""
 
 #: ../src/main.c:185
 msgid ""
@@ -108,27 +108,23 @@ msgid ""
 "Software Foundation, either version 3, or (at your opinion) any later "
 "version.\n"
 msgstr ""
-"Bu program ücretsiz bir yazılımdır; Özgür Yazılım Vakfı'nın yayınladığı GNU "
-"Genel Kamu Lisansı altında; ya da Lisansın üçüncü sürümü veya (isteğinize "
-"göre) sonraki herhangi bir sürümde, yeniden dağıtabilir ve/veya "
-"değiştirebilirsiniz.\n"
 
 #: ../src/pixbuf-file-chooser.c:234
 msgid "All Images"
-msgstr "Tüm Görüntüler"
+msgstr ""
 
 #: ../src/pixbuf-file-chooser.c:353
 msgid "All Files"
-msgstr "Tüm Dosyalar"
+msgstr ""
 
 #: ../src/pixbuf-file-chooser.c:427
 msgid "Load Image"
-msgstr "Görüntü Yükle"
+msgstr ""
 
 #: ../src/pixbuf-file-chooser.c:435
 msgid "Save Image"
-msgstr "Görüntüyü Kaydet"
+msgstr ""
 
 #: ../src/pixbuf-file-chooser.c:443
 msgid "Open Folder"
-msgstr "Klasör Aç"
+msgstr ""

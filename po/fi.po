@@ -1,4 +1,4 @@
-# Turkish translation for gnome-paint
+# Finnish translation for gnome-paint
 # Copyright (c) 2010 Rosetta Contributors and Canonical Ltd 2010
 # This file is distributed under the same license as the gnome-paint package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2010.
@@ -8,9 +8,9 @@ msgstr ""
 "Project-Id-Version: gnome-paint\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2010-06-04 20:10-0300\n"
-"PO-Revision-Date: 2017-11-02 20:38+0000\n"
-"Last-Translator: Dominik <dominik@danelski.pl>\n"
-"Language-Team: Turkish <tr@li.org>\n"
+"PO-Revision-Date: 2011-01-04 08:04+0000\n"
+"Last-Translator: Tomi Juntunen <Unknown>\n"
+"Language-Team: Finnish <fi@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,65 +19,65 @@ msgstr ""
 
 #: ../data/desktop/gnome-paint.desktop.in.in.h:1
 msgid "Create and Edit Drawings or Images"
-msgstr "Çizim veya Görüntü Oluşturun ve Düzenleyin"
+msgstr "Luo ja muokkaa piirustuksia ja kuvia"
 
 #: ../data/desktop/gnome-paint.desktop.in.in.h:2
 msgid "Gnome Paint Drawing Editor"
-msgstr "Gnome Paint Çizim Düzenleyicisi"
+msgstr "Gnome Paint -piirustusohjelma"
 
 #: ../data/ui/gnome_paint.ui.h:1
 msgid "Free select tool"
-msgstr "Serbest seçim aracı"
+msgstr "Vapaavalinta"
 
 #: ../data/ui/gnome_paint.ui.h:2
 msgid "_Color"
-msgstr "_Renk"
+msgstr "_Väri"
 
 #: ../data/ui/gnome_paint.ui.h:3
 msgid "_Edit"
-msgstr "_Düzenle"
+msgstr "M_uokkaa"
 
 #: ../data/ui/gnome_paint.ui.h:4
 msgid "_File"
-msgstr "_Dosya"
+msgstr "_Tiedosto"
 
 #: ../data/ui/gnome_paint.ui.h:5
 msgid "_Help"
-msgstr "_Yardım"
+msgstr "_Ohje"
 
 #: ../data/ui/gnome_paint.ui.h:6
 msgid "_Image"
-msgstr "_Görüntü"
+msgstr "_Kuva"
 
 #: ../data/ui/gnome_paint.ui.h:7
 msgid "_View"
-msgstr "_Görünüm"
+msgstr "_Näytä"
 
 #: ../src/color.c:142
 msgid "Select Background Color"
-msgstr "Artalan Rengini Seç"
+msgstr "Valitse taustaväri"
 
 #: ../src/color.c:155
 msgid "Select Foreground Color"
-msgstr "Önalan Rengini Seçin"
+msgstr "Valitse edustaväri"
 
 #: ../src/color.c:214
 msgid "Select Color"
-msgstr "Renk Seçin"
+msgstr "Valitse väri"
 
 #: ../src/file.c:98
 #, c-format
 msgid "Do you want to save the changes you made to \"%s\"?"
-msgstr "\"%s\" üzerine yapılan değişiklikleri kaydetmek istiyor musunuz?"
+msgstr "Haluatko tallentaa muutokset tiedostoon \"%s\"?"
 
 #: ../src/file.c:102
 msgid "Your changes will be lost if you don't save them."
-msgstr "Eğer kaydetmezseniz yaptığınız değişiklikler kaybolacak."
+msgstr "Tallentamattomat muutokset menetetään!"
 
 #: ../src/file.c:175
 #, c-format
 msgid "Error loading file \"%s\""
-msgstr "\"%s\" dosyasını yüklemede hata"
+msgstr "Virhe ladattaessa tiedostoa \"%s\""
 
 #: ../src/file.c:272
 #, c-format
@@ -86,20 +86,22 @@ msgstr "%s - gnome-paint"
 
 #: ../src/file.c:313
 msgid "untitled"
-msgstr "adsız"
+msgstr "nimetön"
 
 #: ../src/file.c:326
 #, c-format
 msgid "Error saving file \"%s\""
-msgstr "\"%s\" dosyasının kaydedilmesinde hata"
+msgstr "Virhe tallennettaessa tiedostoa \"%s\""
 
 #: ../src/file.c:340
 msgid "unknown error"
-msgstr "bilinmeyen hata"
+msgstr "tuntematon virhe"
 
 #: ../src/main.c:183
 msgid "gnome-paint is a simple, easy to use paint program for GNOME."
-msgstr "gnome-paint, GNOME için sade ve kolay bir boyama programıdır."
+msgstr ""
+"gnome-paint on yksinkertainen ja helppokäyttöinen GNOME-työpöytäympäristön "
+"piirrosohjelma."
 
 #: ../src/main.c:185
 msgid ""
@@ -108,27 +110,26 @@ msgid ""
 "Software Foundation, either version 3, or (at your opinion) any later "
 "version.\n"
 msgstr ""
-"Bu program ücretsiz bir yazılımdır; Özgür Yazılım Vakfı'nın yayınladığı GNU "
-"Genel Kamu Lisansı altında; ya da Lisansın üçüncü sürümü veya (isteğinize "
-"göre) sonraki herhangi bir sürümde, yeniden dağıtabilir ve/veya "
-"değiştirebilirsiniz.\n"
+"Tämä on vapaa ohjelma: tätä ohjelmaa saa levittää edelleen ja muuttaa Free "
+"Software Foundationin julkaiseman GNU General Public Licensen (GPL-lisenssi) "
+"version 3 tai (valinnan mukaan) myöhemmän version ehtojen mukaisesti.\n"
 
 #: ../src/pixbuf-file-chooser.c:234
 msgid "All Images"
-msgstr "Tüm Görüntüler"
+msgstr "Kaikki kuvat"
 
 #: ../src/pixbuf-file-chooser.c:353
 msgid "All Files"
-msgstr "Tüm Dosyalar"
+msgstr "Kaikki tiedostot"
 
 #: ../src/pixbuf-file-chooser.c:427
 msgid "Load Image"
-msgstr "Görüntü Yükle"
+msgstr "Lataa kuva"
 
 #: ../src/pixbuf-file-chooser.c:435
 msgid "Save Image"
-msgstr "Görüntüyü Kaydet"
+msgstr "Tallenna kuva"
 
 #: ../src/pixbuf-file-chooser.c:443
 msgid "Open Folder"
-msgstr "Klasör Aç"
+msgstr "Avaa kansio"

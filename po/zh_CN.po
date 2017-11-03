@@ -8,14 +8,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-paint HEAD\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-12-13 17:49+0800\n"
-"PO-Revision-Date: 2010-12-13 18:01+0800\n"
-"Last-Translator: Aron Xu <happyaron.xu@gmail.com>\n"
+"POT-Creation-Date: 2010-06-04 20:10-0300\n"
+"PO-Revision-Date: 2017-11-02 20:37+0000\n"
+"Last-Translator: Aron Xu <Unknown>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
-"Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2017-11-03 05:24+0000\n"
+"X-Generator: Launchpad (build 18493)\n"
 
 #: ../data/desktop/gnome-paint.desktop.in.in.h:1
 msgid "Create and Edit Drawings or Images"
@@ -26,144 +27,32 @@ msgid "Gnome Paint Drawing Editor"
 msgstr "Gnome 画图工具"
 
 #: ../data/ui/gnome_paint.ui.h:1
-msgid "C_m"
-msgstr "C_m"
-
-#: ../data/ui/gnome_paint.ui.h:2
-msgid "Co_lors"
-msgstr "颜色(_L)"
-
-#: ../data/ui/gnome_paint.ui.h:3
-msgid "Colors"
-msgstr "颜色"
-
-#: ../data/ui/gnome_paint.ui.h:4
-msgid "Defaults"
-msgstr "默认"
-
-#: ../data/ui/gnome_paint.ui.h:5
-msgid "File last saved:"
-msgstr "最近保存的文件："
-
-#: ../data/ui/gnome_paint.ui.h:6
-msgid "Flip _vertical"
-msgstr "竖直翻转"
-
-#: ../data/ui/gnome_paint.ui.h:7
-msgid "Flip and Rotate"
-msgstr "翻转并旋转"
-
-#: ../data/ui/gnome_paint.ui.h:8
-msgid "Flip or rotate"
-msgstr "翻转或旋转"
-
-#: ../data/ui/gnome_paint.ui.h:9
 msgid "Free select tool"
 msgstr "自由选取工具"
 
-#: ../data/ui/gnome_paint.ui.h:10
-msgid "Image Attributes"
-msgstr "图像属性"
+#: ../data/ui/gnome_paint.ui.h:2
+msgid "_Color"
+msgstr "颜色(_C)"
 
-#: ../data/ui/gnome_paint.ui.h:11
-msgid "Not Available"
-msgstr "不可用"
-
-#: ../data/ui/gnome_paint.ui.h:12
-msgid "Resolution:"
-msgstr "分辨率："
-
-#: ../data/ui/gnome_paint.ui.h:13
-msgid "Size on disk:"
-msgstr "磁盘上的大小："
-
-#: ../data/ui/gnome_paint.ui.h:14
-msgid "Units"
-msgstr "单元"
-
-#: ../data/ui/gnome_paint.ui.h:15
-msgid "_180&#xB0;"
-msgstr "_180&#xB0;"
-
-#: ../data/ui/gnome_paint.ui.h:16
-msgid "_270&#xB0;"
-msgstr "_270&#xB0;"
-
-#: ../data/ui/gnome_paint.ui.h:17
-msgid "_90&#xB0;"
-msgstr "_90&#xB0;"
-
-#: ../data/ui/gnome_paint.ui.h:18
-msgid "_Attributes..."
-msgstr "属性(_A)..."
-
-#: ../data/ui/gnome_paint.ui.h:19
-msgid "_Black and white"
-msgstr "黑白(_B)"
-
-#: ../data/ui/gnome_paint.ui.h:20
-msgid "_Clear Image"
-msgstr "清空图像(_C)"
-
-#: ../data/ui/gnome_paint.ui.h:21
-msgid "_Draw Opaque"
-msgstr "绘制不透明图形(_D)"
-
-#: ../data/ui/gnome_paint.ui.h:22
+#: ../data/ui/gnome_paint.ui.h:3
 msgid "_Edit"
 msgstr "编辑(_E)"
 
-#: ../data/ui/gnome_paint.ui.h:23
+#: ../data/ui/gnome_paint.ui.h:4
 msgid "_File"
 msgstr "文件(_F)"
 
-#: ../data/ui/gnome_paint.ui.h:24
-msgid "_Flip horizontal"
-msgstr "水平翻转(_F)"
-
-#: ../data/ui/gnome_paint.ui.h:25
-msgid "_Flip/Rotate..."
-msgstr "翻转/旋转(_F)..."
-
-#: ../data/ui/gnome_paint.ui.h:26
-msgid "_Height"
-msgstr "高度(_H)"
-
-#: ../data/ui/gnome_paint.ui.h:27
+#: ../data/ui/gnome_paint.ui.h:5
 msgid "_Help"
 msgstr "帮助(_H)"
 
-#: ../data/ui/gnome_paint.ui.h:28
+#: ../data/ui/gnome_paint.ui.h:6
 msgid "_Image"
 msgstr "图像(_I)"
 
-#: ../data/ui/gnome_paint.ui.h:29
-msgid "_Inches"
-msgstr "英寸(_I)"
-
-#: ../data/ui/gnome_paint.ui.h:30
-msgid "_Invert Colors"
-msgstr "翻转颜色(_I)"
-
-#: ../data/ui/gnome_paint.ui.h:31
-msgid "_Pixels"
-msgstr "像素(_P)"
-
-#: ../data/ui/gnome_paint.ui.h:32
-msgid "_Rotate by angle"
-msgstr "按角度旋转(_R)"
-
-#: ../data/ui/gnome_paint.ui.h:33
-msgid "_Stretch/Skew..."
-msgstr "拉伸/倾斜(_S)..."
-
-#: ../data/ui/gnome_paint.ui.h:34
+#: ../data/ui/gnome_paint.ui.h:7
 msgid "_View"
 msgstr "查看(_V)"
-
-#: ../data/ui/gnome_paint.ui.h:35
-msgid "_Width"
-msgstr "宽度(_W)"
 
 #: ../src/color.c:142
 msgid "Select Background Color"
@@ -173,7 +62,7 @@ msgstr "选择背景色"
 msgid "Select Foreground Color"
 msgstr "选择前景色"
 
-#: ../src/color.c:215
+#: ../src/color.c:214
 msgid "Select Color"
 msgstr "选择颜色"
 
@@ -209,19 +98,18 @@ msgstr "保存文件 %s 出错"
 msgid "unknown error"
 msgstr "未知错误"
 
-#: ../src/main.c:198
+#: ../src/main.c:183
 msgid "gnome-paint is a simple, easy to use paint program for GNOME."
 msgstr "gnome-paint 是一个简单易用的 GNOME 画图程序。"
 
-#: ../src/main.c:200
+#: ../src/main.c:185
 msgid ""
 "This program is free software; you may redistribute it and/or modify it "
 "under the terms of the GNU General Public License as published by the Free "
 "Software Foundation, either version 3, or (at your opinion) any later "
 "version.\n"
 msgstr ""
-"本程序是自由软件；您可以依照自由软件基金会发布的 GNU 通用公共许可证(GPL)的第"
-"三版(或更高版本)中的条款对软件重新发布和/或进行修改。\n"
+"本程序是自由软件；您可以依照自由软件基金会发布的 GNU 通用公共许可证(GPL)的第三版(或更高版本)中的条款对软件重新发布和/或进行修改。\n"
 
 #: ../src/pixbuf-file-chooser.c:234
 msgid "All Images"
