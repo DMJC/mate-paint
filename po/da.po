@@ -9,14 +9,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-paint\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-12-13 18:22+0800\n"
-"PO-Revision-Date: 2010-12-14 17:34+0000\n"
-"Last-Translator: Joe Hansen <joedalton2@yahoo.dk>\n"
+"POT-Creation-Date: 2010-06-04 20:10-0300\n"
+"PO-Revision-Date: 2017-11-02 20:37+0000\n"
+"Last-Translator: Joe Hansen <Unknown>\n"
 "Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
-"Language: da\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2017-11-03 05:24+0000\n"
+"X-Generator: Launchpad (build 18493)\n"
+"Language: da\n"
 
 #: ../data/desktop/gnome-paint.desktop.in.in.h:1
 msgid "Create and Edit Drawings or Images"
@@ -27,144 +29,32 @@ msgid "Gnome Paint Drawing Editor"
 msgstr "Gnome Paint - tegneprogram"
 
 #: ../data/ui/gnome_paint.ui.h:1
-msgid "C_m"
-msgstr "_Cm"
-
-#: ../data/ui/gnome_paint.ui.h:2
-msgid "Co_lors"
-msgstr "_Farver"
-
-#: ../data/ui/gnome_paint.ui.h:3
-msgid "Colors"
-msgstr "Farver"
-
-#: ../data/ui/gnome_paint.ui.h:4
-msgid "Defaults"
-msgstr "Standarder"
-
-#: ../data/ui/gnome_paint.ui.h:5
-msgid "File last saved:"
-msgstr "Fil sidst gemt:"
-
-#: ../data/ui/gnome_paint.ui.h:6
-msgid "Flip _vertical"
-msgstr "Vend _lodret"
-
-#: ../data/ui/gnome_paint.ui.h:7
-msgid "Flip and Rotate"
-msgstr "Vend og roter"
-
-#: ../data/ui/gnome_paint.ui.h:8
-msgid "Flip or rotate"
-msgstr "Vend eller roter"
-
-#: ../data/ui/gnome_paint.ui.h:9
 msgid "Free select tool"
 msgstr "Værktøj til fri markering"
 
-#: ../data/ui/gnome_paint.ui.h:10
-msgid "Image Attributes"
-msgstr "Billedattributter"
+#: ../data/ui/gnome_paint.ui.h:2
+msgid "_Color"
+msgstr "_Farve"
 
-#: ../data/ui/gnome_paint.ui.h:11
-msgid "Not Available"
-msgstr "Ikke tilgængelig"
-
-#: ../data/ui/gnome_paint.ui.h:12
-msgid "Resolution:"
-msgstr "Opløsning:"
-
-#: ../data/ui/gnome_paint.ui.h:13
-msgid "Size on disk:"
-msgstr "Størrelse på disk:"
-
-#: ../data/ui/gnome_paint.ui.h:14
-msgid "Units"
-msgstr "Enheder"
-
-#: ../data/ui/gnome_paint.ui.h:15
-msgid "_180&#xB0;"
-msgstr "_180&#xB0;"
-
-#: ../data/ui/gnome_paint.ui.h:16
-msgid "_270&#xB0;"
-msgstr "_270&#xB0;"
-
-#: ../data/ui/gnome_paint.ui.h:17
-msgid "_90&#xB0;"
-msgstr "_90&#xB0;"
-
-#: ../data/ui/gnome_paint.ui.h:18
-msgid "_Attributes..."
-msgstr "_Attributter..."
-
-#: ../data/ui/gnome_paint.ui.h:19
-msgid "_Black and white"
-msgstr "_Sort og hvid"
-
-#: ../data/ui/gnome_paint.ui.h:20
-msgid "_Clear Image"
-msgstr "_Ryd billede"
-
-#: ../data/ui/gnome_paint.ui.h:21
-msgid "_Draw Opaque"
-msgstr "_Tegn uigennemsigtig"
-
-#: ../data/ui/gnome_paint.ui.h:22
+#: ../data/ui/gnome_paint.ui.h:3
 msgid "_Edit"
 msgstr "_Rediger"
 
-#: ../data/ui/gnome_paint.ui.h:23
+#: ../data/ui/gnome_paint.ui.h:4
 msgid "_File"
 msgstr "_Fil"
 
-#: ../data/ui/gnome_paint.ui.h:24
-msgid "_Flip horizontal"
-msgstr "_Vend vandret"
-
-#: ../data/ui/gnome_paint.ui.h:25
-msgid "_Flip/Rotate..."
-msgstr "_Vend/roter..."
-
-#: ../data/ui/gnome_paint.ui.h:26
-msgid "_Height"
-msgstr "_Højde"
-
-#: ../data/ui/gnome_paint.ui.h:27
+#: ../data/ui/gnome_paint.ui.h:5
 msgid "_Help"
 msgstr "_Hjælp"
 
-#: ../data/ui/gnome_paint.ui.h:28
+#: ../data/ui/gnome_paint.ui.h:6
 msgid "_Image"
 msgstr "_Billede"
 
-#: ../data/ui/gnome_paint.ui.h:29
-msgid "_Inches"
-msgstr "_Tommer"
-
-#: ../data/ui/gnome_paint.ui.h:30
-msgid "_Invert Colors"
-msgstr "_Inverter farver"
-
-#: ../data/ui/gnome_paint.ui.h:31
-msgid "_Pixels"
-msgstr "_Billedpunkter"
-
-#: ../data/ui/gnome_paint.ui.h:32
-msgid "_Rotate by angle"
-msgstr "_Roter med vinkel"
-
-#: ../data/ui/gnome_paint.ui.h:33
-msgid "_Stretch/Skew..."
-msgstr "_Træk/skævgør..."
-
-#: ../data/ui/gnome_paint.ui.h:34
+#: ../data/ui/gnome_paint.ui.h:7
 msgid "_View"
 msgstr "_Vis"
-
-#: ../data/ui/gnome_paint.ui.h:35
-msgid "_Width"
-msgstr "_Bredde"
 
 #: ../src/color.c:142
 msgid "Select Background Color"
@@ -174,7 +64,7 @@ msgstr "Vælg baggrundsfarve"
 msgid "Select Foreground Color"
 msgstr "Vælg forgrundsfarve"
 
-#: ../src/color.c:215
+#: ../src/color.c:214
 msgid "Select Color"
 msgstr "Vælg farve"
 
@@ -210,11 +100,11 @@ msgstr "Der opstod en fejl under gemning af fil »%s«"
 msgid "unknown error"
 msgstr "ukendt fejl"
 
-#: ../src/main.c:198
+#: ../src/main.c:183
 msgid "gnome-paint is a simple, easy to use paint program for GNOME."
 msgstr "gnome-paint er et enkelt, nemt at bruge tegneprogram til GNOME."
 
-#: ../src/main.c:200
+#: ../src/main.c:185
 msgid ""
 "This program is free software; you may redistribute it and/or modify it "
 "under the terms of the GNU General Public License as published by the Free "
@@ -245,4 +135,3 @@ msgstr "Gem billede"
 #: ../src/pixbuf-file-chooser.c:443
 msgid "Open Folder"
 msgstr "Åbn mappe"
-

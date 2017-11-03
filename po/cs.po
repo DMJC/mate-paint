@@ -7,14 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-paint 0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-12-13 18:22+0800\n"
-"PO-Revision-Date: 2010-12-18 16:01+0100\n"
+"POT-Creation-Date: 2010-06-04 20:10-0300\n"
+"PO-Revision-Date: 2017-11-02 19:04+0000\n"
 "Last-Translator: Michal Simunek <michal.simunek@gmail.com>\n"
 "Language-Team: Czech <debian-l10n-czech@lists.debian.org>\n"
-"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2017-11-03 05:24+0000\n"
+"X-Generator: Launchpad (build 18493)\n"
+"Language: cs\n"
 
 #: ../data/desktop/gnome-paint.desktop.in.in.h:1
 msgid "Create and Edit Drawings or Images"
@@ -25,144 +27,32 @@ msgid "Gnome Paint Drawing Editor"
 msgstr "Editor kreseb Gnome Paint"
 
 #: ../data/ui/gnome_paint.ui.h:1
-msgid "C_m"
-msgstr "c_m"
-
-#: ../data/ui/gnome_paint.ui.h:2
-msgid "Co_lors"
-msgstr "_Barvy"
-
-#: ../data/ui/gnome_paint.ui.h:3
-msgid "Colors"
-msgstr "Barvy"
-
-#: ../data/ui/gnome_paint.ui.h:4
-msgid "Defaults"
-msgstr "Výchozí"
-
-#: ../data/ui/gnome_paint.ui.h:5
-msgid "File last saved:"
-msgstr "Naposledy uložený soubor:"
-
-#: ../data/ui/gnome_paint.ui.h:6
-msgid "Flip _vertical"
-msgstr "_Překlopit svisle"
-
-#: ../data/ui/gnome_paint.ui.h:7
-msgid "Flip and Rotate"
-msgstr "Překlopit a otočit"
-
-#: ../data/ui/gnome_paint.ui.h:8
-msgid "Flip or rotate"
-msgstr "Překlopit či otočit"
-
-#: ../data/ui/gnome_paint.ui.h:9
 msgid "Free select tool"
 msgstr "Nástroj libovolný výběr"
 
-#: ../data/ui/gnome_paint.ui.h:10
-msgid "Image Attributes"
-msgstr "Vlastnosti obrázku"
+#: ../data/ui/gnome_paint.ui.h:2
+msgid "_Color"
+msgstr "_Barva"
 
-#: ../data/ui/gnome_paint.ui.h:11
-msgid "Not Available"
-msgstr "Nedostupné"
-
-#: ../data/ui/gnome_paint.ui.h:12
-msgid "Resolution:"
-msgstr "Rozlišení:"
-
-#: ../data/ui/gnome_paint.ui.h:13
-msgid "Size on disk:"
-msgstr "Místo na disku:"
-
-#: ../data/ui/gnome_paint.ui.h:14
-msgid "Units"
-msgstr "Jednotky"
-
-#: ../data/ui/gnome_paint.ui.h:15
-msgid "_180&#xB0;"
-msgstr "_180&#xB0;"
-
-#: ../data/ui/gnome_paint.ui.h:16
-msgid "_270&#xB0;"
-msgstr "_270&#xB0;"
-
-#: ../data/ui/gnome_paint.ui.h:17
-msgid "_90&#xB0;"
-msgstr "_90&#xB0;"
-
-#: ../data/ui/gnome_paint.ui.h:18
-msgid "_Attributes..."
-msgstr "_Vlastnosti..."
-
-#: ../data/ui/gnome_paint.ui.h:19
-msgid "_Black and white"
-msgstr "Č_erná a bílá"
-
-#: ../data/ui/gnome_paint.ui.h:20
-msgid "_Clear Image"
-msgstr "_Vymazat obrázek"
-
-#: ../data/ui/gnome_paint.ui.h:21
-msgid "_Draw Opaque"
-msgstr "_Kreslit neprůhledně"
-
-#: ../data/ui/gnome_paint.ui.h:22
+#: ../data/ui/gnome_paint.ui.h:3
 msgid "_Edit"
 msgstr "_Upravit"
 
-#: ../data/ui/gnome_paint.ui.h:23
+#: ../data/ui/gnome_paint.ui.h:4
 msgid "_File"
 msgstr "_Soubor"
 
-#: ../data/ui/gnome_paint.ui.h:24
-msgid "_Flip horizontal"
-msgstr "Překlopit _vodorovně"
-
-#: ../data/ui/gnome_paint.ui.h:25
-msgid "_Flip/Rotate..."
-msgstr "_Překlopit/Otočit..."
-
-#: ../data/ui/gnome_paint.ui.h:26
-msgid "_Height"
-msgstr "Výš_ka"
-
-#: ../data/ui/gnome_paint.ui.h:27
+#: ../data/ui/gnome_paint.ui.h:5
 msgid "_Help"
 msgstr "_Nápověda"
 
-#: ../data/ui/gnome_paint.ui.h:28
+#: ../data/ui/gnome_paint.ui.h:6
 msgid "_Image"
 msgstr "_Obrázek"
 
-#: ../data/ui/gnome_paint.ui.h:29
-msgid "_Inches"
-msgstr "_Palce"
-
-#: ../data/ui/gnome_paint.ui.h:30
-msgid "_Invert Colors"
-msgstr "P_rohodit barvy"
-
-#: ../data/ui/gnome_paint.ui.h:31
-msgid "_Pixels"
-msgstr "Pi_xely"
-
-#: ../data/ui/gnome_paint.ui.h:32
-msgid "_Rotate by angle"
-msgstr "O_točit o"
-
-#: ../data/ui/gnome_paint.ui.h:33
-msgid "_Stretch/Skew..."
-msgstr "Roztá_hnout/Zkosit..."
-
-#: ../data/ui/gnome_paint.ui.h:34
+#: ../data/ui/gnome_paint.ui.h:7
 msgid "_View"
 msgstr "_Zobrazit"
-
-#: ../data/ui/gnome_paint.ui.h:35
-msgid "_Width"
-msgstr "Šířk_a"
 
 #: ../src/color.c:142
 msgid "Select Background Color"
@@ -172,7 +62,7 @@ msgstr "Vybrat barvu pozadí"
 msgid "Select Foreground Color"
 msgstr "Vybrat barvu popředí"
 
-#: ../src/color.c:215
+#: ../src/color.c:214
 msgid "Select Color"
 msgstr "Vybrat barvu"
 
@@ -208,19 +98,20 @@ msgstr "Chyba při ukládání souboru \"%s\""
 msgid "unknown error"
 msgstr "neznámá chyba"
 
-#: ../src/main.c:198
+#: ../src/main.c:183
 msgid "gnome-paint is a simple, easy to use paint program for GNOME."
-msgstr "gnome-paint je jednoduchý, snadno ovladatelný kreslící program pro GNOME."
+msgstr ""
+"gnome-paint je jednoduchý, snadno ovladatelný kreslící program pro GNOME."
 
-#: ../src/main.c:200
+#: ../src/main.c:185
 msgid ""
 "This program is free software; you may redistribute it and/or modify it "
 "under the terms of the GNU General Public License as published by the Free "
 "Software Foundation, either version 3, or (at your opinion) any later "
 "version.\n"
 msgstr ""
-"Tento program je svobodný software; můžete jej šířit a nebo upravovat "
-"za podmínek stanovených licencí GNU General Public License, vydanou Free "
+"Tento program je svobodný software; můžete jej šířit a nebo upravovat za "
+"podmínek stanovených licencí GNU General Public License, vydanou Free "
 "Software Foundation, buď ve verzi 3, či (podle svého uvážení) kterékoli "
 "pozdější verze.\n"
 

@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-paint-0.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-08-10 21:32+0000\n"
-"PO-Revision-Date: 2010-11-18 03:29+0000\n"
-"Last-Translator: Adriano Steffler <Unknown>\n"
+"POT-Creation-Date: 2010-06-04 20:10-0300\n"
+"PO-Revision-Date: 2017-11-02 20:36+0000\n"
+"Last-Translator: Dominik <dominik@danelski.pl>\n"
 "Language-Team: pt_BR <rogerioferro@gmail.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2010-12-13 12:32+0000\n"
-"X-Generator: Launchpad (build Unknown)\n"
+"X-Launchpad-Export-Date: 2017-11-03 05:24+0000\n"
+"X-Generator: Launchpad (build 18493)\n"
 
 #: ../data/desktop/gnome-paint.desktop.in.in.h:1
 msgid "Create and Edit Drawings or Images"
@@ -26,144 +26,32 @@ msgid "Gnome Paint Drawing Editor"
 msgstr "Editor de Desenhos Gnome Paint"
 
 #: ../data/ui/gnome_paint.ui.h:1
-msgid "C_m"
-msgstr "C_m"
-
-#: ../data/ui/gnome_paint.ui.h:2
-msgid "Co_lors"
-msgstr "Co_res"
-
-#: ../data/ui/gnome_paint.ui.h:3
-msgid "Colors"
-msgstr "Cores"
-
-#: ../data/ui/gnome_paint.ui.h:4
-msgid "Defaults"
-msgstr "Padrões"
-
-#: ../data/ui/gnome_paint.ui.h:5
-msgid "File last saved:"
-msgstr "Arquivo salvo pela última vez:"
-
-#: ../data/ui/gnome_paint.ui.h:6
-msgid "Flip _vertical"
-msgstr "Inverter _verticalmente"
-
-#: ../data/ui/gnome_paint.ui.h:7
-msgid "Flip and Rotate"
-msgstr "Inverter e Girar"
-
-#: ../data/ui/gnome_paint.ui.h:8
-msgid "Flip or rotate"
-msgstr "Inverter ou girar"
-
-#: ../data/ui/gnome_paint.ui.h:9
 msgid "Free select tool"
 msgstr "Ferramenta de seleção livre"
 
-#: ../data/ui/gnome_paint.ui.h:10
-msgid "Image Attributes"
-msgstr "Atributos da Imagem"
+#: ../data/ui/gnome_paint.ui.h:2
+msgid "_Color"
+msgstr "_Cor"
 
-#: ../data/ui/gnome_paint.ui.h:11
-msgid "Not Available"
-msgstr "Não Disponível"
-
-#: ../data/ui/gnome_paint.ui.h:12
-msgid "Resolution:"
-msgstr "Resolução:"
-
-#: ../data/ui/gnome_paint.ui.h:13
-msgid "Size on disk:"
-msgstr "Tamanho no disco:"
-
-#: ../data/ui/gnome_paint.ui.h:14
-msgid "Units"
-msgstr "Unidades"
-
-#: ../data/ui/gnome_paint.ui.h:15
-msgid "_180&#xB0;"
-msgstr "_180&#xB0;"
-
-#: ../data/ui/gnome_paint.ui.h:16
-msgid "_270&#xB0;"
-msgstr "_270&#xB0;"
-
-#: ../data/ui/gnome_paint.ui.h:17
-msgid "_90&#xB0;"
-msgstr "_90&#xB0;"
-
-#: ../data/ui/gnome_paint.ui.h:18
-msgid "_Attributes..."
-msgstr "_Atributos..."
-
-#: ../data/ui/gnome_paint.ui.h:19
-msgid "_Black and white"
-msgstr "_Preto e Branco"
-
-#: ../data/ui/gnome_paint.ui.h:20
-msgid "_Clear Image"
-msgstr "_Limpar Imagem"
-
-#: ../data/ui/gnome_paint.ui.h:21
-msgid "_Draw Opaque"
-msgstr "_Desenhar Opaco"
-
-#: ../data/ui/gnome_paint.ui.h:22
+#: ../data/ui/gnome_paint.ui.h:3
 msgid "_Edit"
 msgstr "_Editar"
 
-#: ../data/ui/gnome_paint.ui.h:23
+#: ../data/ui/gnome_paint.ui.h:4
 msgid "_File"
 msgstr "_Arquivo"
 
-#: ../data/ui/gnome_paint.ui.h:24
-msgid "_Flip horizontal"
-msgstr "_Inverter horizontalmente"
-
-#: ../data/ui/gnome_paint.ui.h:25
-msgid "_Flip/Rotate..."
-msgstr "_Inverter/Girar..."
-
-#: ../data/ui/gnome_paint.ui.h:26
-msgid "_Height"
-msgstr "_Altura"
-
-#: ../data/ui/gnome_paint.ui.h:27
+#: ../data/ui/gnome_paint.ui.h:5
 msgid "_Help"
-msgstr "_Ajuda"
+msgstr "Aj_uda"
 
-#: ../data/ui/gnome_paint.ui.h:28
+#: ../data/ui/gnome_paint.ui.h:6
 msgid "_Image"
 msgstr "_Imagem"
 
-#: ../data/ui/gnome_paint.ui.h:29
-msgid "_Inches"
-msgstr "_Polegadas"
-
-#: ../data/ui/gnome_paint.ui.h:30
-msgid "_Invert Colors"
-msgstr "_Inverter Cores"
-
-#: ../data/ui/gnome_paint.ui.h:31
-msgid "_Pixels"
-msgstr "_Pixels"
-
-#: ../data/ui/gnome_paint.ui.h:32
-msgid "_Rotate by angle"
-msgstr "_Girar por ângulo"
-
-#: ../data/ui/gnome_paint.ui.h:33
-msgid "_Stretch/Skew..."
-msgstr "_Esticar/Torcer..."
-
-#: ../data/ui/gnome_paint.ui.h:34
+#: ../data/ui/gnome_paint.ui.h:7
 msgid "_View"
 msgstr "_Visualizar"
-
-#: ../data/ui/gnome_paint.ui.h:35
-msgid "_Width"
-msgstr "_Largura"
 
 #: ../src/color.c:142
 msgid "Select Background Color"
@@ -173,7 +61,7 @@ msgstr "Selecione a Cor de Segundo Plano"
 msgid "Select Foreground Color"
 msgstr "Selecione a Cor de Primeiro Plano"
 
-#: ../src/color.c:215
+#: ../src/color.c:214
 msgid "Select Color"
 msgstr "Selecione uma cor"
 
@@ -209,11 +97,11 @@ msgstr "Erro ao salvar arquivo \"%s\""
 msgid "unknown error"
 msgstr "erro desconhecido"
 
-#: ../src/main.c:198
+#: ../src/main.c:183
 msgid "gnome-paint is a simple, easy to use paint program for GNOME."
 msgstr "O gnome-paint é um programa simples e fácil de usar para o GNOME"
 
-#: ../src/main.c:200
+#: ../src/main.c:185
 msgid ""
 "This program is free software; you may redistribute it and/or modify it "
 "under the terms of the GNU General Public License as published by the Free "
@@ -244,6 +132,3 @@ msgstr "Salvar Imagem"
 #: ../src/pixbuf-file-chooser.c:443
 msgid "Open Folder"
 msgstr "Abrir Pasta"
-
-#~ msgid "_Color"
-#~ msgstr "_Cor"
