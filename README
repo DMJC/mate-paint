@@ -1,10 +1,13 @@
 
-                                     GNOME-PAINT 0.4.0
+                                     MATE-PAINT 0.4.0
 
-Gnome-paint is a simple, easy to use paint program for GNOME. It is inspired by MS-Paint.
+MATE-paint is a simple, easy to use paint program for the MATE desktop environment. It is inspired by MS-Paint.
 
 Home:
-        https://launchpad.net/gnome-paint
+        https://github.com/DMJC/mate-paint
+
+Forked From:
+	https://launchpad.net/gnome-paint
         http://code.google.com/p/gnome-paint/
 
 
