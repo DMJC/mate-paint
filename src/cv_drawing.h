@@ -62,7 +62,6 @@ gboolean on_cv_drawing_button_release_event			(GtkWidget	   *widget,
 gboolean on_cv_drawing_motion_notify_event 			(GtkWidget      *widget,
 		                                         GdkEventMotion *event,
                                                  gpointer        user_data);
-
-gboolean on_cv_drawing_expose_event					(GtkWidget	   *widget, 
-												 GdkEventExpose *event,
+gboolean on_cv_drawing_expose_event                 (GtkWidget    *widget,
+                                                 cairo_t        *cr,
                                                  gpointer       user_data );

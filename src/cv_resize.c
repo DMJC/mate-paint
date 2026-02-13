@@ -205,33 +205,29 @@ on_cv_other_edge_realize (GtkWidget *widget, gpointer user_data)
 
 
 /* events */
-gboolean 
-on_cv_other_edge_expose_event	(   GtkWidget	   *widget, 
-									GdkEventExpose *event,
+gboolean on_cv_other_edge_expose_event    (GtkWidget    *widget,
+                                    cairo_t      *cr,
                                     gpointer       user_data )
 {
 	GtkStyleContext *style_context;
 	GdkRGBA color;
-	cairo_t *cr;
 
 	style_context = gtk_widget_get_style_context (widget);
 	gtk_style_context_get_color (style_context,
 	                             gtk_style_context_get_state (style_context),
 	                             &color);
-	cr = gdk_cairo_create (gtk_widget_get_window (widget));
 	gdk_cairo_set_source_rgba (cr, &color);
 	cairo_move_to (cr, 0, 0);
 	cairo_line_to (cr, 0, cv_widget_get_height (widget));
 	cairo_move_to (cr, 0, 0);
 	cairo_line_to (cr, cv_widget_get_width (widget), 0);
 	cairo_stroke (cr);
-	cairo_destroy (cr);
 	return TRUE;
 }
 
 gboolean 
-on_cv_ev_box_expose_event (	GtkWidget	   *widget, 
-							GdkEventExpose *event,
+on_cv_ev_box_expose_event ( GtkWidget    *widget,
+                        	cairo_t      *cr,
                         	gpointer       user_data )
 {
 	if (b_resize)
@@ -248,10 +244,13 @@ on_cv_ev_box_expose_event (	GtkWidget	   *widget,
 		y_offset = cv_widget_get_height (cv->widget) - allocation.y;
 		x = x_res + x_offset;
 		y = y_res + y_offset;
-		gdk_draw_line ( gtk_widget_get_window(cv_ev_box), gc_resize, x_offset, y_offset, x, y_offset );
-		gdk_draw_line ( gtk_widget_get_window(cv_ev_box), gc_resize, x_offset, y, x, y );
-		gdk_draw_line ( gtk_widget_get_window(cv_ev_box), gc_resize, x, y_offset, x, y );
-		gdk_draw_line ( gtk_widget_get_window(cv_ev_box), gc_resize, x_offset, y_offset, x_offset, y );
+		cairo_set_source_rgb (cr, 0, 0, 0);
+		cairo_move_to (cr, x_offset, y_offset);
+		cairo_line_to (cr, x, y_offset);
+		cairo_line_to (cr, x, y);
+		cairo_line_to (cr, x_offset, y);
+		cairo_close_path (cr);
+		cairo_stroke (cr);
 	}
 	gtk_widget_set_app_paintable ( cv_ev_box, b_resize );
 	return TRUE;

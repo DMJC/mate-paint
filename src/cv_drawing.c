@@ -368,20 +368,14 @@ on_cv_drawing_motion_notify_event (	GtkWidget      *widget,
 
 gboolean 
 on_cv_drawing_expose_event	(   GtkWidget	   *widget, 
-								GdkEventExpose *event,
+						cairo_t        *cr,
                					gpointer       user_data )
 {
-	cairo_t *cr;
-
-	cr = gdk_cairo_create (gtk_widget_get_window (widget));
 	gdk_cairo_set_source_pixmap (cr, cv.pixmap, 0, 0);
-	cairo_rectangle (cr,
-	                 event->area.x,
-	                 event->area.y,
-	                 event->area.width,
-	                 event->area.height);
+	cairo_rectangle (cr, 0, 0,
+	                 cv_widget_get_width (widget),
+	                 cv_widget_get_height (widget));
 	cairo_fill (cr);
-	cairo_destroy (cr);
 
 	if ( cv_tool != NULL )
 	{

@@ -44,11 +44,11 @@ void on_lb_size_realize			(GtkWidget *widget, gpointer user_data);
 
 
 /* GUI events */
-gboolean on_cv_other_edge_expose_event			(GtkWidget	   *widget, 
-												 GdkEventExpose *event,
+gboolean on_cv_other_edge_expose_event            (GtkWidget    *widget,
+                                                 cairo_t       *cr,
                                                  gpointer       user_data );
-gboolean on_cv_ev_box_expose_event				(GtkWidget	   *widget, 
-												 GdkEventExpose *event,
+gboolean on_cv_ev_box_expose_event                (GtkWidget    *widget,
+                                                 cairo_t       *cr,
                                                  gpointer       user_data );
 
 gboolean on_cv_bottom_right_button_press_event  (GtkWidget	   *widget, 
