@@ -277,20 +277,22 @@ button_motion ( GdkEventMotion *event )
 {
 	GdkModifierType state;
 	gint x, y;
+	gdouble xd, yd;
 
 	if( m_priv->is_draw )
 	{
 		
-		if (event->is_hint)
+		if (gdk_event_get_coords ((GdkEvent *) event, &xd, &yd))
 		{
-			gdk_window_get_pointer (event->window, &x, &y, &state);
+			x = (gint) xd;
+			y = (gint) yd;
 		}
 		else
 		{
-			x = event->x;
-			y = event->y;
-			state = event->state;
+			x = (gint) event->x;
+			y = (gint) event->y;
 		}
+		state = event->state;
 		m_priv->x0 = x;
 		m_priv->y0 = y;
 		gtk_widget_queue_draw ( m_priv->cv->widget );

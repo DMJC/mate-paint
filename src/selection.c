@@ -656,17 +656,14 @@ static gboolean gp_selection_get_bg_color_rgb(guchar *r, guchar *g, guchar *b)
 	cv = cv_get_canvas ();
 	if((cv) && (r) && (g) && (b))
 	{
-		GdkColor color;
 		GdkGCValues values;
-		GdkColormap* colormap = gdk_colormap_get_system();
 		
 		gdk_gc_get_values (cv->gc_bg, &values);
-		gdk_colormap_query_color(colormap, values.foreground.pixel, &color);
 
-		*r = color.red >>= 8;
-		*g = color.green >>= 8;
-		*b = color.blue >>= 8;
-		
+		*r = values.foreground.red >> 8;
+		*g = values.foreground.green >> 8;
+		*b = values.foreground.blue >> 8;
+
 		return TRUE;
 	}
 	
