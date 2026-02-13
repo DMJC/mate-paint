@@ -24,7 +24,7 @@
 #include "file.h"
 #include "undo.h"
 #include "gp_point_array.h"
-
+#include "cv_drawing.h"
 
 static void draw_rounded_rectangle(GdkDrawable *drawable, GdkGC *gc, gboolean filled, gint x,
 									gint y, gint width, gint height);

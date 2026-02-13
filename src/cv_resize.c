@@ -58,6 +58,21 @@ static gint			y_res			=	0;
  *   CODE
  */
 
+static gint
+cv_widget_get_width ( GtkWidget *widget )
+{
+	GtkAllocation allocation;
+	gtk_widget_get_allocation (widget, &allocation);
+	return allocation.width;
+}
+
+static gint
+cv_widget_get_height ( GtkWidget *widget )
+{
+	GtkAllocation allocation;
+	gtk_widget_get_allocation (widget, &allocation);
+	return allocation.height;
+}
 
 void
 cv_resize_set_canvas ( gp_canvas * canvas )
@@ -197,18 +212,18 @@ on_cv_other_edge_expose_event	(   GtkWidget	   *widget,
 {
 #if GTK_MAJOR_VERSION >= 2 && GTK_MINOR_VERSION >= 18
 	gdk_draw_line ( gtk_widget_get_window(widget),
-                    widget->style->fg_gc[gtk_widget_get_state(widget)],
-                    0,0,0,gtk_widget_get_allocated_height(widget));
+	                    widget->style->fg_gc[gtk_widget_get_state(widget)],
+	                    0,0,0,cv_widget_get_height(widget));
 	gdk_draw_line ( gtk_widget_get_window(widget),
-                    widget->style->fg_gc[gtk_widget_get_state(widget)],
-                    0,0,gtk_widget_get_allocated_width(widget),0);
+	                    widget->style->fg_gc[gtk_widget_get_state(widget)],
+	                    0,0,cv_widget_get_width(widget),0);
 #else
 	gdk_draw_line ( gtk_widget_get_window(widget),
-                    widget->style->fg_gc[gtk_widget_get_state(widget)],
-                    0,0,0,gtk_widget_get_allocated_height(widget));
+	                    widget->style->fg_gc[gtk_widget_get_state(widget)],
+	                    0,0,0,cv_widget_get_height(widget));
 	gdk_draw_line ( gtk_widget_get_window(widget),
-                    widget->style->fg_gc[gtk_widget_get_state(widget)],
-                    0,0,gtk_widget_get_allocated_width(widget),0);
+	                    widget->style->fg_gc[gtk_widget_get_state(widget)],
+	                    0,0,cv_widget_get_width(widget),0);
 #endif
 	return TRUE;
 }
@@ -220,8 +235,8 @@ on_cv_ev_box_expose_event (	GtkWidget	   *widget,
 {
 	if (b_resize)
 	{
-		gint x_offset = gtk_widget_get_allocated_width(cv->widget) - cv_ev_box->allocation.x;
-		gint y_offset = gtk_widget_get_allocated_height(cv->widget) - cv_ev_box->allocation.y;
+		gint x_offset = cv_widget_get_width(cv->widget) - cv_ev_box->allocation.x;
+		gint y_offset = cv_widget_get_height(cv->widget) - cv_ev_box->allocation.y;
 		gint x = x_res + x_offset;
 		gint y = y_res + y_offset;
 		gdk_draw_line ( gtk_widget_get_window(cv_ev_box), gc_resize, x_offset, y_offset, x, y_offset );
@@ -346,8 +361,8 @@ cv_resize_move ( gdouble x,  gdouble y)
 	if( b_rz_init )
 	{
 		b_resize = TRUE;
-		x_res = gtk_widget_get_allocated_width(cv->widget) + (gint)x;
-		y_res = gtk_widget_get_allocated_height(cv->widget) + (gint)y;
+		x_res = cv_widget_get_width(cv->widget) + (gint)x;
+		y_res = cv_widget_get_height(cv->widget) + (gint)y;
 		x_res	= (x_res<1)?1:x_res;
 		y_res	= (y_res<1)?1:y_res;
 		gtk_widget_queue_draw (cv_ev_box);
@@ -360,9 +375,9 @@ cv_resize_stop ( gdouble x,  gdouble y)
 	if( b_resize )
 	{
 		gint width, height;
-		width = gtk_widget_get_allocated_width(cv->widget) + (gint)x;
+		width = cv_widget_get_width(cv->widget) + (gint)x;
 		width = (width<1)?1:width;
-		height = gtk_widget_get_allocated_height(cv->widget) + (gint)y;
+		height = cv_widget_get_height(cv->widget) + (gint)y;
 		height = (height<1)?1:height;
 
         undo_add_resize ( width, height );

@@ -28,6 +28,7 @@
 #include "gp-image.h"
 #include "gp_point_array.h"
 #include "file.h"
+#include "selection.h"
 
 
 
