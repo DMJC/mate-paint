@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl Created by Anjuta application wizard.
 
-AC_INIT(gnome-paint, 0.4.0, http://code.google.com/p/gnome-paint/)
+AC_INIT(mate-paint, 0.4.0, http://code.google.com/p/mate-paint/)
 
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 AC_CONFIG_HEADERS([config.h])
@@ -20,7 +20,7 @@ dnl Internatinalization
 dnl ***************************************************************************
 IT_PROG_INTLTOOL([0.35.0])
 
-GETTEXT_PACKAGE=gnome_paint
+GETTEXT_PACKAGE=mate_paint
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [GETTEXT package name])
 AM_GLIB_GNU_GETTEXT
@@ -32,7 +32,7 @@ AM_PROG_LIBTOOL
 
 
 
-PKG_CHECK_MODULES(GNOME_PAINT, [gtk+-2.0 >= 2.16])
+PKG_CHECK_MODULES(MATE_PAINT, [gtk+-3.0 >= 3.16])
 
 
 
@@ -49,5 +49,5 @@ data/icons/16x16/Makefile
 data/icons/16x16/actions/Makefile
 data/icons/16x16/apps/Makefile
 data/desktop/Makefile
-data/desktop/gnome-paint.desktop.in
+data/desktop/mate-paint.desktop.in
 ])

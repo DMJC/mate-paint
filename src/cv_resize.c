@@ -28,7 +28,7 @@
 #include "cv_resize.h"
 #include "cv_drawing.h"
 #include "file.h"
-
+#include "undo.h"
 
 #define BOX_EDGE_SIZE	4
 
@@ -83,8 +83,8 @@ cv_resize_draw ( void )
 	}
 	else
 	{
-		x = cv->widget->allocation.width;
-		y = cv->widget->allocation.height;
+		x = gtk_widget_get_allocated_width(cv->widget);
+		y = gtk_widget_get_allocated_height(cv->widget);
 	}
 	g_string_printf (str, "%dx%d", x, y );
 	gtk_label_set_text( GTK_LABEL(lb_size), str->str );
@@ -196,19 +196,19 @@ on_cv_other_edge_expose_event	(   GtkWidget	   *widget,
                                     gpointer       user_data )
 {
 #if GTK_MAJOR_VERSION >= 2 && GTK_MINOR_VERSION >= 18
-	gdk_draw_line ( widget->window,
+	gdk_draw_line ( gtk_widget_get_window(widget),
                     widget->style->fg_gc[gtk_widget_get_state(widget)],
-                    0,0,0,widget->allocation.height);
-	gdk_draw_line ( widget->window,
+                    0,0,0,gtk_widget_get_allocated_height(widget));
+	gdk_draw_line ( gtk_widget_get_window(widget),
                     widget->style->fg_gc[gtk_widget_get_state(widget)],
-                    0,0,widget->allocation.width,0);
+                    0,0,gtk_widget_get_allocated_width(widget),0);
 #else
-	gdk_draw_line ( widget->window,
+	gdk_draw_line ( gtk_widget_get_window(widget),
                     widget->style->fg_gc[gtk_widget_get_state(widget)],
-                    0,0,0,widget->allocation.height);
-	gdk_draw_line ( widget->window,
+                    0,0,0,gtk_widget_get_allocated_height(widget));
+	gdk_draw_line ( gtk_widget_get_window(widget),
                     widget->style->fg_gc[gtk_widget_get_state(widget)],
-                    0,0,widget->allocation.width,0);
+                    0,0,gtk_widget_get_allocated_width(widget),0);
 #endif
 	return TRUE;
 }
@@ -220,14 +220,14 @@ on_cv_ev_box_expose_event (	GtkWidget	   *widget,
 {
 	if (b_resize)
 	{
-		gint x_offset = cv->widget->allocation.x - cv_ev_box->allocation.x;
-		gint y_offset = cv->widget->allocation.y - cv_ev_box->allocation.y;
+		gint x_offset = gtk_widget_get_allocated_width(cv->widget) - cv_ev_box->allocation.x;
+		gint y_offset = gtk_widget_get_allocated_height(cv->widget) - cv_ev_box->allocation.y;
 		gint x = x_res + x_offset;
 		gint y = y_res + y_offset;
-		gdk_draw_line ( cv_ev_box->window, gc_resize, x_offset, y_offset, x, y_offset );
-		gdk_draw_line ( cv_ev_box->window, gc_resize, x_offset, y, x, y );
-		gdk_draw_line ( cv_ev_box->window, gc_resize, x, y_offset, x, y );
-		gdk_draw_line ( cv_ev_box->window, gc_resize, x_offset, y_offset, x_offset, y );
+		gdk_draw_line ( gtk_widget_get_window(cv_ev_box), gc_resize, x_offset, y_offset, x, y_offset );
+		gdk_draw_line ( gtk_widget_get_window(cv_ev_box), gc_resize, x_offset, y, x, y );
+		gdk_draw_line ( gtk_widget_get_window(cv_ev_box), gc_resize, x, y_offset, x, y );
+		gdk_draw_line ( gtk_widget_get_window(cv_ev_box), gc_resize, x_offset, y_offset, x_offset, y );
 	}
 	gtk_widget_set_app_paintable ( cv_ev_box, b_resize );
 	return TRUE;
@@ -346,8 +346,8 @@ cv_resize_move ( gdouble x,  gdouble y)
 	if( b_rz_init )
 	{
 		b_resize = TRUE;
-		x_res = cv->widget->allocation.width + (gint)x;
-		y_res = cv->widget->allocation.height + (gint)y;
+		x_res = gtk_widget_get_allocated_width(cv->widget) + (gint)x;
+		y_res = gtk_widget_get_allocated_height(cv->widget) + (gint)y;
 		x_res	= (x_res<1)?1:x_res;
 		y_res	= (y_res<1)?1:y_res;
 		gtk_widget_queue_draw (cv_ev_box);
@@ -360,10 +360,10 @@ cv_resize_stop ( gdouble x,  gdouble y)
 	if( b_resize )
 	{
 		gint width, height;
-		width	= cv->widget->allocation.width + (gint)x;
-		width	= (width<1)?1:width;
-		height	= cv->widget->allocation.height + (gint)y;
-		height	= (height<1)?1:height;
+		width = gtk_widget_get_allocated_width(cv->widget) + (gint)x;
+		width = (width<1)?1:width;
+		height = gtk_widget_get_allocated_height(cv->widget) + (gint)y;
+		height = (height<1)?1:height;
 
         undo_add_resize ( width, height );
         cv_resize_pixmap ( width, height );

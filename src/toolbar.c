@@ -502,7 +502,7 @@ get_gtk_image ( GtkWidget *widget, gchar** xpm )
 	GdkPixbuf *pixbuf		= NULL;
     GtkWidget *gtkimage 	= NULL;
 
-	pixbuf = gdk_pixbuf_new_from_xpm_data (xpm);
+	pixbuf = gdk_pixbuf_new_from_xpm_data ((const char **)xpm);
 
 	if(!gdk_pixbuf_get_has_alpha (pixbuf))
 	{

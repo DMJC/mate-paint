@@ -269,7 +269,7 @@ file_print_title (void)
 {
 	gchar *str;
 
-	str = g_strdup_printf (_("%s - gnome-paint"), file_title);
+	str = g_strdup_printf (_("%s - mate-paint"), file_title);
 	
 	if (!b_saved)
 	{

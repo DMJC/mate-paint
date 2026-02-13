@@ -18,6 +18,8 @@
  */
 
 #include "common.h"
+#include "cv_paintbrush_tool.h"
+#include "cv_eraser_tool.h"
 #include "color.h"
 #include "cv_drawing.h"
 #include "pixbuf_util.h"

@@ -35,12 +35,12 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
-#define UI_FILE		PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "gnome-paint" G_DIR_SEPARATOR_S "ui" G_DIR_SEPARATOR_S "gnome_paint.ui"
-#define ICON_DIR	PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "gnome-paint" G_DIR_SEPARATOR_S "icons"
+#define UI_FILE		PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "mate-paint" G_DIR_SEPARATOR_S "ui" G_DIR_SEPARATOR_S "mate_paint.ui"
+#define ICON_DIR	PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "mate-paint" G_DIR_SEPARATOR_S "icons"
 
 
 GtkWidget	*create_window			( void );
-void		gnome_paint_init		( int argc, char *argv[] );
+void		mate_paint_init		( int argc, char *argv[] );
 void		on_window_destroy		( GtkObject *object, gpointer user_data );
 void		on_menu_about_activate  ( GtkMenuItem *menuitem, gpointer user_data );
 
@@ -80,14 +80,14 @@ main (int argc, char *argv[])
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 	
-	gtk_set_locale ();
+	setlocale (LC_ALL, "");
 	gtk_init (&argc, &argv);
 
 	/* Add application specific icons to search path */
 	gtk_icon_theme_append_search_path (gtk_icon_theme_get_default (), ICON_DIR);
 	gtk_window_set_default_icon_name ("gp");
 	window = create_window ();
-	gnome_paint_init (argc, argv);
+	mate_paint_init (argc, argv);
 	gtk_widget_show (window);
 
 	color_picker = color_picker_new ();
@@ -107,7 +107,7 @@ main (int argc, char *argv[])
 
 
 void
-gnome_paint_init	( int argc, char *argv[] )
+mate_paint_init	( int argc, char *argv[] )
 {
 	if (argc > 1)
 	{
@@ -192,12 +192,12 @@ on_menu_about_activate ( GtkMenuItem *menuitem, gpointer user_data )
 	GtkAboutDialog *dlg;
 	
 	dlg = GTK_ABOUT_DIALOG ( gtk_about_dialog_new () ); 
-	gtk_about_dialog_set_name ( dlg, "gnome-paint" );
+	g_set_application_name( "mate-paint" );
 	gtk_about_dialog_set_version ( dlg, PACKAGE_VERSION); 
 	gtk_about_dialog_set_copyright ( dlg, 
 									"(c) Rogério Ferro do Nascimento");
 	gtk_about_dialog_set_comments ( dlg, 
-									_("gnome-paint is a simple, easy to use paint program for GNOME.") );
+									_("mate-paint is a simple, easy to use paint program for MATE.") );
 	gtk_about_dialog_set_license ( dlg, 
 								_( "This program is free software;"
 								   " you may redistribute it and/or modify it"
@@ -207,7 +207,7 @@ on_menu_about_activate ( GtkMenuItem *menuitem, gpointer user_data )
 	gtk_about_dialog_set_wrap_license ( dlg, TRUE );
 	gtk_about_dialog_set_authors ( dlg, authors );
 	gtk_about_dialog_set_website ( dlg, 
-									"https://launchpad.net/gnome-paint");
+									"https://launchpad.net/mate-paint");
 	//gtk_about_dialog_set_logo ( dlg, pixbuf);
 	gtk_dialog_run ( GTK_DIALOG(dlg) );
 	gtk_widget_destroy ( GTK_WIDGET(dlg) );

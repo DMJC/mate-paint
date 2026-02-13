@@ -5,7 +5,7 @@
  * Author: Rogério Ferro <rogerioferro@gmail.com>
  *
  * Based on eog code (src/eog-file-chooser.h) by:
- * 	- Lucas Rocha <lucasr@gnome.org>
+ * 	- Lucas Rocha <lucasr@mate.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

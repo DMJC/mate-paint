@@ -6,18 +6,18 @@ AM_CPPFLAGS = \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
-	$(GNOME_PAINT_CFLAGS)
+	$(MATE_PAINT_CFLAGS)
 
 AM_CFLAGS =\
 	 -Wall\
 	 -g
 
 bin_PROGRAMS = \
-	gnome-paint
+	mate-paint
 
 EXTRA_DIST = $(glade_DATA)
 
-gnome_paint_SOURCES = \
+mate_paint_SOURCES = \
 	color.c  \
 	color.h  \
 	main.c  \
@@ -75,18 +75,18 @@ gnome_paint_SOURCES = \
 	image_menu.c  \
 	image_menu.h
 
-gnome_paint_CFLAGS = \
+mate_paint_CFLAGS = \
 	-DG_DISABLE_DEPRECATED\
 	-DG_DISABLE_SINGLE_INCLUDES\
 	-DGTK_DISABLE_DEPRECATED\
 	-DGDK_DISABLE_SINGLE_INCLUDES\
 	-DGTK_DISABLE_SINGLE_INCLUDES
 
-gnome_paint_LDFLAGS = \
+mate_paint_LDFLAGS = \
 	-Wl,--export-dynamic
 
-gnome_paint_LDADD = \
-	$(GNOME_PAINT_LIBS) -lX11 -lm
+mate_paint_LDADD = \
+	$(MATE_PAINT_LIBS) -lX11 -lm
 
 SUBDIRS = \
 	pixmaps
@@ -94,4 +94,4 @@ SUBDIRS = \
 # Remove glade directory on uninstall
 uninstall-local:
 	-rm -r $(gladedir)
-	-rm -r $(datadir)/gnome_paint
+	-rm -r $(datadir)/mate_paint

@@ -1,14 +1,14 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
 /*
- * gnome-paint
+ * mate-paint
  * Copyright (C) Rogério Ferro do Nascimento 2010 <rogerioferro@gmail.com>
  * 
- * gnome-paint is free software: you can redistribute it and/or modify it
+ * mate-paint is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * 
- * gnome-paint is distributed in the hope that it will be useful, but
+ * mate-paint is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
