@@ -222,17 +222,27 @@ static void
 color_dialog( GdkColor *color, gchar * title )
 {
 	GtkResponseType result;
-	GtkColorSelection *colorsel;
-	GtkWidget *dialog = gtk_color_selection_dialog_new( title );
-	colorsel = GTK_COLOR_SELECTION(
-                   GTK_COLOR_SELECTION_DIALOG(dialog)->colorsel );
-	gtk_color_selection_set_has_palette ( colorsel, TRUE );
-	gtk_color_selection_set_current_color ( colorsel, color );
-	result = gtk_dialog_run(GTK_DIALOG(dialog));
+	GtkWidget *dialog;
+	GdkRGBA rgba;
+
+	rgba.red = color->red / 65535.0;
+	rgba.green = color->green / 65535.0;
+	rgba.blue = color->blue / 65535.0;
+	rgba.alpha = 1.0;
+
+	dialog = gtk_color_chooser_dialog_new (title, NULL);
+	gtk_color_chooser_set_use_alpha (GTK_COLOR_CHOOSER (dialog), FALSE);
+	gtk_color_chooser_set_rgba (GTK_COLOR_CHOOSER (dialog), &rgba);
+
+	result = gtk_dialog_run (GTK_DIALOG (dialog));
+
 	if (result == GTK_RESPONSE_OK)
 	{
-		gtk_color_selection_get_current_color(colorsel, color);
-	} 
+		gtk_color_chooser_get_rgba (GTK_COLOR_CHOOSER (dialog), &rgba);
+		color->red = (guint16)(rgba.red * 65535.0);
+		color->green = (guint16)(rgba.green * 65535.0);
+		color->blue = (guint16)(rgba.blue * 65535.0);
+	}
 	gtk_widget_destroy(dialog);
 }
 

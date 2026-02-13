@@ -394,8 +394,10 @@ static void draw_rectangular_eraser(GdkDrawable *drawable, int x, int y)
 static GdkCursor *create_eraser_cursor(GPEraserType type)
 {
 	GdkCursor *cursor = NULL;
-	GdkPixmap *pixmap;
-	GdkPixbuf *pixbuf, *tmp;
+	GdkPixmap *pixmap = NULL;
+	GdkPixbuf *pixbuf = NULL;
+	GdkGC *border_gc = NULL;
+	GdkColor black = { 0, 0x0000, 0x0000, 0x0000 };
 
 	pixmap = gdk_pixmap_new(gtk_widget_get_window(m_priv->cv->widget), m_priv->width, m_priv->height, -1);
 	if(!GDK_IS_PIXMAP(pixmap))
@@ -404,20 +406,29 @@ static GdkCursor *create_eraser_cursor(GPEraserType type)
 		goto CURSOR_CLEANUP;
 	}
 
+
+	border_gc = gdk_gc_new (pixmap);
+	if(!GDK_IS_GC(border_gc))
+	{
+		printf("Debug: create_eraser_cursor() !GDK_IS_GC(border_gc)\n");
+		goto CURSOR_CLEANUP;
+	}
+	gdk_gc_set_rgb_fg_color (border_gc, &black);
+
 	/* Draw eraser onto pixmap with back color */
 	switch(type)
 	{
 		case GP_ERASER_TYPE_ROUND:
 			gdk_draw_arc( pixmap, m_priv->cv->gc_bg_pencil, TRUE, 0, 0,
 						  m_priv->width, m_priv->height, 0, 360 * 64 );
-			gdk_draw_arc( pixmap, m_priv->cv->widget->style->black_gc, FALSE, 0, 0,
+			gdk_draw_arc( pixmap, border_gc, FALSE, 0, 0,
 						  m_priv->width, m_priv->height, 0, 360 * 64 );
 			break;
 		case GP_ERASER_TYPE_RECTANGLE:
 			gdk_draw_rectangle( pixmap, m_priv->cv->gc_bg_pencil, TRUE, 0, 0,
-								m_priv->width, m_priv->height );
-			gdk_draw_rectangle( pixmap, m_priv->cv->widget->style->black_gc, FALSE, 0, 0,
-								m_priv->width - 1, m_priv->height - 1);
+							m_priv->width, m_priv->height );
+			gdk_draw_rectangle( pixmap, border_gc, FALSE, 0, 0,
+							m_priv->width - 1, m_priv->height - 1);
 			break;
 		default:
 			printf("Debug: create_eraser_cursor() unknown eraser type: %d\n", type);
@@ -425,7 +436,7 @@ static GdkCursor *create_eraser_cursor(GPEraserType type)
 	}
 
 	/* Create pixbuf for cursor */
-	pixbuf =  gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, m_priv->width, m_priv->height);
+	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, m_priv->width, m_priv->height);
 	if(!GDK_IS_PIXBUF(pixbuf))
 	{
 		printf("Debug: create_eraser_cursor() !GDK_IS_PIXBUF(pixbuf)\n");
@@ -436,9 +447,13 @@ static GdkCursor *create_eraser_cursor(GPEraserType type)
 	gdk_pixbuf_get_from_drawable(pixbuf, pixmap, NULL, 0, 0, 0, 0, m_priv->width, m_priv->height);
 
 	cursor = gdk_cursor_new_from_pixbuf ( gdk_display_get_default (), pixbuf,
-										  m_priv->width / 2, m_priv->height / 2 );
-	
-	CURSOR_CLEANUP: {}
+							  m_priv->width / 2, m_priv->height / 2 );
+
+CURSOR_CLEANUP:
+	if(GDK_IS_GC(border_gc))
+	{
+		g_object_unref(border_gc);
+	}
 
 	if(GDK_IS_PIXMAP(pixmap))
 	{

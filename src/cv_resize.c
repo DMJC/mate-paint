@@ -98,8 +98,8 @@ cv_resize_draw ( void )
 	}
 	else
 	{
-		x = cv->widget->allocation.width;
-		y = cv->widget->allocation.height;
+		x = cv_widget_get_width (cv->widget);
+		y = cv_widget_get_height (cv->widget);
 	}
 	g_string_printf (str, "%dx%d", x, y );
 	gtk_label_set_text( GTK_LABEL(lb_size), str->str );
@@ -210,21 +210,22 @@ on_cv_other_edge_expose_event	(   GtkWidget	   *widget,
 									GdkEventExpose *event,
                                     gpointer       user_data )
 {
-#if GTK_MAJOR_VERSION >= 2 && GTK_MINOR_VERSION >= 18
-	gdk_draw_line ( gtk_widget_get_window(widget),
-	                    widget->style->fg_gc[gtk_widget_get_state(widget)],
-	                    0,0,0,cv_widget_get_height(widget));
-	gdk_draw_line ( gtk_widget_get_window(widget),
-	                    widget->style->fg_gc[gtk_widget_get_state(widget)],
-	                    0,0,cv_widget_get_width(widget),0);
-#else
-	gdk_draw_line ( gtk_widget_get_window(widget),
-	                    widget->style->fg_gc[gtk_widget_get_state(widget)],
-	                    0,0,0,cv_widget_get_height(widget));
-	gdk_draw_line ( gtk_widget_get_window(widget),
-	                    widget->style->fg_gc[gtk_widget_get_state(widget)],
-	                    0,0,cv_widget_get_width(widget),0);
-#endif
+	GtkStyleContext *style_context;
+	GdkRGBA color;
+	cairo_t *cr;
+
+	style_context = gtk_widget_get_style_context (widget);
+	gtk_style_context_get_color (style_context,
+	                             gtk_style_context_get_state (style_context),
+	                             &color);
+	cr = gdk_cairo_create (gtk_widget_get_window (widget));
+	gdk_cairo_set_source_rgba (cr, &color);
+	cairo_move_to (cr, 0, 0);
+	cairo_line_to (cr, 0, cv_widget_get_height (widget));
+	cairo_move_to (cr, 0, 0);
+	cairo_line_to (cr, cv_widget_get_width (widget), 0);
+	cairo_stroke (cr);
+	cairo_destroy (cr);
 	return TRUE;
 }
 
@@ -235,10 +236,18 @@ on_cv_ev_box_expose_event (	GtkWidget	   *widget,
 {
 	if (b_resize)
 	{
-		gint x_offset = cv_widget_get_width(cv->widget) - cv_ev_box->allocation.x;
-		gint y_offset = cv_widget_get_height(cv->widget) - cv_ev_box->allocation.y;
-		gint x = x_res + x_offset;
-		gint y = y_res + y_offset;
+		GtkAllocation allocation;
+		gint x_offset;
+		gint y_offset;
+		gint x;
+		gint y;
+
+		gtk_widget_get_allocation (cv_ev_box, &allocation);
+
+		x_offset = cv_widget_get_width (cv->widget) - allocation.x;
+		y_offset = cv_widget_get_height (cv->widget) - allocation.y;
+		x = x_res + x_offset;
+		y = y_res + y_offset;
 		gdk_draw_line ( gtk_widget_get_window(cv_ev_box), gc_resize, x_offset, y_offset, x, y_offset );
 		gdk_draw_line ( gtk_widget_get_window(cv_ev_box), gc_resize, x_offset, y, x, y );
 		gdk_draw_line ( gtk_widget_get_window(cv_ev_box), gc_resize, x, y_offset, x, y );

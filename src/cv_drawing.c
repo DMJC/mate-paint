@@ -371,21 +371,17 @@ on_cv_drawing_expose_event	(   GtkWidget	   *widget,
 								GdkEventExpose *event,
                					gpointer       user_data )
 {
-#if GTK_MAJOR_VERSION >= 2 && GTK_MINOR_VERSION >= 18
-    gdk_draw_drawable (	gtk_widget_get_window(widget),
-                    	widget->style->fg_gc[gtk_widget_get_state(widget)],
-    	                cv.pixmap,
-    	                event->area.x, event->area.y,
-    	                event->area.x, event->area.y,
-    	                event->area.width, event->area.height);	
-#else
-	gdk_draw_drawable (	gtk_widget_get_window(widget),
-                    	widget->style->fg_gc[gtk_widget_get_state(widget)],
-    	                cv.pixmap,
-    	                event->area.x, event->area.y,
-    	                event->area.x, event->area.y,
-    	                event->area.width, event->area.height);
-#endif
+	cairo_t *cr;
+
+	cr = gdk_cairo_create (gtk_widget_get_window (widget));
+	gdk_cairo_set_source_pixmap (cr, cv.pixmap, 0, 0);
+	cairo_rectangle (cr,
+	                 event->area.x,
+	                 event->area.y,
+	                 event->area.width,
+	                 event->area.height);
+	cairo_fill (cr);
+	cairo_destroy (cr);
 
 	if ( cv_tool != NULL )
 	{
