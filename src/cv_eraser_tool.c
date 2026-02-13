@@ -281,12 +281,11 @@ reset ( void )
 	if(!cursor)
 	{
 		printf("Debug eraser reset\n");
-		cursor = gdk_cursor_new ( GDK_CROSSHAIR );
+		cursor = gdk_cursor_new_for_display (gdk_display_get_default (), GDK_CROSSHAIR);
 		g_assert(cursor);
 	}
 	gdk_window_set_cursor ( m_priv->cv->drawing, cursor );
-	gdk_cursor_unref( cursor );
-
+	g_object_unref ( cursor );
 	m_priv->is_draw = FALSE;
 }
 
@@ -320,11 +319,11 @@ void notify_eraser_of_bg_color_change(void)
 	
 	if(!cursor)
 	{
-		cursor = gdk_cursor_new ( GDK_CROSSHAIR );
+		cursor = gdk_cursor_new_for_display (gdk_display_get_default (), GDK_CROSSHAIR);
 		g_assert(cursor);
 	}
 	gdk_window_set_cursor ( m_priv->cv->drawing, cursor );
-	gdk_cursor_unref( cursor );
+	g_object_unref ( cursor );
 }
 
 /*
@@ -398,7 +397,7 @@ static GdkCursor *create_eraser_cursor(GPEraserType type)
 	GdkPixmap *pixmap;
 	GdkPixbuf *pixbuf, *tmp;
 
-	pixmap = gdk_pixmap_new(m_priv->cv->widget->window, m_priv->width, m_priv->height, -1);
+	pixmap = gdk_pixmap_new(gtk_widget_get_window(m_priv->cv->widget), m_priv->width, m_priv->height, -1);
 	if(!GDK_IS_PIXMAP(pixmap))
 	{
 		printf("Debug: create_eraser_cursor() !GDK_IS_PIXMAP(pixmap)\n");
@@ -507,11 +506,11 @@ void on_eraser_size_toggled(GtkWidget *widget, gpointer data)
 	
 			if(!cursor)
 			{
-				cursor = gdk_cursor_new ( GDK_CROSSHAIR );
+				cursor = gdk_cursor_new_for_display (gdk_display_get_default (), GDK_CROSSHAIR);
 				g_assert(cursor);
 			}
 			gdk_window_set_cursor ( m_priv->cv->drawing, cursor );
-			gdk_cursor_unref( cursor );
+			g_object_unref ( cursor );
 		}
 		
 	}

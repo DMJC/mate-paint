@@ -354,7 +354,7 @@ gp_selection_set_floating ( gboolean floating )
             	w = gdk_pixbuf_get_width(m_priv->pb_clipboard);
 				h = gdk_pixbuf_get_height(m_priv->pb_clipboard);
             	
-            	pm = gdk_pixmap_new (cv->widget->window, w, h, -1);
+                pm = gdk_pixmap_new (gtk_widget_get_window(cv->widget), w, h, -1);
             	gdk_draw_pixbuf (pm, cv->gc_fg, m_priv->pb_clipboard, 0, 0,
 								 0, 0, w, h, GDK_RGB_DITHER_NONE, 0, 0);
 				
@@ -572,7 +572,7 @@ gp_selection_draw ( GdkDrawable *gdkd )
         GdkGC *gc;
 
         cv = cv_get_canvas ();
-        gc	=	gdk_gc_new ( cv->widget->window );
+        gc	=	gdk_gc_new ( gtk_widget_get_window(cv->widget) );
         gdk_gc_set_function ( gc, GDK_INVERT );
         gdk_gc_set_dashes ( gc, 0, dash_list, 2 );
         gdk_gc_set_line_attributes ( gc, 1, GDK_LINE_ON_OFF_DASH,

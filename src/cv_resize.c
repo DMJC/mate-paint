@@ -153,7 +153,7 @@ on_cv_right_realize (GtkWidget *widget, gpointer user_data)
 	cursor = gdk_cursor_new_for_display ( gtk_widget_get_display(widget) , GDK_RIGHT_SIDE );
 	g_assert (cursor);
 	gdk_window_set_cursor ( gtk_widget_get_window(widget), cursor );
-	gdk_cursor_unref ( cursor );
+	g_object_unref ( cursor );
 }
 
 void 
@@ -165,7 +165,7 @@ on_cv_bottom_right_realize (GtkWidget *widget, gpointer user_data)
 	cursor = gdk_cursor_new_for_display ( gtk_widget_get_display(widget) , GDK_BOTTOM_RIGHT_CORNER );
 	g_assert (cursor);
 	gdk_window_set_cursor ( gtk_widget_get_window(widget), cursor );
-	gdk_cursor_unref ( cursor );
+	g_object_unref ( cursor );
 }
 
 void
@@ -178,7 +178,7 @@ on_cv_bottom_realize (GtkWidget *widget, gpointer user_data)
 	cursor = gdk_cursor_new_for_display ( gtk_widget_get_display(widget) , GDK_BOTTOM_SIDE );
 	g_assert (cursor);
 	gdk_window_set_cursor ( gtk_widget_get_window(widget), cursor );
-	gdk_cursor_unref ( cursor );
+	g_object_unref ( cursor );
 }
 
 void

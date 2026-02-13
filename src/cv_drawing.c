@@ -272,7 +272,7 @@ on_cv_drawing_realize (GtkWidget *widget, gpointer user_data)
 {
 	cv.widget		=	widget;
 	cv.toplevel		=	gtk_widget_get_toplevel( widget );
-	cv.drawing		=	cv.widget->window;
+	cv.drawing		=	gtk_widget_get_window(cv.widget);
 	cv.gc_fg		=	cv_create_new_gc( "cv_gc_fg" );
 	cv.gc_bg		=	cv_create_new_gc( "cv_gc_bg" );
 	cv.gc_fg_pencil	=	cv_create_new_gc( "cv_gc_fg_pencil" );
@@ -372,14 +372,14 @@ on_cv_drawing_expose_event	(   GtkWidget	   *widget,
                					gpointer       user_data )
 {
 #if GTK_MAJOR_VERSION >= 2 && GTK_MINOR_VERSION >= 18
-    gdk_draw_drawable (	widget->window,
+    gdk_draw_drawable (	gtk_widget_get_window(widget),
                     	widget->style->fg_gc[gtk_widget_get_state(widget)],
     	                cv.pixmap,
     	                event->area.x, event->area.y,
     	                event->area.x, event->area.y,
     	                event->area.width, event->area.height);	
 #else
-	gdk_draw_drawable (	widget->window,
+	gdk_draw_drawable (	gtk_widget_get_window(widget),
                     	widget->style->fg_gc[gtk_widget_get_state(widget)],
     	                cv.pixmap,
     	                event->area.x, event->area.y,
@@ -402,7 +402,7 @@ static GdkGC *
 cv_create_new_gc ( char * name )
 {
 	GdkGC  * gc;
-	gc	=	gdk_gc_new ( cv.widget->window );
+	gc	=	gdk_gc_new ( gtk_widget_get_window(cv.widget) );
 	g_assert( gc );
 	/*set data to be destroyed*/
 	g_object_set_data_full (	G_OBJECT( cv.widget ), name, 

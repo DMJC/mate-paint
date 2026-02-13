@@ -440,7 +440,7 @@ color_picker_get_screen_color (ColorPicker *colorpicker, GtkWidget *widget)
 				  NULL,
 				  picker_cursor,
 				  time);
-  gdk_cursor_unref (picker_cursor);
+  g_object_unref (picker_cursor);
   
   if (grab_status != GDK_GRAB_SUCCESS)
   {

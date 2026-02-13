@@ -233,10 +233,10 @@ set_cursor ( GdkCursorType cursor_type )
     static GdkCursorType last_cursor = GDK_LAST_CURSOR;
     if ( cursor_type != last_cursor )
     {
-        GdkCursor *cursor = gdk_cursor_new ( cursor_type );
+        GdkCursor *cursor = gdk_cursor_new_for_display (gdk_display_get_default (), cursor_type);
 	    g_assert(cursor);
 	    gdk_window_set_cursor ( m_priv->cv->drawing, cursor );
-	    gdk_cursor_unref( cursor );
+	    g_object_unref ( cursor );
         last_cursor = cursor_type;
     }
 }

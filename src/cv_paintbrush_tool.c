@@ -318,11 +318,11 @@ reset ( void )
 	
 	if(!cursor)
 	{
-		cursor = gdk_cursor_new ( GDK_CROSSHAIR );
+		cursor = gdk_cursor_new_for_display (gdk_display_get_default (), GDK_CROSSHAIR);
 		g_assert(cursor);
 	}
 	gdk_window_set_cursor ( m_priv->cv->drawing, cursor );
-	gdk_cursor_unref( cursor );
+	g_object_unref ( cursor );
 
 	m_priv->is_draw = FALSE;
 }
@@ -363,11 +363,11 @@ void notify_brush_of_fg_color_change(void)
 	
 	if(!cursor)
 	{
-		cursor = gdk_cursor_new ( GDK_CROSSHAIR );
+		cursor = gdk_cursor_new_for_display (gdk_display_get_default (), GDK_CROSSHAIR);
 		g_assert(cursor);
 	}
 	gdk_window_set_cursor ( m_priv->cv->drawing, cursor );
-	gdk_cursor_unref( cursor );
+	g_object_unref ( cursor );
 }
 
 /*
@@ -503,7 +503,7 @@ static GdkCursor *create_brush_cursor(GPBrushType type)
 		hcur = m_priv->height;
 	}
 
-	pixmap = gdk_pixmap_new(m_priv->cv->widget->window, wcur, hcur, -1);
+	pixmap = gdk_pixmap_new(gtk_widget_get_window(m_priv->cv->widget), wcur, hcur, -1);
 	if(!GDK_IS_PIXMAP(pixmap))
 	{
 		printf("Debug: create_brush_cursor() !GDK_IS_PIXMAP(pixmap)\n");
@@ -681,11 +681,11 @@ void on_brush_size_toggled(GtkWidget *widget, gpointer data)
 	
 			if(!cursor)
 			{
-				cursor = gdk_cursor_new ( GDK_CROSSHAIR );
+				cursor = gdk_cursor_new_for_display (gdk_display_get_default (), GDK_CROSSHAIR);
 				g_assert(cursor);
 			}
 			gdk_window_set_cursor ( m_priv->cv->drawing, cursor );
-			gdk_cursor_unref( cursor );
+			g_object_unref( cursor );
 		}
 		
 	}
@@ -800,8 +800,7 @@ static GdkGC *color_for_alphaing(GtkWidget *widget, GdkGC *fg, GdkGC *bg)
 			/* Create the gc and set the new color */
 			if(fgvalues.foreground.pixel != bgvalues.background.pixel)
 			{
-				gc = gdk_gc_new(widget->window);
-
+				gc = gdk_gc_new(gtk_widget_get_window(widget));
 				gdk_gc_set_rgb_bg_color(gc, &bgvalues.background);
 				gdk_gc_set_rgb_fg_color(gc, &bgvalues.background);
 
