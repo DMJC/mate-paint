@@ -81,39 +81,39 @@ void on_draw_curve_toggled				(GtkToggleToolButton *button, gpointer user_data);
 void on_draw_polygon_toggled			(GtkToggleToolButton *button, gpointer user_data);
 void on_draw_rounded_rectangle_toggled  (GtkToggleToolButton *button, gpointer user_data);
 /*Option Bar realize funcitons*/
-void on_notebook_realize				(GtkObject *object, gpointer user_data);
-void on_frame_rect_realize  			(GtkObject *object, gpointer user_data);
+void on_notebook_realize				(GtkWidget *object, gpointer user_data);
+void on_frame_rect_realize  			(GtkWidget *object, gpointer user_data);
 /*Selection Bar realize functions*/
-void on_sel1_realize   					(GtkObject *object, gpointer user_data);
-void on_sel2_realize   					(GtkObject *object, gpointer user_data);
+void on_sel1_realize   					(GtkWidget *object, gpointer user_data);
+void on_sel2_realize   					(GtkWidget *object, gpointer user_data);
 /*Rect Bar realize functions*/
-void on_rect0_realize   				(GtkObject *object, gpointer user_data);
-void on_rect1_realize   				(GtkObject *object, gpointer user_data);
-void on_rect2_realize  					(GtkObject *object, gpointer user_data);
+void on_rect0_realize   				(GtkWidget *object, gpointer user_data);
+void on_rect1_realize   				(GtkWidget *object, gpointer user_data);
+void on_rect2_realize  					(GtkWidget *object, gpointer user_data);
 /*Line Bar realize functions*/
-void on_line0_realize   				(GtkObject *object, gpointer user_data);
-void on_line1_realize   				(GtkObject *object, gpointer user_data);
-void on_line2_realize   				(GtkObject *object, gpointer user_data);
-void on_line3_realize   				(GtkObject *object, gpointer user_data);
-void on_line4_realize   				(GtkObject *object, gpointer user_data);
+void on_line0_realize   				(GtkWidget *object, gpointer user_data);
+void on_line1_realize   				(GtkWidget *object, gpointer user_data);
+void on_line2_realize   				(GtkWidget *object, gpointer user_data);
+void on_line3_realize   				(GtkWidget *object, gpointer user_data);
+void on_line4_realize   				(GtkWidget *object, gpointer user_data);
 /*Erase Bar realize functions*/
-void on_erase0_realize   				(GtkObject *object, gpointer user_data);
-void on_erase1_realize   				(GtkObject *object, gpointer user_data);
-void on_erase2_realize   				(GtkObject *object, gpointer user_data);
-void on_erase3_realize   				(GtkObject *object, gpointer user_data);
+void on_erase0_realize   				(GtkWidget *object, gpointer user_data);
+void on_erase1_realize   				(GtkWidget *object, gpointer user_data);
+void on_erase2_realize   				(GtkWidget *object, gpointer user_data);
+void on_erase3_realize   				(GtkWidget *object, gpointer user_data);
 /*Brush Bar realize functions*/
-void on_brush0_realize   				(GtkObject *object, gpointer user_data);
-void on_brush1_realize   				(GtkObject *object, gpointer user_data);
-void on_brush2_realize   				(GtkObject *object, gpointer user_data);
-void on_brush3_realize   				(GtkObject *object, gpointer user_data);
-void on_brush4_realize   				(GtkObject *object, gpointer user_data);
-void on_brush5_realize   				(GtkObject *object, gpointer user_data);
-void on_brush6_realize   				(GtkObject *object, gpointer user_data);
-void on_brush7_realize   				(GtkObject *object, gpointer user_data);
-void on_brush8_realize   				(GtkObject *object, gpointer user_data);
-void on_brush9_realize   				(GtkObject *object, gpointer user_data);
-void on_brush10_realize   				(GtkObject *object, gpointer user_data);
-void on_brush11_realize   				(GtkObject *object, gpointer user_data);
+void on_brush0_realize   				(GtkWidget *object, gpointer user_data);
+void on_brush1_realize   				(GtkWidget *object, gpointer user_data);
+void on_brush2_realize   				(GtkWidget *object, gpointer user_data);
+void on_brush3_realize   				(GtkWidget *object, gpointer user_data);
+void on_brush4_realize   				(GtkWidget *object, gpointer user_data);
+void on_brush5_realize   				(GtkWidget *object, gpointer user_data);
+void on_brush6_realize   				(GtkWidget *object, gpointer user_data);
+void on_brush7_realize   				(GtkWidget *object, gpointer user_data);
+void on_brush8_realize   				(GtkWidget *object, gpointer user_data);
+void on_brush9_realize   				(GtkWidget *object, gpointer user_data);
+void on_brush10_realize   				(GtkWidget *object, gpointer user_data);
+void on_brush11_realize   				(GtkWidget *object, gpointer user_data);
 
 
 

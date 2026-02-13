@@ -316,13 +316,13 @@ on_sel2_toggled (GtkToggleToolButton *button, gpointer user_data)
 
 /*Option Bar realize funcitons*/
 void 
-on_notebook_realize   (GtkObject *object, gpointer user_data)
+on_notebook_realize   (GtkWidget *object, gpointer user_data)
 {
 	notebook	=	GTK_NOTEBOOK( object );
 	gtk_notebook_set_current_page ( notebook, TAB_SELECTION );
 }
 void 
-on_frame_rect_realize  (GtkObject *object, gpointer user_data)
+on_frame_rect_realize  (GtkWidget *object, gpointer user_data)
 {
 	frame_rect	=	GTK_FRAME( object );
 	show_frame_rect ( frame_rect_show );
@@ -330,13 +330,13 @@ on_frame_rect_realize  (GtkObject *object, gpointer user_data)
 
 /*Selection Bar realize functions*/
 void 
-on_sel1_realize   (GtkObject *object, gpointer user_data)
+on_sel1_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)sel1_xpm ) );
 }
 void 
-on_sel2_realize   (GtkObject *object, gpointer user_data)
+on_sel2_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)sel2_xpm ) );
@@ -344,19 +344,19 @@ on_sel2_realize   (GtkObject *object, gpointer user_data)
 
 /*Rect Bar realize functions*/
 void 
-on_rect0_realize   (GtkObject *object, gpointer user_data)
+on_rect0_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)rect0_xpm ) );
 }
 void 
-on_rect1_realize   (GtkObject *object, gpointer user_data)
+on_rect1_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)rect1_xpm ) );
 }
 void 
-on_rect2_realize   (GtkObject *object, gpointer user_data)
+on_rect2_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)rect2_xpm ) );
@@ -364,31 +364,31 @@ on_rect2_realize   (GtkObject *object, gpointer user_data)
 
 /*Line Bar realize functions*/
 void
-on_line0_realize   (GtkObject *object, gpointer user_data)
+on_line0_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)line_0_xpm ) );
 }
 void
-on_line1_realize   (GtkObject *object, gpointer user_data)
+on_line1_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)line_1_xpm ) );
 }
 void
-on_line2_realize   (GtkObject *object, gpointer user_data)
+on_line2_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)line_2_xpm ) );
 }
 void
-on_line3_realize   (GtkObject *object, gpointer user_data)
+on_line3_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)line_3_xpm ) );
 }
 void
-on_line4_realize   (GtkObject *object, gpointer user_data)
+on_line4_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object), 
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)line_4_xpm ) );
@@ -396,98 +396,98 @@ on_line4_realize   (GtkObject *object, gpointer user_data)
 
 /*Erase Bar realize functions*/
 void
-on_erase0_realize   (GtkObject *object, gpointer user_data)
+on_erase0_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)erase_0_xpm ) );
 }
 void
-on_erase1_realize   (GtkObject *object, gpointer user_data)
+on_erase1_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)erase_1_xpm ) );
 }
 void
-on_erase2_realize   (GtkObject *object, gpointer user_data)
+on_erase2_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)erase_2_xpm ) );
 }
 void
-on_erase3_realize   (GtkObject *object, gpointer user_data)
+on_erase3_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
 	                                 	get_gtk_image( GTK_WIDGET(object), (gchar**)erase_3_xpm ) );
 }
 /*Brush Bar realize functions*/
 void
-on_brush0_realize   (GtkObject *object, gpointer user_data)
+on_brush0_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
                                      	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_0_xpm ) );
 }
 void
-on_brush1_realize   (GtkObject *object, gpointer user_data)
+on_brush1_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
                                      	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_1_xpm ) );
 }
 void
-on_brush2_realize   (GtkObject *object, gpointer user_data)
+on_brush2_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
                                      	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_2_xpm ) );
 }
 void
-on_brush3_realize   (GtkObject *object, gpointer user_data)
+on_brush3_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
                                      	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_3_xpm ) );
 }
 void
-on_brush4_realize   (GtkObject *object, gpointer user_data)
+on_brush4_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
                                      	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_4_xpm ) );
 }
 void
-on_brush5_realize   (GtkObject *object, gpointer user_data)
+on_brush5_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
                                      	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_5_xpm ) );
 }
 void
-on_brush6_realize   (GtkObject *object, gpointer user_data)
+on_brush6_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
                                      	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_6_xpm ) );
 }
 void
-on_brush7_realize   (GtkObject *object, gpointer user_data)
+on_brush7_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
                                      	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_7_xpm ) );
 }
 void
-on_brush8_realize   (GtkObject *object, gpointer user_data)
+on_brush8_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
                                      	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_8_xpm ) );
 }
 void
-on_brush9_realize   (GtkObject *object, gpointer user_data)
+on_brush9_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
                                      	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_9_xpm ) );
 }
 void
-on_brush10_realize   (GtkObject *object, gpointer user_data)
+on_brush10_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
                                      	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_10_xpm ) );
 }
 void
-on_brush11_realize   (GtkObject *object, gpointer user_data)
+on_brush11_realize   (GtkWidget *object, gpointer user_data)
 {
 	gtk_tool_button_set_icon_widget (	GTK_TOOL_BUTTON(object),
                                      	get_gtk_image( GTK_WIDGET(object), (gchar**)brush_11_xpm ) );

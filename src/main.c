@@ -49,7 +49,7 @@
 
 GtkWidget	*create_window			( void );
 void		mate_paint_init		( int argc, char *argv[] );
-void		on_window_destroy		( GtkObject *object, gpointer user_data );
+void		on_window_destroy		( GtkWidget *object, gpointer user_data );
 void		on_menu_about_activate  ( GtkMenuItem *menuitem, gpointer user_data );
 
 static void init_eraser				(GtkBuilder *builder);
@@ -150,7 +150,7 @@ on_window_delete_event (GtkWidget       *widget,
 }
 
 void 
-on_window_destroy ( GtkObject   *object, 
+on_window_destroy ( GtkWidget *object, 
 				    gpointer	user_data )
 {
 	gtk_main_quit();
