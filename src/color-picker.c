@@ -17,7 +17,7 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include  <gdk/gdkkeysyms.h>
+#include  <gdk/gdk.h>
 
 #include "color-picker.h"
 
@@ -185,31 +185,35 @@ grab_color_at_mouse (GdkScreen *screen,
 		     gint       y_root,
 		     gpointer   data)
 {
-  GdkImage *image;
-  guint32 pixel;
+  GdkPixbuf *pixbuf;
+  guchar *pixels;
+  gint n_channels;
+  gint rowstride;
   ColorPicker *colorpicker = data;
   ColorPickerPrivate *priv;
-  GdkColormap *colormap = gdk_screen_get_system_colormap (screen);
   GdkWindow *root_window = gdk_screen_get_root_window (screen);
   
   priv = colorpicker->priv;
 
-  image = gdk_drawable_get_image (root_window, x_root, y_root, 1, 1);
-  if (!image)
-    {
-      gint x, y;
-      GdkDisplay *display = gdk_screen_get_display (screen);
-      GdkWindow *window = gdk_display_get_window_at_pointer (display, &x, &y);
-      if (!window)
-	return;
-      image = gdk_drawable_get_image (window, x, y, 1, 1);
-      if (!image)
-	return;
-    }
-  pixel = gdk_image_get_pixel (image, 0, 0);
-  g_object_unref (image);
+  pixbuf = gdk_pixbuf_get_from_window (root_window, x_root, y_root, 1, 1);
+  if (!pixbuf)
+      return;
 
-  gdk_colormap_query_color (colormap, pixel, &priv->color);
+  n_channels = gdk_pixbuf_get_n_channels (pixbuf);
+  rowstride = gdk_pixbuf_get_rowstride (pixbuf);
+  pixels = gdk_pixbuf_get_pixels (pixbuf);
+
+  if (n_channels < 3)
+    {
+      g_object_unref (pixbuf);
+      return;
+    }
+  priv->color.red = pixels[0] * 257;
+  priv->color.green = pixels[1] * 257;
+  priv->color.blue = pixels[2] * 257;
+
+  (void)rowstride;
+  g_object_unref (pixbuf);
 
   g_signal_emit (colorpicker, picker_signals[COLOR_CHANGED], 0);
 }
@@ -286,15 +290,15 @@ key_press (GtkWidget   *invisible,
 
   switch (event->keyval) 
     {
-    case GDK_space:
-    case GDK_Return:
-    case GDK_ISO_Enter:
-    case GDK_KP_Enter:
-    case GDK_KP_Space:
+    case GDK_KEY_space:
+    case GDK_KEY_Return:
+    case GDK_KEY_ISO_Enter:
+    case GDK_KEY_KP_Enter:
+    case GDK_KEY_KP_Space:
       grab_color_at_mouse (screen, x, y, data);
       /* fall through */
 
-    case GDK_Escape:
+    case GDK_KEY_Escape:
       shutdown_eyedropper (COLOR_PICKER (data));
       
       g_signal_handlers_disconnect_by_func (invisible,
@@ -308,23 +312,23 @@ key_press (GtkWidget   *invisible,
       return TRUE;
 
 #if defined GDK_WINDOWING_X11 || defined GDK_WINDOWING_WIN32
-    case GDK_Up:
-    case GDK_KP_Up:
+    case GDK_KEY_Up:
+    case GDK_KEY_KP_Up:
       dy = state == GDK_MOD1_MASK ? -BIG_STEP : -1;
       break;
 
-    case GDK_Down:
-    case GDK_KP_Down:
+    case GDK_KEY_Down:
+    case GDK_KEY_KP_Down:
       dy = state == GDK_MOD1_MASK ? BIG_STEP : 1;
       break;
 
-    case GDK_Left:
-    case GDK_KP_Left:
+    case GDK_KEY_Left:
+    case GDK_KEY_KP_Left:
       dx = state == GDK_MOD1_MASK ? -BIG_STEP : -1;
       break;
 
-    case GDK_Right:
-    case GDK_KP_Right:
+    case GDK_KEY_Right:
+    case GDK_KEY_KP_Right:
       dx = state == GDK_MOD1_MASK ? BIG_STEP : 1;
       break;
 #endif

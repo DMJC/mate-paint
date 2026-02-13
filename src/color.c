@@ -64,6 +64,7 @@ static void background_set_color_from_palette   ( guint palette );
 static void foreground_set_color_from_palette   ( guint palette );
 static void palette_color_picker				( guint palette );
 static void color_dialog						( GdkColor *color, gchar * title );
+static void color_to_rgba                       ( const GdkColor *color, GdkRGBA *rgba );
 static void background_show						( void );
 static void foreground_show						( void );
 static void pallete_show						( guint palette );
@@ -246,25 +247,40 @@ color_dialog( GdkColor *color, gchar * title )
 	gtk_widget_destroy(dialog);
 }
 
+static void
+color_to_rgba (const GdkColor *color, GdkRGBA *rgba)
+{
+	rgba->red = color->red / 65535.0;
+	rgba->green = color->green / 65535.0;
+	rgba->blue = color->blue / 65535.0;
+	rgba->alpha = 1.0;
+}
+
 static void 
 background_show ( void )
 {
+	GdkRGBA rgba;
 	g_return_if_fail( background_widget != NULL );
-	gtk_widget_override_background_color (background_widget, GTK_STATE_FLAG_NORMAL, &background_color);
+	color_to_rgba (&background_color, &rgba);
+	gtk_widget_override_background_color (background_widget, GTK_STATE_FLAG_NORMAL, &rgba);
 	cv_set_color_bg ( &background_color );
 }
 
 static void 
 foreground_show ( void )
 {
+	GdkRGBA rgba;
 	g_return_if_fail( foreground_widget != NULL );
-	gtk_widget_override_background_color (foreground_widget, GTK_STATE_FLAG_NORMAL, &foreground_color);
+	color_to_rgba (&foreground_color, &rgba);
+	gtk_widget_override_background_color (foreground_widget, GTK_STATE_FLAG_NORMAL, &rgba);
 	cv_set_color_fg ( &foreground_color );
 }
 
 static void 
 pallete_show ( guint palette )
 {
+	GdkRGBA rgba;
 	g_return_if_fail( pallete_widgets[palette] != NULL );
-	gtk_widget_override_background_color (pallete_widgets[palette], GTK_STATE_FLAG_NORMAL, &pallete_colors[palette]);
+	color_to_rgba (&pallete_colors[palette], &rgba);
+	gtk_widget_override_background_color (pallete_widgets[palette], GTK_STATE_FLAG_NORMAL, &rgba);
 }
