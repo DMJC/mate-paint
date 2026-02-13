@@ -36,10 +36,6 @@ static char *last_dir[] = { NULL, NULL, NULL, NULL };
 
 #define FILE_FORMAT_KEY "file-format"
 
-#define PIXBUF_FILE_CHOOSER_GET_PRIVATE(object)	\
-	(G_TYPE_INSTANCE_GET_PRIVATE ((object), PIXBUF_TYPE_FILE_CHOOSER, PixbufFileChooserPrivate))
-
-
 static GdkPixbufFormat*	pixbuf_get_format_by_suffix		(const gchar *suffix);
 static gchar*			get_suffix_from_basename 		(const gchar *basename);
 
@@ -58,8 +54,7 @@ struct _PixbufFileChooserPrivate
 	gchar		*name;
 };
 
-
-G_DEFINE_TYPE(PixbufFileChooser, pixbuf_file_chooser, GTK_TYPE_FILE_CHOOSER_DIALOG)
+G_DEFINE_TYPE_WITH_PRIVATE (PixbufFileChooser, pixbuf_file_chooser, GTK_TYPE_FILE_CHOOSER_DIALOG)
 
 static void
 pixbuf_file_chooser_finalize (GObject *object)
@@ -87,14 +82,12 @@ pixbuf_file_chooser_class_init (PixbufFileChooserClass *klass)
 	GObjectClass *object_class = (GObjectClass *) klass;
 
 	object_class->finalize = pixbuf_file_chooser_finalize;
-
-	g_type_class_add_private (object_class, sizeof (PixbufFileChooserPrivate));
 }
 
 static void
 pixbuf_file_chooser_init (PixbufFileChooser *chooser)
 {
-	chooser->priv = PIXBUF_FILE_CHOOSER_GET_PRIVATE (chooser);
+	chooser->priv = pixbuf_file_chooser_get_instance_private (chooser);
 	chooser->priv->combo_filter	= NULL;
 	chooser->priv->filters 		= NULL;
 	chooser->priv->name			= g_strdup ("untitled");
@@ -128,7 +121,7 @@ add_custom_button_to_dialog (GtkDialog   *dialog,
   GtkWidget *button;
 
   button = gtk_button_new_with_mnemonic (mnemonic_label);
-  GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default (button, TRUE);
   gtk_button_set_image (GTK_BUTTON (button),
 			gtk_image_new_from_stock (stock_id, GTK_ICON_SIZE_BUTTON));
   gtk_widget_show (button);
