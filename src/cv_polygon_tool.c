@@ -28,6 +28,7 @@
 #include "gp_point_array.h"
 #include "undo.h"
 #include "file.h"
+#include "cv_drawing.h"
 
 /*Member functions*/
 static gboolean	button_press	( GdkEventButton *event );

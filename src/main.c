@@ -33,11 +33,19 @@
 #include "cv_paintbrush_tool.h"
 
 #include <glib/gi18n.h>
+#include <locale.h>
 #include <gtk/gtk.h>
 
 #define UI_FILE		PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "mate-paint" G_DIR_SEPARATOR_S "ui" G_DIR_SEPARATOR_S "mate_paint.ui"
 #define ICON_DIR	PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "mate-paint" G_DIR_SEPARATOR_S "icons"
 
+#ifndef GETTEXT_PACKAGE
+#define GETTEXT_PACKAGE "mate-paint"
+#endif
+
+#ifndef PACKAGE_VERSION
+#define PACKAGE_VERSION "unknown"
+#endif
 
 GtkWidget	*create_window			( void );
 void		mate_paint_init		( int argc, char *argv[] );

@@ -63,8 +63,8 @@ static gdouble convert_units (int from, int to, gdouble d, guint Dpi);
 
 static GPFlipRotateDlg m_fr = {NULL, GP_FILP_HORZ, GDK_PIXBUF_ROTATE_COUNTERCLOCKWISE};
 
-static m_cur_unit = px;
-static m_prev_unit = px;
+static GPUnitType m_cur_unit = px;
+static GPUnitType m_prev_unit = px;
 
 /************** Flip and rotate stuff **************************************/
 void

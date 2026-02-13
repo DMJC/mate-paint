@@ -25,6 +25,7 @@
  #include <gtk/gtk.h>
 
 #include "cv_ellipse_tool.h"
+#include "cv_drawing.h"
 #include "file.h"
 #include "undo.h"
 #include "gp_point_array.h"

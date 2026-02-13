@@ -25,6 +25,7 @@
 #include "file.h"
 #include "gp-image.h"
 #include "toolbar.h"
+#include "undo.h"
 
 #define BRUSH_WIDTH		17
 #define BRUSH_HEIGHT	17

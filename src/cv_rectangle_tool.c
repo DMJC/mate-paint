@@ -26,6 +26,7 @@
 
 #include "cv_rectangle_tool.h"
 #include "file.h"
+#include "cv_drawing.h"
 #include "undo.h"
 #include "gp_point_array.h"
 

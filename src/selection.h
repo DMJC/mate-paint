@@ -40,6 +40,10 @@ void            gp_selection_do_action                  ( GdkPoint *p );
 void            gp_selection_draw                       ( GdkDrawable *gdkd );
 
 gboolean        gp_selection_query                      ( void );
+GdkPixbuf *     gp_selection_get_pixbuf                 ( void );
+void            gp_selection_invert                     ( void );
+void            gp_selection_flip                       ( gboolean flip );
+void            gp_selection_rotate                     ( GdkPixbufRotation angle );
 gboolean		gp_selection_create						( GdkPoint *s,
 														  GdkPoint *e,
 														  GdkPixbuf *pixbuf );

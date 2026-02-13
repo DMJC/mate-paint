@@ -25,6 +25,7 @@
 #include "file.h"
 #include "gp-image.h"
 #include "toolbar.h"
+#include "undo.h"
 
 #define ERASER_WIDTH	17
 #define ERASER_HEIGHT	17

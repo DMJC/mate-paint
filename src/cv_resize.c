@@ -83,8 +83,8 @@ cv_resize_draw ( void )
 	}
 	else
 	{
-		x = gtk_widget_get_allocated_width(cv->widget);
-		y = gtk_widget_get_allocated_height(cv->widget);
+		x = cv->widget->allocation.width;
+		y = cv->widget->allocation.height;
 	}
 	g_string_printf (str, "%dx%d", x, y );
 	gtk_label_set_text( GTK_LABEL(lb_size), str->str );
