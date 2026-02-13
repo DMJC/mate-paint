@@ -229,16 +229,9 @@ guint get_fg_color_from_gc(GdkGC *gc)
 {
 	GdkGCValues values;
 	guint color = 0;
-	GdkColor tmp;
 
 	gdk_gc_get_values(gc, &values);
 
-	tmp = values.foreground;
-	gdk_colormap_query_color (gtk_widget_get_colormap(m_priv->cv->widget), 
-	                          values.foreground.pixel, 
-	                          &tmp);
-
-	values.foreground = tmp;
 	values.foreground.red /= 256;
 	values.foreground.green /= 256;
 	values.foreground.blue /= 256;

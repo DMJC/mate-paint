@@ -488,8 +488,8 @@ static GdkCursor *create_brush_cursor(GPBrushType type)
 	GdkCursor *cursor = NULL;
 	GdkPixmap *pixmap;
 	GdkPixbuf *pixbuf, *tmp;
-	GdkGCValues bgvalues, fgvalues;
-	GdkColor color, fgcolor;
+	GdkGCValues bgvalues;
+	GdkColor color;
 	GdkGC *gc;
 	/* No cursor is less than 19 pixels ie. w & h of crosshair */
 	gint wcur = MIN_CURSOR_WIDTH;
@@ -515,21 +515,13 @@ static GdkCursor *create_brush_cursor(GPBrushType type)
 	if(GDK_IS_GC(gc)){
 		gdk_draw_rectangle(pixmap, gc, TRUE, 0, 0, wcur, hcur);
 		gdk_gc_get_values(gc, &bgvalues);
-		gdk_colormap_query_color (gtk_widget_get_colormap(m_priv->cv->widget), 
-	                          bgvalues.foreground.pixel, 
-	                          &color);
-		bgvalues.foreground = color;
 		gdk_gc_unref(gc);
 	}
 	else{
 		gdk_draw_rectangle(pixmap, m_priv->cv->gc_bg_pencil, TRUE, 0, 0, wcur, hcur);
 		gdk_gc_get_values(m_priv->cv->gc_bg_pencil, &bgvalues);
-		gdk_colormap_query_color (gtk_widget_get_colormap(m_priv->cv->widget), 
-	                          bgvalues.background.pixel, 
-	                          &color);
-		bgvalues.foreground = color;
+		color = bgvalues.foreground;
 	}
-	
 
 	/* Draw brush shape centered onto pixmap with fore color */
 	switch(type)
