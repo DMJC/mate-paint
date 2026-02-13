@@ -101,9 +101,9 @@ file_save_dialog ( void )
 		    GTK_MESSAGE_DIALOG (dlg), 
 		    _("Your changes will be lost if you don't save them.") );
 
-		gtk_dialog_add_button (GTK_DIALOG(dlg), GTK_STOCK_DISCARD, GTK_RESPONSE_NO);
-        gtk_dialog_add_button (GTK_DIALOG(dlg), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
-        gtk_dialog_add_button (GTK_DIALOG(dlg), GTK_STOCK_SAVE, GTK_RESPONSE_YES);
+		gtk_dialog_add_button (GTK_DIALOG(dlg), _("_Discard"), GTK_RESPONSE_NO);
+        	gtk_dialog_add_button (GTK_DIALOG(dlg), _("_Cancel"), GTK_RESPONSE_CANCEL);
+	        gtk_dialog_add_button (GTK_DIALOG(dlg), _("_Save"), GTK_RESPONSE_YES);
 		gtk_dialog_set_default_response (GTK_DIALOG(dlg), GTK_RESPONSE_YES);
 
 		result = gtk_dialog_run (GTK_DIALOG (dlg));

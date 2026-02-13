@@ -240,7 +240,7 @@ static void
 background_show ( void )
 {
 	g_return_if_fail( background_widget != NULL );
-	gtk_widget_modify_bg ( background_widget, GTK_STATE_NORMAL , &background_color );
+	gtk_widget_override_background_color (background_widget, GTK_STATE_FLAG_NORMAL, &background_color);
 	cv_set_color_bg ( &background_color );
 }
 
@@ -248,7 +248,7 @@ static void
 foreground_show ( void )
 {
 	g_return_if_fail( foreground_widget != NULL );
-	gtk_widget_modify_bg ( foreground_widget, GTK_STATE_NORMAL , &foreground_color );
+	gtk_widget_override_background_color (foreground_widget, GTK_STATE_FLAG_NORMAL, &foreground_color);
 	cv_set_color_fg ( &foreground_color );
 }
 
@@ -256,5 +256,5 @@ static void
 pallete_show ( guint palette )
 {
 	g_return_if_fail( pallete_widgets[palette] != NULL );
-	gtk_widget_modify_bg ( pallete_widgets[palette], GTK_STATE_NORMAL , &pallete_colors[palette] );
+	gtk_widget_override_background_color (pallete_widgets[palette], GTK_STATE_FLAG_NORMAL, &pallete_colors[palette]);
 }

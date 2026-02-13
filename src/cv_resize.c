@@ -124,7 +124,7 @@ on_cv_ev_box_realize (GtkWidget *widget, gpointer user_data)
 {
 	gint8 dash_list[]	=	{ 1, 1 };
 	cv_ev_box	        =	widget;	
-	gc_resize	        =	gdk_gc_new ( widget->window );
+	gc_resize	        =	gdk_gc_new ( gtk_widget_get_window(widget) );
 	g_assert( gc_resize );
 	/*set data to be destroyed*/
 	g_object_set_data_full (	G_OBJECT(widget), "gc_resize", 
@@ -149,10 +149,10 @@ on_cv_right_realize (GtkWidget *widget, gpointer user_data)
 	GdkCursor *cursor;
 	cv_right_edge = widget;
 	gtk_widget_set_size_request ( widget, BOX_EDGE_SIZE, BOX_EDGE_SIZE );
-	gtk_widget_modify_bg ( widget, GTK_STATE_NORMAL , &edge_color );
+	gtk_widget_override_background_color (widget, GTK_STATE_FLAG_NORMAL, &edge_color);
 	cursor = gdk_cursor_new_for_display ( gtk_widget_get_display(widget) , GDK_RIGHT_SIDE );
 	g_assert (cursor);
-	gdk_window_set_cursor ( widget->window, cursor );
+	gdk_window_set_cursor ( gtk_widget_get_window(widget), cursor );
 	gdk_cursor_unref ( cursor );
 }
 
@@ -161,10 +161,10 @@ on_cv_bottom_right_realize (GtkWidget *widget, gpointer user_data)
 {
 	GdkCursor *cursor;
 	gtk_widget_set_size_request ( widget, BOX_EDGE_SIZE, BOX_EDGE_SIZE );
-	gtk_widget_modify_bg ( widget, GTK_STATE_NORMAL , &edge_color );
+	gtk_widget_override_background_color (widget, GTK_STATE_FLAG_NORMAL, &edge_color);
 	cursor = gdk_cursor_new_for_display ( gtk_widget_get_display(widget) , GDK_BOTTOM_RIGHT_CORNER );
 	g_assert (cursor);
-	gdk_window_set_cursor ( widget->window, cursor );
+	gdk_window_set_cursor ( gtk_widget_get_window(widget), cursor );
 	gdk_cursor_unref ( cursor );
 }
 
@@ -174,10 +174,10 @@ on_cv_bottom_realize (GtkWidget *widget, gpointer user_data)
 	GdkCursor *cursor;
 	cv_bottom_edge = widget;
 	gtk_widget_set_size_request ( widget, BOX_EDGE_SIZE, BOX_EDGE_SIZE );
-	gtk_widget_modify_bg ( widget, GTK_STATE_NORMAL , &edge_color );
+	gtk_widget_override_background_color (widget, GTK_STATE_FLAG_NORMAL, &edge_color);
 	cursor = gdk_cursor_new_for_display ( gtk_widget_get_display(widget) , GDK_BOTTOM_SIDE );
 	g_assert (cursor);
-	gdk_window_set_cursor ( widget->window, cursor );
+	gdk_window_set_cursor ( gtk_widget_get_window(widget), cursor );
 	gdk_cursor_unref ( cursor );
 }
 
@@ -199,7 +199,7 @@ on_cv_left_realize (GtkWidget *widget, gpointer user_data)
 void
 on_cv_other_edge_realize (GtkWidget *widget, gpointer user_data)
 {
-	gtk_widget_modify_fg ( widget, GTK_STATE_NORMAL , &edge_color  );
+	gtk_widget_override_color (widget, GTK_STATE_FLAG_NORMAL, &edge_color);
 	gtk_widget_set_size_request ( widget, BOX_EDGE_SIZE, BOX_EDGE_SIZE );
 }
 

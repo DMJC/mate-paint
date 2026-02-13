@@ -420,21 +420,21 @@ color_picker_get_screen_color (ColorPicker *colorpicker, GtkWidget *widget)
       toplevel = gtk_widget_get_toplevel ( widget );
   
       if (GTK_IS_WINDOW (toplevel))
-	  {
-		if (GTK_WINDOW (toplevel)->group)
-			gtk_window_group_add_window (GTK_WINDOW (toplevel)->group, 
-										 GTK_WINDOW (grab_widget));
-	  }
+      {
+          GtkWindowGroup *group = gtk_window_get_group (GTK_WINDOW (toplevel));
+          if (group != NULL)
+              gtk_window_group_add_window (group, GTK_WINDOW (grab_widget));
+      }
 
       priv->dropper_grab_widget = grab_widget;
    }
 
-  if (gdk_keyboard_grab (priv->dropper_grab_widget->window,
+  if (gdk_keyboard_grab (gtk_widget_get_window (priv->dropper_grab_widget),
                          FALSE, time) != GDK_GRAB_SUCCESS)
     return;
   
   picker_cursor = make_picker_cursor (screen);
-  grab_status = gdk_pointer_grab (priv->dropper_grab_widget->window,
+  grab_status = gdk_pointer_grab (gtk_widget_get_window (priv->dropper_grab_widget),
 				  FALSE,
 				  GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK,
 				  NULL,
