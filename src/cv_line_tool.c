@@ -46,11 +46,34 @@ static void     save_undo       ( void );
 typedef struct {
 	gp_tool			tool;
 	gp_canvas *		cv;
-	GdkGC *			gc;
+	GdkGC *			color_gc;
 	gint 			x0,y0,x1,y1;
 	guint			button;
 	gboolean 		is_draw;
 } private_data;
+
+static void
+draw_line_with_cairo (GdkDrawable *drawable, GdkGC *gc, gint x0, gint y0, gint x1, gint y1)
+{
+	GdkGCValues values;
+	cairo_t *cr;
+
+	g_return_if_fail (drawable != NULL);
+	g_return_if_fail (gc != NULL);
+
+	cr = gdk_cairo_create (drawable);
+	gdk_gc_get_values (gc, &values);
+
+	cairo_set_source_rgb (cr,
+	                      values.foreground.red / 65535.0,
+	                      values.foreground.green / 65535.0,
+	                      values.foreground.blue / 65535.0);
+	cairo_set_line_width (cr, MAX (values.line_width, 1));
+	cairo_move_to (cr, x0 + 0.5, y0 + 0.5);
+	cairo_line_to (cr, x1 + 0.5, y1 + 0.5);
+	cairo_stroke (cr);
+	cairo_destroy (cr);
+}
 
 static private_data		*m_priv = NULL;
 
@@ -61,7 +84,7 @@ create_private_data( void )
 	{
 		m_priv = g_slice_new0 (private_data);
 		m_priv->cv		=	NULL;
-		m_priv->gc		=	NULL;
+		m_priv->color_gc	=	NULL;
 		m_priv->button	=	0;
 		m_priv->is_draw	=	FALSE;
 	}
@@ -98,11 +121,11 @@ button_press ( GdkEventButton *event )
 	{
 		if ( event->button == LEFT_BUTTON )
 		{
-			m_priv->gc = m_priv->cv->gc_fg;
+			m_priv->color_gc = m_priv->cv->gc_fg;
 		}
 		else if ( event->button == RIGHT_BUTTON )
 		{
-			m_priv->gc = m_priv->cv->gc_bg;
+			m_priv->color_gc = m_priv->cv->gc_bg;
 		}
 		m_priv->is_draw = !m_priv->is_draw;
 		if( m_priv->is_draw ) 
@@ -126,7 +149,7 @@ button_release ( GdkEventButton *event )
 			if( m_priv->is_draw )
              {
                 save_undo ();
-				gdk_draw_line ( m_priv->cv->pixmap, m_priv->gc, m_priv->x0, m_priv->y0, m_priv->x1, m_priv->y1 );
+				draw_line_with_cairo ( m_priv->cv->pixmap, m_priv->color_gc, m_priv->x0, m_priv->y0, m_priv->x1, m_priv->y1 );
 				file_set_unsave ();
     		}
 			gtk_widget_queue_draw ( m_priv->cv->widget );
@@ -153,7 +176,7 @@ draw ( void )
 {
 	if ( m_priv->is_draw )
 	{
-        gdk_draw_line ( m_priv->cv->drawing, m_priv->gc, m_priv->x0, m_priv->y0, m_priv->x1, m_priv->y1 );
+        draw_line_with_cairo ( m_priv->cv->drawing, m_priv->color_gc, m_priv->x0, m_priv->y0, m_priv->x1, m_priv->y1 );
 	}
 }
 

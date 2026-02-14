@@ -44,11 +44,36 @@ static void     save_undo       ( void );
 typedef struct {
 	gp_tool			tool;
 	gp_canvas *		cv;
-	GdkGC *			gc;
+	GdkGC *			color_gc;
     gp_point_array  *pa;
 	guint			button;
 	gboolean 		is_draw;
 } private_data;
+
+static void
+draw_points_with_cairo (GdkDrawable *drawable, GdkGC *gc, GdkPoint *points, gint n_points)
+{
+	GdkGCValues values;
+	cairo_t *cr;
+	gint i;
+
+	if (n_points < 1)
+		return;
+
+	cr = gdk_cairo_create (drawable);
+	gdk_gc_get_values (gc, &values);
+
+	cairo_set_source_rgb (cr,
+	                      values.foreground.red / 65535.0,
+	                      values.foreground.green / 65535.0,
+	                      values.foreground.blue / 65535.0);
+	cairo_set_line_width (cr, MAX (values.line_width, 1));
+	cairo_move_to (cr, points[0].x + 0.5, points[0].y + 0.5);
+	for (i = 1; i < n_points; i++)
+		cairo_line_to (cr, points[i].x + 0.5, points[i].y + 0.5);
+	cairo_stroke (cr);
+	cairo_destroy (cr);
+}
 
 static private_data		*m_priv = NULL;
 
@@ -59,7 +84,7 @@ create_private_data( void )
 	{
 		m_priv = g_new0 (private_data,1);
 		m_priv->cv		=	NULL;
-		m_priv->gc		=	NULL;
+		m_priv->color_gc	=	NULL;
 		m_priv->button	=	NONE_BUTTON;
         m_priv->pa      =   gp_point_array_new();
 		m_priv->is_draw	=	FALSE;
@@ -96,11 +121,11 @@ button_press ( GdkEventButton *event )
 	{
 		if ( event->button == LEFT_BUTTON )
 		{
-			m_priv->gc = m_priv->cv->gc_fg_pencil;
+			m_priv->color_gc = m_priv->cv->gc_fg_pencil;
 		}
 		else if ( event->button == RIGHT_BUTTON )
 		{
-			m_priv->gc = m_priv->cv->gc_bg_pencil;
+			m_priv->color_gc = m_priv->cv->gc_bg_pencil;
 		}
 		m_priv->is_draw = !m_priv->is_draw;
 		if( m_priv->is_draw ) m_priv->button = event->button;
@@ -175,7 +200,7 @@ draw_in_pixmap ( GdkDrawable *drawable )
 {
 	GdkPoint *	points		=	gp_point_array_data (m_priv->pa);
 	gint		n_points	=	gp_point_array_size (m_priv->pa);
-	gdk_draw_lines (drawable, m_priv->gc, points, n_points );
+	draw_points_with_cairo (drawable, m_priv->color_gc, points, n_points );
 }
 
 static void     
