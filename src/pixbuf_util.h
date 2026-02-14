@@ -1,6 +1,6 @@
 #ifndef _PIXBUF_UTIL_H_
 #define _PIXBUF_UTIL_H_
-
+#include "gdk_legacy_compat.h"
 
 #define col(r, g ,b)  ((unsigned int) (((unsigned char) (b) | \
 					  ((unsigned short) (g) << 8)) | \

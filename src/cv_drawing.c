@@ -48,6 +48,8 @@
 static GdkGC * 	cv_create_new_gc	( char * name );
 static void		cv_create_pixmap	(gint width, gint height, gboolean b_resize);
 static void		cv_print_pos		( gint x, gint y );
+static void         cv_cairo_copy_area  ( GdkDrawable *dst, GdkDrawable *src, gint width, gint height );
+static void         cv_cairo_fill_bg    ( GdkDrawable *dst, gint width, gint height );
 
 
 /* private data  */
@@ -64,6 +66,31 @@ static gint			x_pos,y_pos;
  *   CODE
  */
 
+static void
+cv_cairo_copy_area ( GdkDrawable *dst, GdkDrawable *src, gint width, gint height )
+{
+	cairo_t *cr;
+
+	cr = gdk_cairo_create (dst);
+	gdk_cairo_set_source_pixmap (cr, GDK_PIXMAP(src), 0, 0);
+	cairo_rectangle (cr, 0, 0, width, height);
+	cairo_fill (cr);
+	cairo_destroy (cr);
+}
+
+static void
+cv_cairo_fill_bg ( GdkDrawable *dst, gint width, gint height )
+{
+	GdkGCValues values;
+	cairo_t *cr;
+
+	gdk_gc_get_values (cv.gc_bg, &values);
+	cr = gdk_cairo_create (dst);
+	gdk_cairo_set_source_color (cr, &values.foreground);
+	cairo_rectangle (cr, 0, 0, width, height);
+	cairo_fill (cr);
+	cairo_destroy (cr);
+}
 
 void
 cv_redraw ( void )
@@ -216,14 +243,13 @@ cv_set_pixbuf	(const GdkPixbuf	*pixbuf)
 		gint width	=	gdk_pixbuf_get_width (pixbuf);
 		gint height	=	gdk_pixbuf_get_height (pixbuf);
 		cv_create_pixmap (width, height, FALSE);
-		gdk_draw_pixbuf	(   cv.pixmap,
-					        cv.gc_fg,
-						    tmp,//pixbuf,
-						    0, 0,
-						    0, 0,
-						    width, height,
-					        GDK_RGB_DITHER_NORMAL,
-                            0, 0);
+		{
+			cairo_t *cr = gdk_cairo_create (cv.pixmap);
+			gdk_cairo_set_source_pixbuf (cr, tmp, 0, 0);
+			cairo_rectangle (cr, 0, 0, width, height);
+			cairo_fill (cr);
+			cairo_destroy (cr);
+		}
         g_object_unref(tmp);
 		gtk_widget_queue_draw (cv.widget);
 	}
@@ -417,19 +443,14 @@ cv_create_pixmap ( gint width, gint height, gboolean b_resize )
 	if (b_resize)
 	{
 		/* initial drawing is filled with background color */ 
-		gdk_draw_rectangle( px, cv.gc_bg, TRUE, 0, 0, width, height );
+		cv_cairo_fill_bg (px, width, height);
 		if ( cv.pixmap != NULL )
 		{
 			gint w,h;
 			gdk_drawable_get_size ( cv.pixmap, &w, &h );
 			if ( width < w ) w = width;
 			if ( height < h ) h = height;
-			gdk_draw_drawable (	px,
-				            	cv.gc_fg,
-					            cv.pixmap,
-					            0, 0,
-					            0, 0,
-					            w, h );
+			cv_cairo_copy_area (GDK_DRAWABLE(px), GDK_DRAWABLE(cv.pixmap), w, h);
 		}
 	}
 	/*set new data to be destroyed and destroy old data*/
@@ -442,7 +463,7 @@ cv_create_pixmap ( gint width, gint height, gboolean b_resize )
 	cv_resize_adjust_box_size (width, height);
 }
 
-static void		
+static void
 cv_print_pos ( gint x, gint y )
 {
 	GString *str = g_string_new("");

@@ -25,8 +25,7 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#include <gtk/gtk.h>
-
+#include "gdk_legacy_compat.h"
 /* Mouse Button Type */
 typedef enum
 {

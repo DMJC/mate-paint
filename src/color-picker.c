@@ -52,15 +52,12 @@ struct _ColorPickerPrivate
 	guint32		grab_time;
 };
 
-G_DEFINE_TYPE (ColorPicker, color_picker, G_TYPE_OBJECT);
-
-#define COLOR_PICKER_GET_PRIVATE(object)	\
-	(G_TYPE_INSTANCE_GET_PRIVATE ((object), COLOR_TYPE_PICKER, ColorPickerPrivate))
+G_DEFINE_TYPE_WITH_PRIVATE (ColorPicker, color_picker, G_TYPE_OBJECT);
 
 static void
 color_picker_init (ColorPicker *object)
 {
-	object->priv = COLOR_PICKER_GET_PRIVATE (object);
+	object->priv = color_picker_get_instance_private (object);
 	object->priv->dropper_grab_widget = NULL;
 }
 
@@ -84,9 +81,6 @@ color_picker_class_init (ColorPickerClass *klass)
 //	GObjectClass* parent_class = G_OBJECT_CLASS (klass);
 
 	object_class->finalize = color_picker_finalize;
-
-	g_type_class_add_private (object_class, sizeof (ColorPickerPrivate));
-
 	
 //	klass->color_changed = color_picker_color_changed;
 

@@ -21,8 +21,7 @@
 #define _GP_IMAGE_H_
 
 #include <glib-object.h>
- #include <gtk/gtk.h>
-
+#include "gdk_legacy_compat.h"
 
 G_BEGIN_DECLS
 

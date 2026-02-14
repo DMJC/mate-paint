@@ -25,8 +25,7 @@
 #ifndef __SELECTION_H__
 #define __SELECTION_H__
 
-#include <gtk/gtk.h>
-
+#include "gdk_legacy_compat.h"
 void            gp_selection_init                       ( void );
 void            gp_selection_clear                      ( void );
 void            gp_selection_clipbox_set_start_point    ( GdkPoint *p );

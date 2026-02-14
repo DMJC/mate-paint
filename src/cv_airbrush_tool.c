@@ -362,11 +362,13 @@ static GdkPixmap *copy_pixmap(GdkPixmap *pixmap)
 	
 	gdk_drawable_get_size(GDK_DRAWABLE( pixmap ), &w, &h);
 	pixmap_copy = gdk_pixmap_new(GDK_DRAWABLE( pixmap ), w, h, -1);
-	gdk_draw_drawable (	pixmap_copy,
-		            	m_priv->cv->gc_fg,
-			            pixmap,
-			            0, 0,
-			            0, 0,
-			            w, h );
+	if (GDK_IS_PIXMAP(pixmap_copy))
+	{
+		cairo_t *cr = gdk_cairo_create (GDK_DRAWABLE (pixmap_copy));
+		gdk_cairo_set_source_pixmap (cr, pixmap, 0, 0);
+		cairo_rectangle (cr, 0, 0, w, h);
+		cairo_fill (cr);
+		cairo_destroy (cr);
+	}
 	return pixmap_copy;
 }

@@ -104,12 +104,14 @@ save_background ( void )
     destroy_background ();
 	gdk_drawable_get_size ( m_priv->cv->pixmap, &w, &h );
 	m_priv->bg_pixmap = gdk_pixmap_new ( m_priv->cv->drawing, w, h, -1);
-	gdk_draw_drawable (	m_priv->bg_pixmap,
-		            	m_priv->cv->gc_fg,
-			            m_priv->cv->pixmap,
-			            0, 0,
-			            0, 0,
-			            w, h );
+	if (GDK_IS_PIXMAP (m_priv->bg_pixmap))
+	{
+		cairo_t *cr = gdk_cairo_create (GDK_DRAWABLE (m_priv->bg_pixmap));
+		gdk_cairo_set_source_pixmap (cr, m_priv->cv->pixmap, 0, 0);
+		cairo_rectangle (cr, 0, 0, w, h);
+		cairo_fill (cr);
+		cairo_destroy (cr);
+	}
 }
 
 static void
@@ -117,12 +119,16 @@ restore_background ( void )
 {
     if ( m_priv->bg_pixmap != NULL )
     {
-	    gdk_draw_drawable (	m_priv->cv->pixmap,
-		                	m_priv->cv->gc_fg,
-			                m_priv->bg_pixmap,
-			                0, 0,
-			                0, 0,
-			                -1, -1 );
+	    cairo_t *cr;
+	    gint w;
+	    gint h;
+
+	    gdk_drawable_get_size (GDK_DRAWABLE (m_priv->bg_pixmap), &w, &h);
+	    cr = gdk_cairo_create (GDK_DRAWABLE (m_priv->cv->pixmap));
+	    gdk_cairo_set_source_pixmap (cr, m_priv->bg_pixmap, 0, 0);
+	    cairo_rectangle (cr, 0, 0, w, h);
+	    cairo_fill (cr);
+	    cairo_destroy (cr);
         destroy_background ();
     }    
 }
