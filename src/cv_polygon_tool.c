@@ -40,6 +40,19 @@ static void		destroy			( gpointer data  );
 static void		draw_in_pixmap	( GdkDrawable *drawable );
 static void     save_undo       ( void );
 
+static void
+set_cairo_from_gc (cairo_t *cr, GdkGC *gc)
+{
+	GdkGCValues values;
+
+	gdk_gc_get_values (gc, &values);
+	cairo_set_source_rgb (cr,
+	                      values.foreground.red / 65535.0,
+	                      values.foreground.green / 65535.0,
+	                      values.foreground.blue / 65535.0);
+	cairo_set_line_width (cr, MAX (values.line_width, 1));
+}
+
 /*private data*/
 typedef enum
 {
@@ -228,16 +241,32 @@ draw_in_pixmap ( GdkDrawable *drawable )
 	{
 		GdkPoint *	points		=	gp_point_array_data (m_priv->pa);
 		gint		n_points	=	gp_point_array_size (m_priv->pa);
+		cairo_t *cr = gdk_cairo_create (drawable);
+		gint i;
+
+		cairo_new_path (cr);
+		cairo_move_to (cr, points[0].x + 0.5, points[0].y + 0.5);
+		for (i = 1; i < n_points; i++)
+		{
+			cairo_line_to (cr, points[i].x + 0.5, points[i].y + 0.5);
+		}
+		cairo_close_path (cr);
+
 		if ( m_priv->cv->filled == FILLED_BACK )
 		{
-			gdk_draw_polygon ( drawable, m_priv->gcb, TRUE, points, n_points);
+			set_cairo_from_gc (cr, m_priv->gcb);
+			cairo_fill_preserve (cr);
 		}
 		else
 		if ( m_priv->cv->filled == FILLED_FORE )
 		{
-			gdk_draw_polygon ( drawable, m_priv->gcf, TRUE, points, n_points);
+			set_cairo_from_gc (cr, m_priv->gcf);
+			cairo_fill_preserve (cr);
 		}
-		gdk_draw_polygon ( drawable, m_priv->gcf, FALSE, points, n_points);
+
+		set_cairo_from_gc (cr, m_priv->gcf);
+		cairo_stroke (cr);
+		cairo_destroy (cr);
 	}
 }
 

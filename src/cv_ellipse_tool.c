@@ -40,6 +40,48 @@ static void		destroy			( gpointer data  );
 static void		draw_in_pixmap	( GdkDrawable *drawable );
 static void     save_undo       ( void );
 
+static void
+set_cairo_from_gc (cairo_t *cr, GdkGC *gc)
+{
+	GdkGCValues values;
+
+	gdk_gc_get_values (gc, &values);
+	cairo_set_source_rgb (cr,
+	                      values.foreground.red / 65535.0,
+	                      values.foreground.green / 65535.0,
+	                      values.foreground.blue / 65535.0);
+	cairo_set_line_width (cr, MAX (values.line_width, 1));
+}
+
+static void
+draw_ellipse_with_cairo (cairo_t *cr,
+                         gint x,
+                         gint y,
+                         gint width,
+                         gint height,
+                         gboolean filled)
+{
+	if (width <= 0 || height <= 0)
+	{
+		return;
+	}
+
+	cairo_save (cr);
+	cairo_translate (cr, x + width / 2.0, y + height / 2.0);
+	cairo_scale (cr, width / 2.0, height / 2.0);
+	cairo_arc (cr, 0, 0, 1, 0, 2 * G_PI);
+	cairo_restore (cr);
+
+	if (filled)
+	{
+		cairo_fill (cr);
+	}
+	else
+	{
+		cairo_stroke (cr);
+	}
+}
+
 /*private data*/
 typedef struct {
 	gp_tool			tool;
@@ -182,21 +224,29 @@ draw_in_pixmap ( GdkDrawable *drawable )
 {
     GdkRectangle    rect;
     GdkPoint        *p = gp_point_array_data (m_priv->pa);
+	cairo_t         *cr;
 	rect.x      = MIN(p[0].x,p[1].x);
 	rect.y      = MIN(p[0].y,p[1].y);
 	rect.width  = ABS(p[1].x-p[0].x);
 	rect.height = ABS(p[1].y-p[0].y);
 
+	cr = gdk_cairo_create (drawable);
+
     if ( m_priv->cv->filled == FILLED_BACK )
 	{
-		gdk_draw_arc (drawable, m_priv->gcb, TRUE, rect.x, rect.y, rect.width, rect.height, 0, 23040);
+		set_cairo_from_gc (cr, m_priv->gcb);
+		draw_ellipse_with_cairo (cr, rect.x, rect.y, rect.width, rect.height, TRUE);
 	}
 	else
 	if ( m_priv->cv->filled == FILLED_FORE )
 	{
-		gdk_draw_arc (drawable, m_priv->gcf, TRUE, rect.x, rect.y, rect.width, rect.height, 0, 23040);
+		set_cairo_from_gc (cr, m_priv->gcf);
+		draw_ellipse_with_cairo (cr, rect.x, rect.y, rect.width, rect.height, TRUE);
 	}
-	gdk_draw_arc (drawable, m_priv->gcf, FALSE, rect.x, rect.y, rect.width, rect.height, 0, 23040);
+
+	set_cairo_from_gc (cr, m_priv->gcf);
+	draw_ellipse_with_cairo (cr, rect.x, rect.y, rect.width, rect.height, FALSE);
+	cairo_destroy (cr);
 }
 
 static void     

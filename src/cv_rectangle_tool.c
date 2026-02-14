@@ -40,6 +40,19 @@ static void		destroy			( gpointer data  );
 static void		draw_in_pixmap	( GdkDrawable *drawable );
 static void     save_undo       ( void );
 
+static void
+set_cairo_from_gc (cairo_t *cr, GdkGC *gc)
+{
+	GdkGCValues values;
+
+	gdk_gc_get_values (gc, &values);
+	cairo_set_source_rgb (cr,
+	                      values.foreground.red / 65535.0,
+	                      values.foreground.green / 65535.0,
+	                      values.foreground.blue / 65535.0);
+	cairo_set_line_width (cr, MAX (values.line_width, 1));
+}
+
 
 /*private data*/
 typedef struct {
@@ -184,21 +197,36 @@ draw_in_pixmap ( GdkDrawable *drawable )
 {
     GdkRectangle    rect;
     GdkPoint        *p = gp_point_array_data (m_priv->pa);
+	cairo_t         *cr;
 	rect.x      = MIN(p[0].x,p[1].x);
 	rect.y      = MIN(p[0].y,p[1].y);
 	rect.width  = ABS(p[1].x-p[0].x);
 	rect.height = ABS(p[1].y-p[0].y);
 
+	cr = gdk_cairo_create (drawable);
+
 	if ( m_priv->cv->filled == FILLED_BACK )
 	{
-		gdk_draw_rectangle (drawable, m_priv->gcb, TRUE, rect.x, rect.y, rect.width, rect.height );
+		set_cairo_from_gc (cr, m_priv->gcb);
+		cairo_rectangle (cr, rect.x, rect.y, rect.width, rect.height);
+		cairo_fill (cr);
 	}
 	else
 	if ( m_priv->cv->filled == FILLED_FORE )
 	{
-		gdk_draw_rectangle (drawable, m_priv->gcf, TRUE, rect.x, rect.y, rect.width, rect.height );
+		set_cairo_from_gc (cr, m_priv->gcf);
+		cairo_rectangle (cr, rect.x, rect.y, rect.width, rect.height);
+		cairo_fill (cr);
 	}
-	gdk_draw_rectangle (drawable, m_priv->gcf, FALSE, rect.x, rect.y, rect.width, rect.height );
+
+	set_cairo_from_gc (cr, m_priv->gcf);
+	cairo_rectangle (cr,
+	                 rect.x + 0.5,
+	                 rect.y + 0.5,
+	                 MAX (rect.width - 1, 0),
+	                 MAX (rect.height - 1, 0));
+	cairo_stroke (cr);
+	cairo_destroy (cr);
 }
 
 static void     
