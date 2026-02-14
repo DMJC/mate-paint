@@ -91,6 +91,7 @@ static void set_brush_size(GPBrushSize size);
 static GdkGC *color_for_alphaing(GtkWidget *widget, GdkGC *fg, GdkGC *bg);
 static void brush_set_pixel(GdkPixbuf *pixbuf, gint color, gint x, gint y);
 static void draw_crosshair(GdkPixbuf *pixbuf, GPBrushType type);
+static void copy_drawable_with_cairo(GdkDrawable *dst, GdkDrawable *src, gint width, gint height);
 
 /* Private drawing functions */
 static void draw_round_brush(GdkDrawable *drawable, int x, int y);
@@ -130,6 +131,18 @@ typedef struct {
 static private_data		*m_priv = NULL;
 
 static void
+copy_drawable_with_cairo ( GdkDrawable *dst, GdkDrawable *src, gint width, gint height )
+{
+	cairo_t *cr;
+
+	cr = gdk_cairo_create (dst);
+	gdk_cairo_set_source_pixmap (cr, GDK_PIXMAP (src), 0, 0);
+	cairo_rectangle (cr, 0, 0, width, height);
+	cairo_fill (cr);
+	cairo_destroy (cr);
+}
+
+static void
 destroy_background ( void )
 {
     if (m_priv->bg_pixmap != NULL) 
@@ -146,12 +159,7 @@ save_background ( void )
     destroy_background ();
 	gdk_drawable_get_size ( m_priv->cv->pixmap, &w, &h );
 	m_priv->bg_pixmap = gdk_pixmap_new ( m_priv->cv->drawing, w, h, -1);
-	gdk_draw_drawable (	m_priv->bg_pixmap,
-		            	m_priv->cv->gc_fg,
-			            m_priv->cv->pixmap,
-			            0, 0,
-			            0, 0,
-			            w, h );
+	copy_drawable_with_cairo ( GDK_DRAWABLE (m_priv->bg_pixmap), m_priv->cv->pixmap, w, h );
 }
 
 static void
@@ -159,14 +167,12 @@ restore_background ( void )
 {
     if ( m_priv->bg_pixmap != NULL )
     {
-	    gdk_draw_drawable (	m_priv->cv->pixmap,
-		                	m_priv->cv->gc_fg,
-			                m_priv->bg_pixmap,
-			                0, 0,
-			                0, 0,
-			                -1, -1 );
+		gint w, h;
+
+		gdk_drawable_get_size ( GDK_DRAWABLE (m_priv->bg_pixmap), &w, &h );
+	    copy_drawable_with_cairo ( m_priv->cv->pixmap, GDK_DRAWABLE (m_priv->bg_pixmap), w, h );
         destroy_background ();
-    }    
+    }
 }
 
 static void
