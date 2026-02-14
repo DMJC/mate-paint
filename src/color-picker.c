@@ -30,27 +30,7 @@ enum {
 
 
 /* The cursor for the dropper */
-#define DROPPER_WIDTH 17
-#define DROPPER_HEIGHT 17
-#define DROPPER_X_HOT 2
-#define DROPPER_Y_HOT 16
-
 #define BIG_STEP 20
-
-
-static const guchar dropper_bits[] = {
-  0xff, 0x8f, 0x01, 0xff, 0x77, 0x01, 0xff, 0xfb, 0x00, 0xff, 0xf8, 0x00,
-  0x7f, 0xff, 0x00, 0xff, 0x7e, 0x01, 0xff, 0x9d, 0x01, 0xff, 0xd8, 0x01,
-  0x7f, 0xd4, 0x01, 0x3f, 0xee, 0x01, 0x1f, 0xff, 0x01, 0x8f, 0xff, 0x01,
-  0xc7, 0xff, 0x01, 0xe3, 0xff, 0x01, 0xf3, 0xff, 0x01, 0xfd, 0xff, 0x01,
-  0xff, 0xff, 0x01, };
-
-static const guchar dropper_mask[] = {
-  0x00, 0x70, 0x00, 0x00, 0xf8, 0x00, 0x00, 0xfc, 0x01, 0x00, 0xff, 0x01,
-  0x80, 0xff, 0x01, 0x00, 0xff, 0x00, 0x00, 0x7f, 0x00, 0x80, 0x3f, 0x00,
-  0xc0, 0x3f, 0x00, 0xe0, 0x13, 0x00, 0xf0, 0x01, 0x00, 0xf8, 0x00, 0x00,
-  0x7c, 0x00, 0x00, 0x3e, 0x00, 0x00, 0x1e, 0x00, 0x00, 0x0d, 0x00, 0x00,
-  0x02, 0x00, 0x00, };
 
 
 static void		shutdown_eyedropper (ColorPicker *colorpicker);
@@ -147,36 +127,81 @@ color_picker_grab_broken (GtkWidget          *widget,
 static GdkCursor *
 make_picker_cursor (GdkScreen *screen)
 {
-  GdkCursor *cursor;
+  GdkDisplay *display = gdk_screen_get_display (screen);
+  GdkCursor *cursor = gdk_cursor_new_from_name (display, "color-picker");
 
-  cursor = gdk_cursor_new_from_name (gdk_screen_get_display (screen),
-				     "color-picker");
+  if (cursor == NULL)
+    cursor = gdk_cursor_new_from_name (display, "crosshair");
 
-  if (!cursor)
-    {
-      GdkColor bg = { 0, 0xffff, 0xffff, 0xffff };
-      GdkColor fg = { 0, 0x0000, 0x0000, 0x0000 };
-      GdkWindow *window;
-      GdkPixmap *pixmap, *mask;
-
-      window = gdk_screen_get_root_window (screen);
-      
-      pixmap =
-	gdk_bitmap_create_from_data (window, (gchar *) dropper_bits,
-				     DROPPER_WIDTH, DROPPER_HEIGHT);
-      
-      mask =
-	gdk_bitmap_create_from_data (window, (gchar *) dropper_mask,
-				     DROPPER_WIDTH, DROPPER_HEIGHT);
-      
-      cursor = gdk_cursor_new_from_pixmap (pixmap, mask, &fg, &bg,
-					   DROPPER_X_HOT, DROPPER_Y_HOT);
-      
-      g_object_unref (pixmap);
-      g_object_unref (mask);
-    }
-      
   return cursor;
+}
+
+static void
+get_pointer_position (GdkDisplay *display,
+                      GdkScreen  *screen,
+                      gint       *x,
+                      gint       *y)
+{
+#if GTK_CHECK_VERSION (3, 20, 0)
+  GdkSeat *seat = gdk_display_get_default_seat (display);
+  GdkDevice *pointer = gdk_seat_get_pointer (seat);
+  GdkWindow *root = gdk_screen_get_root_window (screen);
+
+  gdk_window_get_device_position (root, pointer, x, y, NULL);
+#else
+  gdk_display_get_pointer (display, NULL, x, y, NULL);
+#endif
+}
+
+static GdkGrabStatus
+color_picker_grab_pointer_and_keyboard (GtkWidget *widget,
+                                        GdkCursor *cursor,
+                                        guint32    time)
+{
+#if GTK_CHECK_VERSION (3, 20, 0)
+  GdkSeat *seat = gdk_display_get_default_seat (gtk_widget_get_display (widget));
+  (void)time;
+
+  return gdk_seat_grab (seat,
+                        gtk_widget_get_window (widget),
+                        GDK_SEAT_CAPABILITY_ALL,
+                        FALSE,
+                        cursor,
+                        NULL,
+                        NULL,
+                        NULL);
+#else
+  GdkGrabStatus grab_status;
+
+  if (gdk_keyboard_grab (gtk_widget_get_window (widget), FALSE, time) != GDK_GRAB_SUCCESS)
+    return GDK_GRAB_FAILED;
+
+  grab_status = gdk_pointer_grab (gtk_widget_get_window (widget),
+                                  FALSE,
+                                  GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK,
+                                  NULL,
+                                  cursor,
+                                  time);
+  if (grab_status != GDK_GRAB_SUCCESS)
+    gdk_display_keyboard_ungrab (gtk_widget_get_display (widget), time);
+
+  return grab_status;
+#endif
+}
+
+static void
+color_picker_ungrab_pointer_and_keyboard (GtkWidget *widget,
+                                          guint32    time)
+{
+#if GTK_CHECK_VERSION (3, 20, 0)
+  GdkSeat *seat = gdk_display_get_default_seat (gtk_widget_get_display (widget));
+  (void)time;
+  gdk_seat_ungrab (seat);
+#else
+  GdkDisplay *display = gtk_widget_get_display (widget);
+  gdk_display_keyboard_ungrab (display, time);
+  gdk_display_pointer_ungrab (display, time);
+#endif
 }
 
 static void
@@ -226,9 +251,8 @@ shutdown_eyedropper (ColorPicker *colorpicker)
 
 	if (priv->has_grab)
 	{
-		GdkDisplay *display = gtk_widget_get_display (priv->dropper_grab_widget);
-		gdk_display_keyboard_ungrab (display, priv->grab_time);
-		gdk_display_pointer_ungrab (display, priv->grab_time);
+		color_picker_ungrab_pointer_and_keyboard (priv->dropper_grab_widget,
+		                                          priv->grab_time);
 		gtk_grab_remove (priv->dropper_grab_widget);
 
 		priv->has_grab = FALSE;
@@ -283,7 +307,7 @@ key_press (GtkWidget   *invisible,
   gint x, y;
   gint dx, dy;
 
-  gdk_display_get_pointer (display, NULL, &x, &y, NULL);
+  get_pointer_position (display, screen, &x, &y);
 
   dx = 0;
   dy = 0;
@@ -433,22 +457,16 @@ color_picker_get_screen_color (ColorPicker *colorpicker, GtkWidget *widget)
       priv->dropper_grab_widget = grab_widget;
    }
 
-  if (gdk_keyboard_grab (gtk_widget_get_window (priv->dropper_grab_widget),
-                         FALSE, time) != GDK_GRAB_SUCCESS)
-    return;
-  
   picker_cursor = make_picker_cursor (screen);
-  grab_status = gdk_pointer_grab (gtk_widget_get_window (priv->dropper_grab_widget),
-				  FALSE,
-				  GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK,
-				  NULL,
-				  picker_cursor,
-				  time);
-  g_object_unref (picker_cursor);
+  grab_status = color_picker_grab_pointer_and_keyboard (priv->dropper_grab_widget,
+							 picker_cursor,
+							 time);
+  if (picker_cursor != NULL)
+    g_object_unref (picker_cursor);
   
   if (grab_status != GDK_GRAB_SUCCESS)
   {
-      gdk_display_keyboard_ungrab (gtk_widget_get_display (widget), time);
+      color_picker_ungrab_pointer_and_keyboard (priv->dropper_grab_widget, time);
       return;
   }
 
