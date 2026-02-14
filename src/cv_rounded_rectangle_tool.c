@@ -26,8 +26,8 @@
 #include "gp_point_array.h"
 #include "cv_drawing.h"
 
-static void draw_rounded_rectangle(GdkDrawable *drawable, GdkGC *gc, gboolean filled, gint x,
-									gint y, gint width, gint height);
+static void draw_rounded_rectangle(cairo_t *cr, GdkGC *gc, gboolean filled, gint x,
+									gint y, gint width, gint height, gint line_width);
 
 /*Member functions*/
 static gboolean	button_press	( GdkEventButton *event );
@@ -188,16 +188,24 @@ draw_in_pixmap ( GdkDrawable *drawable )
 	rect.width  = ABS(p[1].x-p[0].x);
 	rect.height = ABS(p[1].y-p[0].y);
 
+	cairo_t         *cr;
+
+	cr = gdk_cairo_create (drawable);
+	if (cr == NULL) {
+		return;
+	}
+
 	if ( m_priv->cv->filled == FILLED_BACK )
 	{
-		draw_rounded_rectangle (drawable, m_priv->gcb, TRUE, rect.x, rect.y, rect.width, rect.height );
+		draw_rounded_rectangle (cr, m_priv->gcb, TRUE, rect.x, rect.y, rect.width, rect.height, m_priv->cv->line_width);
 	}
 	else
 	if ( m_priv->cv->filled == FILLED_FORE )
 	{
-		draw_rounded_rectangle (drawable, m_priv->gcf, TRUE, rect.x, rect.y, rect.width, rect.height );
+		draw_rounded_rectangle (cr, m_priv->gcf, TRUE, rect.x, rect.y, rect.width, rect.height, m_priv->cv->line_width);
 	}
-	draw_rounded_rectangle (drawable, m_priv->gcf, FALSE, rect.x, rect.y, rect.width, rect.height );
+	draw_rounded_rectangle (cr, m_priv->gcf, FALSE, rect.x, rect.y, rect.width, rect.height, m_priv->cv->line_width);
+	cairo_destroy (cr
 }
 
 static void     
@@ -219,62 +227,71 @@ save_undo ( void )
         w   = ABS(p[1].x-p[0].x);
         h   = ABS(p[1].y-p[0].y);
         undo_create_mask ( rect.width, rect.height, &mask, &gc_mask );
-        draw_rounded_rectangle ( mask, gc_mask, FALSE, 
-                             x - rect.x, y-rect.y, w, h );
+        cairo_t *cr = gdk_cairo_create (mask);
+        if (cr != NULL)
+        {
+            draw_rounded_rectangle ( cr, gc_mask, FALSE,
+                                     x - rect.x, y-rect.y, w, h, m_priv->cv->line_width );
+            cairo_destroy (cr);
+        }
+
         g_object_unref (gc_mask);
     }                
     undo_add ( &rect, mask, NULL, TOOL_ROUNDED_RECTANGLE );
     if ( mask != NULL ) g_object_unref (mask);
 }
 
-static void draw_rounded_rectangle(GdkDrawable *drawable, GdkGC *gc, gboolean filled, gint x,
-					   gint y, gint width, gint height)
+static void add_rounded_rectangle_path (cairo_t *cr, gint x, gint y, gint width, gint height, gint warc, gint harc)
 {
-	gint warc = 16; /* Width & height of arc rectangle */
-	gint harc = 16; /* 16 is an arbitrary number that looks good on my system */
-	
-	if((width < warc) && (height < harc)){
-		gdk_draw_arc(drawable, gc, filled, x, y, width, height, 0, 360 * 64);
-		return; 
+	double radius_x = warc / 2.0;
+	double radius_y = harc / 2.0;
+	double x0 = x;
+	double y0 = y;
+	double x1 = x + width;
+	double y1 = y + height;
+
+	cairo_save (cr);
+	cairo_translate (cr, x0 + radius_x, y0 + radius_y);
+	cairo_scale (cr, radius_x, radius_y);
+	cairo_arc (cr, (x1 - x0 - warc) / (2.0 * radius_x), (y1 - y0 - harc) / (2.0 * radius_y), 1.0, -G_PI_2, 0);
+	cairo_arc (cr, (x1 - x0 - warc) / (2.0 * radius_x), (y1 - y0 - harc) / (2.0 * radius_y), 1.0, 0, G_PI_2);
+	cairo_arc (cr, 0, (y1 - y0 - harc) / (2.0 * radius_y), 1.0, G_PI_2, G_PI);
+	cairo_arc (cr, 0, 0, 1.0, G_PI, 3 * G_PI_2);
+	cairo_close_path (cr);
+	cairo_restore (cr);
+}
+
+static void draw_rounded_rectangle(cairo_t *cr, GdkGC *gc, gboolean filled, gint x,
+					   gint y, gint width, gint height, gint line_width)
+{
+	GdkGCValues values;
+	gint warc = 16;
+	gint harc = 16;
+
+	if ((width <= 0) || (height <= 0))
+		return;
+
+	gdk_gc_get_values (gc, &values);
+	gdk_cairo_set_source_color (cr, &values.foreground);
+
+	if ((width < warc) && (height < harc)) {
+		cairo_arc (cr,
+			x + (width / 2.0),
+			y + (height / 2.0),
+			MIN (width, height) / 2.0,
+			0,
+			2 * G_PI);
+	} else {
+		if (width < warc) warc = width;
+		if (height < harc) harc = height;
+		add_rounded_rectangle_path (cr, x, y, width, height, warc, harc);
 	}
-	
-	if(width < warc){ warc = width; }
-	if(height < harc){ harc = height; }
 
-	/* Top right */
-	gdk_draw_arc(drawable, gc, filled, x + width - warc, y, warc, harc, 0, 90 * 64);
-	
-	/* Top left */
-	gdk_draw_arc(drawable, gc, filled, x, y, warc, harc, 90 * 64, 90 * 64);
-
-	/* Bottom left */
-	gdk_draw_arc(drawable, gc, filled, x, y + height - harc, warc, harc, 180 * 64, 90 * 64);
-
-	/* Bottom right */
-	gdk_draw_arc(drawable, gc, filled, x + width - warc, y + height - harc, warc, harc, 270 * 64, 90 * 64);
-	
-	if(filled){
-		/* Fill the center */
-		gdk_draw_rectangle(drawable, gc, TRUE, x + (warc / 2), y, width - warc, height );
-	
-		/* Fill left side */
-		gdk_draw_rectangle(drawable, gc, TRUE, x, y +  (harc / 2), warc / 2, height - harc );
-	
-		/* Fill right */
-		gdk_draw_rectangle(drawable, gc, TRUE, x + width - (warc / 2), y +  (harc / 2), warc / 2, height - harc );
-	}
-	else{
-		/* Top line */
-		gdk_draw_line(drawable, gc, x + (warc / 2), y, x + width - (warc / 2), y);
-	
-		/* Left line */
-		gdk_draw_line(drawable, gc, x, y +  (harc / 2), x, y + height - (harc / 2));
-	
-		/* right line */
-		gdk_draw_line(drawable, gc, x + width, y +  (harc / 2), x + width, y + height - (harc / 2));
-	
-		/* Bottom line */
-		gdk_draw_line(drawable, gc, x + (warc / 2), y + height, x + width - (warc / 2), y + height);
+	if (filled) {
+		cairo_fill (cr);
+	} else {
+		cairo_set_line_width (cr, MAX (1, line_width));
+		cairo_stroke (cr);	
 	}
 }
 
