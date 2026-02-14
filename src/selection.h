@@ -26,6 +26,7 @@
 #define __SELECTION_H__
 
 #include "gdk_legacy_compat.h"
+#include <cairo.h>
 void            gp_selection_init                       ( void );
 void            gp_selection_clear                      ( void );
 void            gp_selection_clipbox_set_start_point    ( GdkPoint *p );
@@ -36,7 +37,7 @@ void            gp_selection_set_floating               ( gboolean floating );
 GdkCursorType   gp_selection_get_cursor                 ( GdkPoint *p );
 gboolean        gp_selection_start_action               ( GdkPoint *p );
 void            gp_selection_do_action                  ( GdkPoint *p );
-void            gp_selection_draw                       ( GdkDrawable *gdkd );
+void            gp_selection_draw                       ( cairo_t *cr );
 
 gboolean        gp_selection_query                      ( void );
 GdkPixbuf *     gp_selection_get_pixbuf                 ( void );

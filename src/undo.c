@@ -358,7 +358,11 @@ draw_undo ( GpUndo *undo )
         redo_image  =   get_redo_image ( image, t_data->x, t_data->y );
         ret_undo	=	undo_image_new (redo_image, t_data->x, t_data->y, t_data->tool );
         g_object_unref (redo_image);
-        gp_image_draw ( image, cv->pixmap, cv->gc_fg, t_data->x, t_data->y, -1, -1 );
+        {
+            cairo_t *cr = gdk_cairo_create (cv->pixmap);
+            gp_image_draw ( image, cr, t_data->x, t_data->y, -1, -1 );
+            cairo_destroy (cr);
+        }
         g_object_unref ( image );
     }
     else
@@ -373,14 +377,22 @@ draw_undo ( GpUndo *undo )
         {
             GpImage     *image;
             image   =   gp_image_new_from_data ( t_data->im_data_width );
-            gp_image_draw ( image, cv->pixmap, cv->gc_fg, cv_rect.width, 0, -1, -1 );
+            {
+                cairo_t *cr = gdk_cairo_create (cv->pixmap);
+                gp_image_draw ( image, cr, cv_rect.width, 0, -1, -1 );
+                cairo_destroy (cr);
+            }
             g_object_unref ( image );
         }
         if ( t_data->im_data_height != NULL )
         {
             GpImage     *image;
             image   =   gp_image_new_from_data ( t_data->im_data_height );
-            gp_image_draw ( image, cv->pixmap, cv->gc_fg, 0, cv_rect.height, -1, -1 );
+            {
+                cairo_t *cr = gdk_cairo_create (cv->pixmap);
+                gp_image_draw ( image, cr, 0, cv_rect.height, -1, -1 );
+                cairo_destroy (cr);
+            }
             g_object_unref ( image );
         }
     }

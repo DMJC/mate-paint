@@ -333,11 +333,12 @@ gp_selection_set_floating ( gboolean floating )
             printf("gp_selection_set_floating() TRUE\n");
             if ( m_priv->image != NULL )
             {
-                gp_image_draw ( m_priv->image,
-                                cv->pixmap,
-                                cv->gc_fg,
-                                rect.x, rect.y,
-                                rect.width, rect.height );            
+                cairo_t *cr = gdk_cairo_create (cv->pixmap);
+                    gp_image_draw ( m_priv->image,
+                                    cr,
+                                    rect.x, rect.y,
+                                    rect.width, rect.height );
+                cairo_destroy (cr);
                 destroy_image ();
             }
         }
@@ -564,7 +565,7 @@ draw_borders (cairo_t *cr)
 
 
 void
-gp_selection_draw ( GdkDrawable *gdkd )
+gp_selection_draw ( cairo_t *cr )
 {
     g_return_if_fail ( m_priv != NULL );
     if ( m_priv->active )
@@ -619,18 +620,16 @@ gp_selection_draw ( GdkDrawable *gdkd )
              * doesn't seem right. This is just temporary
              * until we find out.
              */
-            if(GDK_IS_DRAWABLE(gdkd)){
-            	gp_image_draw ( m_priv->image,
-                            gdkd,
-                            cv->gc_fg,
-                            x,y,w,h );
+            if (cr != NULL)
+            {
+                gp_image_draw ( m_priv->image, cr, x, y, w, h );
             }
-            else{
-            	gp_image_draw ( m_priv->image,
-                            cv->drawing,
-                            cv->gc_fg,
-                            x,y,w,h );
-        	}
+            else
+            {
+                cairo_t *selection_cr = gdk_cairo_create (cv->drawing);
+                gp_image_draw ( m_priv->image, selection_cr, x, y, w, h );
+                cairo_destroy (selection_cr);
+            }
         }
 
 

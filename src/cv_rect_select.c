@@ -221,7 +221,11 @@ static void
 destroy ( gpointer data  )
 {
 	g_print("rect select tool destroy\n");
-	gp_selection_draw (m_priv->cv->pixmap);
+	{
+		cairo_t *cr = gdk_cairo_create (m_priv->cv->pixmap);
+		gp_selection_draw (cr);
+		cairo_destroy (cr);
+	}
     gtk_widget_queue_draw ( m_priv->cv->widget );
 	destroy_private_data ();
 }

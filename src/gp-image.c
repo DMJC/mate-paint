@@ -366,9 +366,8 @@ gp_image_set_mask ( GpImage *image, GdkBitmap *mask )
 }
 
 void
-gp_image_draw ( GpImage *image, 
-                GdkDrawable *drawable,
-                GdkGC *gc,
+gp_image_draw ( GpImage *image,
+                cairo_t *cr,
 				gint x, gint y,
                 gint width, gint height )
 {
@@ -377,6 +376,7 @@ gp_image_draw ( GpImage *image,
 	gint		wo,ho,w,h;
 
 	g_return_if_fail ( GP_IS_IMAGE (image) );
+	g_return_if_fail (cr != NULL);
 
 	wo = gp_image_get_width  (image);
 	ho = gp_image_get_height (image);
@@ -394,14 +394,8 @@ gp_image_draw ( GpImage *image,
 		resized = TRUE;
 	}
 	
-	gdk_draw_pixbuf	( drawable,
-			          gc,
-			     	  pixbuf,
-			          0, 0,
-			          x, y,
-			          -1, -1,
-			          GDK_RGB_DITHER_NORMAL, 
-		              0, 0);
+	gdk_cairo_set_source_pixbuf (cr, pixbuf, x, y);
+	cairo_paint (cr);
 	if ( resized )
 	{
 		g_object_unref ( pixbuf );

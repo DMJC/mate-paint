@@ -21,6 +21,7 @@
 #define _GP_IMAGE_H_
 
 #include <glib-object.h>
+#include <cairo.h>
 #include "gdk_legacy_compat.h"
 
 G_BEGIN_DECLS
@@ -60,9 +61,8 @@ void			gp_image_set_mask			( GpImage *image, GdkBitmap *mask );
 GdkPixbuf *		gp_image_get_pixbuf			( GpImage *image );
 GpImageData *   gp_image_get_data			( GpImage *image );
 void			gp_image_data_free			( GpImageData *data );
-void			gp_image_draw				( GpImage *image, 
-							                  GdkDrawable *drawable,
-							                  GdkGC *gc,
+void			gp_image_draw				( GpImage *image,
+							                  cairo_t *cr,
 							                  gint x, gint y,
 							                  gint width, gint height );
 gint			gp_image_get_width			( GpImage *image );
