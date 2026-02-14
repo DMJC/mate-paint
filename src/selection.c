@@ -483,79 +483,83 @@ gp_selection_do_action ( GdkPoint *p )
 }
 
 
-static void 
-draw_sel_box ( GdkDrawable *drawing, GdkGC *gc, GpSelBox *box )
+static void
+draw_sel_box (cairo_t *cr, GpSelBox *box)
 {
     gint x,y,w,h;
     x = box->p0.x;
     y = box->p0.y;
     w = (box->p1.x - x + 1);
     h = (box->p1.y - y + 1);
-    gdk_draw_rectangle ( drawing, gc, TRUE, 
-                         x, y, w, h);
+    cairo_rectangle (cr, x, y, w, h);
+    cairo_fill (cr);
 }
 
 static void
-draw_top_line ( GdkDrawable *drawing, GdkGC *gc )
+draw_top_line (cairo_t *cr)
 {
     GpSelBox *tlbox = &m_priv->boxes[SEL_TOP_LEFT];
     GpSelBox *tmbox = &m_priv->boxes[SEL_TOP_MID];
     GpSelBox *trbox = &m_priv->boxes[SEL_TOP_RIGHT];
-    gdk_draw_line ( drawing, gc, tlbox->p1.x+1, tlbox->p0.y, 
-                                 tmbox->p0.x-1, tmbox->p0.y );
-    gdk_draw_line ( drawing, gc, tmbox->p1.x+1, tmbox->p0.y,
-                                 trbox->p0.x-1, trbox->p0.y );
+    cairo_move_to (cr, tlbox->p1.x+1, tlbox->p0.y);
+    cairo_line_to (cr, tmbox->p0.x-1, tmbox->p0.y);
+    cairo_move_to (cr, tmbox->p1.x+1, tmbox->p0.y);
+    cairo_line_to (cr, trbox->p0.x-1, trbox->p0.y);
+    cairo_stroke (cr);
 }
 
 static void
-draw_right_line ( GdkDrawable *drawing, GdkGC *gc )
+draw_right_line (cairo_t *cr)
 {
     GpSelBox *trbox = &m_priv->boxes[SEL_TOP_RIGHT];
     GpSelBox *mrbox = &m_priv->boxes[SEL_MID_RIGHT];
     GpSelBox *brbox = &m_priv->boxes[SEL_BOTTOM_RIGHT];
-    gdk_draw_line ( drawing, gc, trbox->p1.x, trbox->p1.y+1, 
-                                 mrbox->p1.x, mrbox->p0.y-1);
-    gdk_draw_line ( drawing, gc, mrbox->p1.x, mrbox->p1.y+1,
-                                 brbox->p1.x, brbox->p0.y-1 );
+    cairo_move_to (cr, trbox->p1.x, trbox->p1.y+1);
+    cairo_line_to (cr, mrbox->p1.x, mrbox->p0.y-1);
+    cairo_move_to (cr, mrbox->p1.x, mrbox->p1.y+1);
+    cairo_line_to (cr, brbox->p1.x, brbox->p0.y-1);
+    cairo_stroke (cr);
 }
 
 
 static void
-draw_left_line ( GdkDrawable *drawing, GdkGC *gc )
+draw_left_line (cairo_t *cr)
 {
     GpSelBox *tlbox = &m_priv->boxes[SEL_TOP_LEFT];
     GpSelBox *mlbox = &m_priv->boxes[SEL_MID_LEFT];
     GpSelBox *blbox = &m_priv->boxes[SEL_BOTTOM_LEFT];
-    gdk_draw_line ( drawing, gc, tlbox->p0.x, tlbox->p1.y+1, 
-                                 mlbox->p0.x, mlbox->p0.y-1 );
-    gdk_draw_line ( drawing, gc, mlbox->p0.x, mlbox->p1.y+1,
-                                 blbox->p0.x, blbox->p0.y-1 );
+    cairo_move_to (cr, tlbox->p0.x, tlbox->p1.y+1);
+    cairo_line_to (cr, mlbox->p0.x, mlbox->p0.y-1);
+    cairo_move_to (cr, mlbox->p0.x, mlbox->p1.y+1);
+    cairo_line_to (cr, blbox->p0.x, blbox->p0.y-1);
+    cairo_stroke (cr);
 }
 
 static void
-draw_bottom_line ( GdkDrawable *drawing, GdkGC *gc )
+draw_bottom_line (cairo_t *cr)
 {
     GpSelBox *brbox = &m_priv->boxes[SEL_BOTTOM_RIGHT];
     GpSelBox *bmbox = &m_priv->boxes[SEL_BOTTOM_MID];
     GpSelBox *blbox = &m_priv->boxes[SEL_BOTTOM_LEFT];
-    gdk_draw_line ( drawing, gc, brbox->p0.x-1, brbox->p1.y, 
-                                 bmbox->p1.x+1, bmbox->p1.y );
-    gdk_draw_line ( drawing, gc, bmbox->p0.x-1, bmbox->p1.y,
-                                 blbox->p1.x+1, blbox->p1.y );
+    cairo_move_to (cr, brbox->p0.x-1, brbox->p1.y);
+    cairo_line_to (cr, bmbox->p1.x+1, bmbox->p1.y);
+    cairo_move_to (cr, bmbox->p0.x-1, bmbox->p1.y);
+    cairo_line_to (cr, blbox->p1.x+1, blbox->p1.y);
+    cairo_stroke (cr);
 }
 
 static void
-draw_borders ( GdkDrawable *drawing, GdkGC *gc )
+draw_borders (cairo_t *cr)
 {
     GpSelBoxEnum box;
     for ( box = SEL_TOP_LEFT; box < SEL_CLIPBOX; box++ )
     {
-        draw_sel_box ( drawing, gc, &m_priv->boxes[box] );
+        draw_sel_box (cr, &m_priv->boxes[box]);
     }
-    draw_top_line       ( drawing, gc );
-    draw_right_line     ( drawing, gc );
-    draw_bottom_line    ( drawing, gc );
-    draw_left_line      ( drawing, gc );
+    draw_top_line       (cr);
+    draw_right_line     (cr);
+    draw_bottom_line    (cr);
+    draw_left_line      (cr);
 }
 
 
@@ -568,15 +572,13 @@ gp_selection_draw ( GdkDrawable *gdkd )
         GpSelBox *clipbox   = &m_priv->boxes[SEL_CLIPBOX];
         gint x,y,w,h;
         gp_canvas *cv;
-        gint8 dash_list[]	=	{ 3, 3 };
-        GdkGC *gc;
+        cairo_t *border_cr;
+        double dash_list[] = { 3.0, 3.0 };
 
         cv = cv_get_canvas ();
-        gc	=	gdk_gc_new ( gtk_widget_get_window(cv->widget) );
-        gdk_gc_set_function ( gc, GDK_INVERT );
-        gdk_gc_set_dashes ( gc, 0, dash_list, 2 );
-        gdk_gc_set_line_attributes ( gc, 1, GDK_LINE_ON_OFF_DASH,
-                                     GDK_CAP_NOT_LAST, GDK_JOIN_ROUND );
+        border_cr = gdk_cairo_create (cv->drawing);
+        cairo_set_line_width (border_cr, 1.0);
+        cairo_set_dash (border_cr, dash_list, G_N_ELEMENTS (dash_list), 0.0);
 
         x = MIN(clipbox->p0.x,clipbox->p1.x);
         y = MIN(clipbox->p0.y,clipbox->p1.y);
@@ -634,16 +636,26 @@ gp_selection_draw ( GdkDrawable *gdkd )
 
         if ( m_priv->show_borders )
         {
-            draw_borders ( cv->drawing, gc );
+            cairo_set_source_rgb (border_cr, 0.0, 0.0, 0.0);
+            draw_borders (border_cr);
+
+            cairo_set_dash (border_cr, dash_list, G_N_ELEMENTS (dash_list), 3.0);
+            cairo_set_source_rgb (border_cr, 1.0, 1.0, 1.0);
+            draw_borders (border_cr);
         }
         else
         {
-            gdk_draw_rectangle ( cv->drawing, gc, FALSE, 
-                                 x, y, w-1, h-1 );
+            cairo_set_source_rgb (border_cr, 0.0, 0.0, 0.0);
+            cairo_rectangle (border_cr, x, y, w - 1, h - 1);
+            cairo_stroke (border_cr);
+
+            cairo_set_dash (border_cr, dash_list, G_N_ELEMENTS (dash_list), 3.0);
+            cairo_set_source_rgb (border_cr, 1.0, 1.0, 1.0);
+            cairo_rectangle (border_cr, x, y, w - 1, h - 1);
+            cairo_stroke (border_cr);
         }
 
-        
-        g_object_unref ( gc );
+        cairo_destroy (border_cr);
         
     }    
 }

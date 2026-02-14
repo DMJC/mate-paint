@@ -47,7 +47,6 @@ static GtkWidget	*cv_bottom_edge	=	NULL;
 static GtkWidget	*cv_left_edge	=	NULL;
 static GtkWidget	*cv_right_edge	=	NULL;
 static GtkWidget	*lb_size		=	NULL;
-static GdkGC 		*gc_resize		=	NULL;
 static GdkColor 	edge_color		=	{ 0, 0x2f00, 0x3600, 0x9800  };
 static gboolean		b_resize		=	FALSE;
 static gboolean		b_rz_init		=	FALSE;
@@ -89,10 +88,6 @@ cv_resize_draw ( void )
 
 	if (b_resize)
 	{
-		gdk_draw_line ( cv->drawing, gc_resize, 0, 0, x_res, 0 );
-		gdk_draw_line ( cv->drawing, gc_resize, 0, y_res, x_res, y_res );
-		gdk_draw_line ( cv->drawing, gc_resize, x_res, 0, x_res, y_res );
-		gdk_draw_line ( cv->drawing, gc_resize, 0, 0, 0, y_res );
 		x = x_res;
 		y = y_res;
 	}
@@ -122,18 +117,7 @@ cv_resize_adjust_box_size (gint width, gint height)
 void
 on_cv_ev_box_realize (GtkWidget *widget, gpointer user_data)
 {
-	gint8 dash_list[]	=	{ 1, 1 };
 	cv_ev_box	        =	widget;	
-	gc_resize	        =	gdk_gc_new ( gtk_widget_get_window(widget) );
-	g_assert( gc_resize );
-	/*set data to be destroyed*/
-	g_object_set_data_full (	G_OBJECT(widget), "gc_resize", 
-	                       		(gpointer)gc_resize , 
-	                        	(GDestroyNotify)g_object_unref );
-	gdk_gc_set_function ( gc_resize, GDK_INVERT );
-	gdk_gc_set_dashes ( gc_resize, 0, dash_list, 2 );
-	gdk_gc_set_line_attributes ( gc_resize, 1, GDK_LINE_ON_OFF_DASH,
-	                             GDK_CAP_NOT_LAST, GDK_JOIN_ROUND );
 }
 
 void
