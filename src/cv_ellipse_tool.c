@@ -256,7 +256,7 @@ save_undo ( void )
     GdkRectangle    rect_max;
     GdkPoint        *p = gp_point_array_data (m_priv->pa);
     GdkBitmap       *mask;
-    GdkGC	        *gc_mask;
+    cairo_t         *cr_mask;
     gint            x,y,w,h;
 
     x   = MIN(p[0].x,p[1].x);
@@ -266,16 +266,19 @@ save_undo ( void )
 
     cv_get_rect_size ( &rect_max );
     gp_point_array_get_clipbox ( m_priv->pa, &rect, m_priv->cv->line_width, &rect_max );
-    undo_create_mask ( rect.width, rect.height, &mask, &gc_mask );
+    undo_create_mask ( rect.width, rect.height, &mask, &cr_mask );
 
-    gdk_draw_arc ( mask, gc_mask, FALSE, 
-                   x - rect.x, y - rect.y, w, h, 0, 23040);
+    cairo_save (cr_mask);
+    cairo_translate (cr_mask, x - rect.x + (w / 2.0), y - rect.y + (h / 2.0));
+    cairo_scale (cr_mask, MAX (w / 2.0, 1.0), MAX (h / 2.0, 1.0));
+    cairo_arc (cr_mask, 0, 0, 1, 0, 2 * G_PI);
     if ( m_priv->cv->filled != FILLED_NONE )
     {
-        gdk_draw_arc ( mask, gc_mask, TRUE, 
-                       x - rect.x, y - rect.y, w, h, 0, 23040);        
+        cairo_fill_preserve (cr_mask);
     }
+    cairo_stroke (cr_mask);
+    cairo_restore (cr_mask);
     undo_add ( &rect, mask, NULL, TOOL_ELLIPSE );
-    g_object_unref (gc_mask);
+    cairo_destroy (cr_mask);
     g_object_unref (mask);
 }

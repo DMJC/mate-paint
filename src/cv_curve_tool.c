@@ -43,6 +43,10 @@ static void draw_bezier_with_cairo (GdkDrawable *drawable,
                                     GdkPoint pt1,
                                     GdkPoint pt2,
                                     GdkPoint pt3);
+static void draw_bezier_on_context (cairo_t *cr,
+                                    GdkPoint pt1,
+                                    GdkPoint pt2,
+                                    GdkPoint pt3);
 
 /*Member functions*/
 static gboolean	button_press	( GdkEventButton *event );
@@ -287,32 +291,44 @@ draw_in_pixmap ( GdkDrawable *drawable )
 }
 
 static void
+draw_bezier_on_context (cairo_t *cr, GdkPoint pt1, GdkPoint pt2, GdkPoint pt3)
+{
+	double t;
+
+	cairo_move_to (cr, pt1.x, pt1.y);
+	for (t = 0.02; t <= 1.0 + 0.001; t += 0.02)
+	{
+		double one_minus_t = 1.0 - t;
+		double x = (one_minus_t * one_minus_t * pt1.x) +
+		           (2.0 * t * one_minus_t * pt2.x) +
+		           (t * t * pt3.x);
+		double y = (one_minus_t * one_minus_t * pt1.y) +
+		           (2.0 * t * one_minus_t * pt2.y) +
+		           (t * t * pt3.y);
+		cairo_line_to (cr, x, y);
+	}
+	cairo_stroke (cr);
+}
+
+static void
 draw_bezier_with_cairo (GdkDrawable *drawable, GdkGC *gc, GdkPoint pt1, GdkPoint pt2, GdkPoint pt3)
 {
-	gint x, y, x2, y2;
-	double t, t2;
-	
-	x2 = pt1.x;
-	y2 = pt1.y;
-	
-	for(t = 0.0; t < 1.0 + .02; t += .02)
-	{
-		t2 = t;
+	GdkGCValues values;
+	cairo_t *cr;
 
-		x = ((1 - t2) * (1 - t2)) *
-			pt1.x + 2 * t2 * (1 -t2) *
-			pt2.x + (t2 * t2) *
-			pt3.x ;
+	g_return_if_fail (drawable != NULL);
+	g_return_if_fail (gc != NULL);
 
-		y = ((1 - t2) * (1 - t2)) *
-			pt1.y + 2 * t2 * (1 -t2) *
-			pt2.y + (t2 * t2) *
-			pt3.y ;
+	cr = gdk_cairo_create (drawable);
+	gdk_gc_get_values (gc, &values);
 
-		draw_line_with_cairo (drawable, gc, x, y, x2, y2);
-		x2 = x; y2 = y;
-	}
-
+	cairo_set_source_rgb (cr,
+	                      values.foreground.red / 65535.0,
+	                      values.foreground.green / 65535.0,
+	                      values.foreground.blue / 65535.0);
+	cairo_set_line_width (cr, MAX (values.line_width, 1));
+	draw_bezier_on_context (cr, pt1, pt2, pt3);
+	cairo_destroy (cr);
 }
 
 static void     
@@ -321,7 +337,7 @@ save_undo ( void )
     GdkRectangle    rect;
     GdkRectangle    rect_max;
     GdkBitmap       *mask = NULL;
-	GdkGC	        *gc_mask;
+	cairo_t         *cr_mask;
 	gp_point_array  *pa;
 	GdkPoint		*points;
 
@@ -333,14 +349,14 @@ save_undo ( void )
     
     gp_point_array_get_clipbox ( pa, &rect, m_priv->cv->line_width, &rect_max );
         
-	undo_create_mask ( rect.width, rect.height, &mask, &gc_mask );
+	undo_create_mask ( rect.width, rect.height, &mask, &cr_mask );
 	
 	gp_point_array_offset ( pa, -rect.x, -rect.y);
 	points = gp_point_array_data ( pa );
 
-	draw_bezier_with_cairo (mask, gc_mask, points[0], points[1], points[2]);
+	draw_bezier_on_context (cr_mask, points[0], points[1], points[2]);
 
-	g_object_unref (gc_mask);
+	cairo_destroy (cr_mask);
 	gp_point_array_free ( pa );
 
     undo_add ( &rect, mask, NULL, TOOL_CURVE );

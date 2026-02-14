@@ -22,13 +22,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
 #include "gdk_legacy_compat.h"
+#include <cairo.h>
 #include "toolbar.h"
 
 
 void undo_create_mask   ( gint        width, 
                           gint        height, 
                           GdkBitmap   **mask, 
-                          GdkGC       **gc_mask );
+                          cairo_t     **cr_mask );
 
 void undo_add           ( GdkRectangle  *rect, 
                           GdkBitmap     *mask,

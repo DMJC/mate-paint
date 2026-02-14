@@ -205,7 +205,7 @@ draw_in_pixmap ( GdkDrawable *drawable )
 		draw_rounded_rectangle (cr, m_priv->gcf, TRUE, rect.x, rect.y, rect.width, rect.height, m_priv->cv->line_width);
 	}
 	draw_rounded_rectangle (cr, m_priv->gcf, FALSE, rect.x, rect.y, rect.width, rect.height, m_priv->cv->line_width);
-	cairo_destroy (cr
+	cairo_destroy (cr);
 }
 
 static void     
@@ -220,22 +220,17 @@ save_undo ( void )
     if ( m_priv->cv->filled == FILLED_NONE )
     {
         GdkPoint    *p = gp_point_array_data (m_priv->pa);
-        GdkGC	    *gc_mask;
+        cairo_t     *cr_mask;
         gint        x,y,w,h;
         x   = MIN(p[0].x,p[1].x);
         y   = MIN(p[0].y,p[1].y);
         w   = ABS(p[1].x-p[0].x);
         h   = ABS(p[1].y-p[0].y);
-        undo_create_mask ( rect.width, rect.height, &mask, &gc_mask );
-        cairo_t *cr = gdk_cairo_create (mask);
-        if (cr != NULL)
-        {
-            draw_rounded_rectangle ( cr, gc_mask, FALSE,
-                                     x - rect.x, y-rect.y, w, h, m_priv->cv->line_width );
-            cairo_destroy (cr);
-        }
+        undo_create_mask ( rect.width, rect.height, &mask, &cr_mask );
+        draw_rounded_rectangle ( cr_mask, NULL, FALSE,
+                                 x - rect.x, y-rect.y, w, h, m_priv->cv->line_width );
 
-        g_object_unref (gc_mask);
+        cairo_destroy (cr_mask);
     }                
     undo_add ( &rect, mask, NULL, TOOL_ROUNDED_RECTANGLE );
     if ( mask != NULL ) g_object_unref (mask);
@@ -271,8 +266,11 @@ static void draw_rounded_rectangle(cairo_t *cr, GdkGC *gc, gboolean filled, gint
 	if ((width <= 0) || (height <= 0))
 		return;
 
-	gdk_gc_get_values (gc, &values);
-	gdk_cairo_set_source_color (cr, &values.foreground);
+	if (gc != NULL)
+	{
+		gdk_gc_get_values (gc, &values);
+		gdk_cairo_set_source_color (cr, &values.foreground);
+	}
 
 	if ((width < warc) && (height < harc)) {
 		cairo_arc (cr,

@@ -241,16 +241,17 @@ save_undo ( void )
     if ( m_priv->cv->filled == FILLED_NONE )
     {
         GdkPoint    *p = gp_point_array_data (m_priv->pa);
-        GdkGC	    *gc_mask;
+        cairo_t     *cr_mask;
         gint        x,y,w,h;
         x   = MIN(p[0].x,p[1].x);
         y   = MIN(p[0].y,p[1].y);
         w   = ABS(p[1].x-p[0].x);
         h   = ABS(p[1].y-p[0].y);
-        undo_create_mask ( rect.width, rect.height, &mask, &gc_mask );
-        gdk_draw_rectangle ( mask, gc_mask, FALSE, 
-                             x - rect.x, y-rect.y, w, h );
-        g_object_unref (gc_mask);
+        undo_create_mask ( rect.width, rect.height, &mask, &cr_mask );
+        cairo_rectangle (cr_mask, x - rect.x + 0.5, y - rect.y + 0.5,
+                         MAX (w - 1, 0), MAX (h - 1, 0));
+        cairo_stroke (cr_mask);
+        cairo_destroy (cr_mask);
     }                
     undo_add ( &rect, mask, NULL, TOOL_RECTANGLE );
     if ( mask != NULL ) g_object_unref (mask);

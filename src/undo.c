@@ -84,22 +84,23 @@ static void         free_undo_queue     ( void );
 /* CODE */
 
 void 
-undo_create_mask ( gint width, gint height, GdkBitmap **mask, GdkGC **gc_mask )
+undo_create_mask ( gint width, gint height, GdkBitmap **mask, cairo_t **cr_mask )
 {
-    GdkColor    color;
-	gp_canvas   *cv	=	cv_get_canvas();
+    gp_canvas   *cv	=	cv_get_canvas();
      
     *mask 		=	gdk_pixmap_new (NULL, width, height, 1 );
-    *gc_mask	=	gdk_gc_new ( *mask );
-    gdk_gc_set_line_attributes ( *gc_mask, cv->line_width, GDK_LINE_SOLID, 
-                             	 GDK_CAP_ROUND, GDK_JOIN_ROUND );
+    *cr_mask    =   gdk_cairo_create (*mask);
 
-    color.pixel = 0;
-    gdk_gc_set_foreground (*gc_mask, &color);
-    gdk_draw_rectangle (*mask, *gc_mask, TRUE, 0, 0, width, height);
+    cairo_save (*cr_mask);
+    cairo_set_operator (*cr_mask, CAIRO_OPERATOR_SOURCE);
+    cairo_set_source_rgb (*cr_mask, 0.0, 0.0, 0.0);
+    cairo_paint (*cr_mask);
+    cairo_restore (*cr_mask);
 
-    color.pixel = 1;
-    gdk_gc_set_foreground (*gc_mask, &color);
+    cairo_set_source_rgb (*cr_mask, 1.0, 1.0, 1.0);
+    cairo_set_line_width (*cr_mask, MAX (cv->line_width, 1));
+    cairo_set_line_cap (*cr_mask, CAIRO_LINE_CAP_ROUND);
+    cairo_set_line_join (*cr_mask, CAIRO_LINE_JOIN_ROUND);
     return;
 }
 

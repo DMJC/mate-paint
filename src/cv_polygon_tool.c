@@ -276,7 +276,7 @@ save_undo ( void )
     GdkRectangle    rect;
     GdkRectangle    rect_max;
     GdkBitmap       *mask;
-    GdkGC	        *gc_mask;
+    cairo_t         *cr_mask;
     gp_point_array  *pa;
     GdkPoint        *points;
     gint	        n_points;
@@ -288,18 +288,24 @@ save_undo ( void )
 
     cv_get_rect_size ( &rect_max );
     gp_point_array_get_clipbox ( pa, &rect, m_priv->cv->line_width, &rect_max );
-    undo_create_mask ( rect.width, rect.height, &mask, &gc_mask );
+    undo_create_mask ( rect.width, rect.height, &mask, &cr_mask );
     gp_point_array_offset ( pa, -rect.x, -rect.y);
 
-    gdk_draw_polygon ( mask, gc_mask, FALSE, points, n_points);
+    cairo_move_to (cr_mask, points[0].x, points[0].y);
+    for (gint i = 1; i < n_points; ++i)
+    {
+        cairo_line_to (cr_mask, points[i].x, points[i].y);
+    }
+    cairo_close_path (cr_mask);
     if ( m_priv->cv->filled != FILLED_NONE )
     {
-        gdk_draw_polygon ( mask, gc_mask, TRUE, points, n_points);
+        cairo_fill_preserve (cr_mask);
     }
+    cairo_stroke (cr_mask);
 
     undo_add ( &rect, mask, NULL, TOOL_POLYGON );
 
     gp_point_array_free ( pa );
-    g_object_unref (gc_mask);
+    cairo_destroy (cr_mask);
     g_object_unref (mask);
  }
