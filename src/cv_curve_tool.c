@@ -32,7 +32,17 @@ typedef enum{
 	GP_CURVE_SET
 }GPCurveAction;
 
-void draw_bezier(GdkDrawable *drawable, GdkGC *gc, GdkPoint pt1, GdkPoint pt2, GdkPoint pt3);
+static void draw_line_with_cairo (GdkDrawable *drawable,
+                                  GdkGC *gc,
+                                  gint x0,
+                                  gint y0,
+                                  gint x1,
+                                  gint y1);
+static void draw_bezier_with_cairo (GdkDrawable *drawable,
+                                    GdkGC *gc,
+                                    GdkPoint pt1,
+                                    GdkPoint pt2,
+                                    GdkPoint pt3);
 
 /*Member functions*/
 static gboolean	button_press	( GdkEventButton *event );
@@ -56,6 +66,29 @@ typedef struct {
 	GdkPoint		start, crv, end;
 	gint			action;
 } private_data;
+
+static void
+draw_line_with_cairo (GdkDrawable *drawable, GdkGC *gc, gint x0, gint y0, gint x1, gint y1)
+{
+	GdkGCValues values;
+	cairo_t *cr;
+
+	g_return_if_fail (drawable != NULL);
+	g_return_if_fail (gc != NULL);
+
+	cr = gdk_cairo_create (drawable);
+	gdk_gc_get_values (gc, &values);
+
+	cairo_set_source_rgb (cr,
+	                      values.foreground.red / 65535.0,
+	                      values.foreground.green / 65535.0,
+	                      values.foreground.blue / 65535.0);
+	cairo_set_line_width (cr, MAX (values.line_width, 1));
+	cairo_move_to (cr, x0 + 0.5, y0 + 0.5);
+	cairo_line_to (cr, x1 + 0.5, y1 + 0.5);
+	cairo_stroke (cr);
+	cairo_destroy (cr);
+}
 
 static private_data		*m_priv = NULL;
 	
@@ -236,21 +269,25 @@ draw_in_pixmap ( GdkDrawable *drawable )
     switch(m_priv->action)
     {
        	case GP_CURVE_DO_LINE:
-       		gdk_draw_line(drawable, m_priv->gcf, m_priv->start.x, m_priv->start.y,
-       					  m_priv->end.x, m_priv->end.y);
+		draw_line_with_cairo (drawable, m_priv->gcf,
+		                     m_priv->start.x, m_priv->start.y,
+		                     m_priv->end.x, m_priv->end.y);
 			break;
 		case GP_CURVE_DO_CURVE:
-			draw_bezier(drawable, m_priv->gcf, m_priv->start, m_priv->crv, m_priv->end);
+			draw_bezier_with_cairo (drawable, m_priv->gcf,
+			                       m_priv->start, m_priv->crv, m_priv->end);
 			break;
 		case GP_CURVE_SET:
-			draw_bezier(drawable, m_priv->gcf, m_priv->start, m_priv->crv, m_priv->end);
+			draw_bezier_with_cairo (drawable, m_priv->gcf,
+			                       m_priv->start, m_priv->crv, m_priv->end);
 			break;
 		default:
 			break;
     }
 }
 
-void draw_bezier(GdkDrawable *drawable, GdkGC *gc, GdkPoint pt1, GdkPoint pt2, GdkPoint pt3)
+static void
+draw_bezier_with_cairo (GdkDrawable *drawable, GdkGC *gc, GdkPoint pt1, GdkPoint pt2, GdkPoint pt3)
 {
 	gint x, y, x2, y2;
 	double t, t2;
@@ -272,8 +309,7 @@ void draw_bezier(GdkDrawable *drawable, GdkGC *gc, GdkPoint pt1, GdkPoint pt2, G
 			pt2.y + (t2 * t2) *
 			pt3.y ;
 
-		gdk_draw_line(drawable, gc, x, y, x2, y2);
-		
+		draw_line_with_cairo (drawable, gc, x, y, x2, y2);
 		x2 = x; y2 = y;
 	}
 
@@ -302,7 +338,7 @@ save_undo ( void )
 	gp_point_array_offset ( pa, -rect.x, -rect.y);
 	points = gp_point_array_data ( pa );
 
-	draw_bezier(mask, gc_mask, points[0], points[1], points[2]);
+	draw_bezier_with_cairo (mask, gc_mask, points[0], points[1], points[2]);
 
 	g_object_unref (gc_mask);
 	gp_point_array_free ( pa );
