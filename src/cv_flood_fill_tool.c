@@ -28,6 +28,7 @@
 //#include "color.h"
 
 guint get_fg_color_from_gc(GdkGC *gc);
+static cairo_surface_t *surface_from_drawable(GdkDrawable *drawable);
 
 /*Member functions*/
 static gboolean	button_press	( GdkEventButton *event );
@@ -86,6 +87,19 @@ tool_flood_fill_init ( gp_canvas * canvas )
 	m_priv->tool.reset			= reset;
 	m_priv->tool.destroy		= destroy;
 	return &m_priv->tool;
+}
+
+static cairo_surface_t *
+surface_from_drawable (GdkDrawable *drawable)
+{
+	cairo_t *cr;
+	cairo_surface_t *surface;
+
+	cr = gdk_cairo_create (drawable);
+	surface = cairo_surface_reference (cairo_get_target (cr));
+	cairo_destroy (cr);
+
+	return surface;
 }
 
 gboolean
@@ -147,18 +161,15 @@ button_release ( GdkEventButton *event )
                                                          -1);
 					gdk_draw_pixbuf(m_priv->pixmap, m_priv->gc, pixbuf, 0, 0, 0, 0,
                                     -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
-					
-					m_priv->rect = fill_draw( GDK_DRAWABLE( m_priv->cv->pixmap ), 
-				    	      m_priv->gc, 
-				    	      m_priv->fill_color, 
-				    	      m_priv->x0, 
-			    		      m_priv->y0);
-					
+					{
+						cairo_surface_t *surface = surface_from_drawable (GDK_DRAWABLE (m_priv->cv->pixmap));
+						m_priv->rect = fill_draw (surface, width, height, m_priv->fill_color, m_priv->x0, m_priv->y0);
+						cairo_surface_destroy (surface);
+					}
 					g_object_unref(pixbuf);
 
 					save_undo ();
 					g_object_unref(m_priv->pixmap);
-					
 					file_set_unsave ();
 				}
 			}
@@ -197,12 +208,15 @@ draw ( void )
 				g_object_unref(pixbuf);
 				pixbuf = tmp;
 			}
+			{
+				gint width, height;
+				cairo_surface_t *surface;
 
-			fill_draw( GDK_DRAWABLE( m_priv->cv->pixmap ), 
-			          m_priv->gc, 
-			          m_priv->fill_color, 
-			          m_priv->x0, 
-			          m_priv->y0);
+				gdk_drawable_get_size (GDK_DRAWABLE (m_priv->cv->pixmap), &width, &height);
+				surface = surface_from_drawable (GDK_DRAWABLE (m_priv->cv->pixmap));
+				fill_draw (surface, width, height, m_priv->fill_color, m_priv->x0, m_priv->y0);
+				cairo_surface_destroy (surface);
+			}
 			g_object_unref(pixbuf);
 
 			file_set_unsave ();

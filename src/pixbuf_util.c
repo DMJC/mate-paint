@@ -45,26 +45,24 @@ static void
 flood_fill_algo(struct fillinfo *info, int x, int y);
 
 
-GdkRectangle fill_draw(GdkDrawable *drawable, GdkGC *gc, guint fill_color, guint x, guint y)
+GdkRectangle fill_draw(cairo_surface_t *surface, gint width, gint height,
+                       guint fill_color, guint x, guint y)
 {
 	GdkPixbuf *pixbuf;
-	gint width, height;
 	struct fillinfo fillinfo;
 	guchar *p;
 	GdkRectangle rect = {0, 0, 0, 0};
-	
-	//printf("fill_draw fill_color: %.08X\n", fill_color);
-	//printf("fill_draw x: %d, y: %d\n", x, y);
-	
-	gdk_drawable_get_size(drawable, &width, &height);
-	//printf("fill_draw w: %d, h: %d\n", width, height);
-	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, width, height);
+	cairo_t *cr;
 
-	gdk_pixbuf_fill(pixbuf, 0);
+	g_return_val_if_fail(surface != NULL, rect);
+	g_return_val_if_fail(width > 0 && height > 0, rect);
+	g_return_val_if_fail(x < (guint) width && y < (guint) height, rect);
 
-	/* 1 get pixbuf from drawable */
-	gdk_pixbuf_get_from_drawable(pixbuf, drawable, NULL, 0, 0, 0, 0, width, height);
-	
+	pixbuf = gdk_pixbuf_get_from_surface(surface, 0, 0, width, height);
+	if (pixbuf == NULL) {
+		return rect;
+	}
+
 	fillinfo.gx = x;
 	fillinfo.gw = x;
 	fillinfo.gy = y;
@@ -92,9 +90,11 @@ GdkRectangle fill_draw(GdkDrawable *drawable, GdkGC *gc, guint fill_color, guint
 
     flood_fill_algo(&fillinfo, x, y);
 
-	/* 3 draw pixbuf back onto drawable.  */
-	gdk_draw_pixbuf(drawable, gc, pixbuf, 0, 0, 0, 0, gdk_pixbuf_get_width(pixbuf),
-					gdk_pixbuf_get_height(pixbuf), GDK_RGB_DITHER_NONE, 0, 0);
+	/* 3 draw pixbuf back onto cairo surface. */
+	cr = cairo_create(surface);
+	gdk_cairo_set_source_pixbuf(cr, pixbuf, 0, 0);
+	cairo_paint(cr);
+	cairo_destroy(cr);
 	
 	/* clean up */
 	g_object_unref(pixbuf);

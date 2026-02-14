@@ -16,8 +16,8 @@
 #define getb(x) (((x >> 8) & 0x0FF))
 #define geta(x) ((x & 0x0FF))
 
-GdkRectangle fill_draw(GdkDrawable *drawable, GdkGC *gc, guint fill_color,
-					   guint x, guint y);
+GdkRectangle fill_draw(cairo_surface_t *surface, gint width, gint height,
+                       guint fill_color, guint x, guint y);
 gboolean get_pixel_from_pixbuf(GdkPixbuf *pixbuf, guint *color,
                                guint x, guint y);
 
