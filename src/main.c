@@ -54,8 +54,9 @@ void		on_menu_about_activate  ( GtkMenuItem *menuitem, gpointer user_data );
 
 static void init_eraser				(GtkBuilder *builder);
 static void init_paint_brush		(GtkBuilder *builder);
-static void save_the_children		(GtkBuilder *builder);
+static void save_the_children		(GtkBuilder *builder, GtkWidget *drawing);
 static GtkWidget *create_fallback_window	( void );
+static GtkWidget *find_drawing_widget	(GtkWidget *widget);
 
 void		
 on_menu_new_activate( GtkMenuItem *menuitem, gpointer user_data)
@@ -167,12 +168,19 @@ create_window (void)
 
 	builder = gtk_builder_new ();
     gtk_builder_add_from_file (builder, UI_FILE, NULL);
-    window = GTK_WIDGET (gtk_builder_get_object (builder, "window"));
+	window = GTK_WIDGET (gtk_builder_get_object (builder, "window"));
 	g_assert ( window );
 
-    widget = GTK_WIDGET (gtk_builder_get_object (builder, "flip_roate_dialog"));
-    drawing = GTK_WIDGET (gtk_builder_get_object (builder, "cv_drawing"));
-	g_object_set_data(G_OBJECT(drawing), "flip_roate_dialog", widget);
+	widget = GTK_WIDGET (gtk_builder_get_object (builder, "flip_roate_dialog"));
+	drawing = GTK_WIDGET (gtk_builder_get_object (builder, "cv_drawing"));
+	if (!GTK_IS_WIDGET (drawing))
+	{
+		drawing = find_drawing_widget (window);
+	}
+	if (GTK_IS_WIDGET (drawing))
+	{
+		g_object_set_data (G_OBJECT (drawing), "flip_roate_dialog", widget);
+	}
 
 	file_set_parent_window ( GTK_WINDOW(window) );	
     gtk_builder_connect_signals (builder, NULL);          
@@ -183,13 +191,16 @@ create_window (void)
 	 * GTK3 only repaints through "draw", so hook it explicitly to avoid
 	 * a blank canvas when the builder file doesn't define the new signal.
 	 */
-	g_signal_connect (drawing, "draw",
-	                  G_CALLBACK (on_cv_drawing_expose_event), NULL);
+	if (GTK_IS_WIDGET (drawing))
+	{
+		g_signal_connect (drawing, "draw",
+		                  G_CALLBACK (on_cv_drawing_expose_event), NULL);
+	}
 #endif
 
 	init_eraser (builder);
 	init_paint_brush (builder);
-	save_the_children (builder);
+	save_the_children (builder, drawing);
 
     g_object_unref (G_OBJECT (builder));	
 	
@@ -298,11 +309,10 @@ static void init_paint_brush(GtkBuilder *builder)
 	}
 }
 
-static void save_the_children (GtkBuilder *builder)
+static void save_the_children (GtkBuilder *builder, GtkWidget *drawing)
 {
-	GtkWidget *child, *drawing;
+	GtkWidget *child;
 
-	drawing = GTK_WIDGET (gtk_builder_get_object (builder, "cv_drawing"));
 	if (!GTK_IS_WIDGET (drawing))
 	{
 		return;
@@ -348,4 +358,43 @@ static void save_the_children (GtkBuilder *builder)
 	//g_object_set_data(G_OBJECT(drawing), "", (gpointer)child);
 }
 
+static GtkWidget *
+find_drawing_widget (GtkWidget *widget)
+{
+	GList *children;
+	GList *iter;
+
+	if (!GTK_IS_WIDGET (widget))
+	{
+		return NULL;
+	}
+
+	if (GTK_IS_DRAWING_AREA (widget))
+	{
+		return widget;
+	}
+
+	if (!GTK_IS_CONTAINER (widget))
+	{
+		return NULL;
+	}
+
+	children = gtk_container_get_children (GTK_CONTAINER (widget));
+	for (iter = children; iter != NULL; iter = iter->next)
+	{
+		GtkWidget *child;
+		GtkWidget *drawing;
+
+		child = GTK_WIDGET (iter->data);
+		drawing = find_drawing_widget (child);
+		if (GTK_IS_WIDGET (drawing))
+		{
+			g_list_free (children);
+			return drawing;
+		}
+	}
+	g_list_free (children);
+
+	return NULL;
+}
 
