@@ -8,7 +8,7 @@
 #include <queue>
 
 const double line_thickness_options[] = {1.0, 2.0, 4.0, 6.0, 8.0};
-
+const double zoom_options[] = {1.0, 2.0, 4.0, 6.0, 8.0};
 // Tool types
 enum Tool {
     TOOL_LASSO_SELECT,
@@ -114,6 +114,11 @@ struct AppState {
     std::vector<GtkWidget*> line_thickness_buttons;
     int active_line_thickness_index = 1;
     std::vector<int> tool_line_thickness_indices = std::vector<int>(TOOL_COUNT, 1);
+    GtkWidget* zoom_box = nullptr;
+    std::vector<GtkWidget*> zoom_buttons;
+    int active_zoom_index = 0;
+    double zoom_factor = 1.0;
+    GtkWidget* scrolled_window = nullptr;
    
     std::string current_filename;
 };
@@ -167,6 +172,51 @@ bool tool_supports_line_thickness(Tool tool) {
     return tool == TOOL_PENCIL || tool == TOOL_PAINTBRUSH || tool == TOOL_ERASER ||
            tool == TOOL_LINE || tool == TOOL_CURVE || tool == TOOL_RECTANGLE ||
            tool == TOOL_POLYGON || tool == TOOL_ELLIPSE || tool == TOOL_ROUNDED_RECT;
+}
+
+double to_canvas_coordinate(double coordinate) {
+    return coordinate / app_state.zoom_factor;
+}
+
+double clamp_double(double value, double min_value, double max_value) {
+    return fmax(min_value, fmin(value, max_value));
+}
+
+void apply_zoom(double zoom_factor, double focus_x, double focus_y) {
+    if (!app_state.drawing_area) {
+        return;
+    }
+
+    app_state.zoom_factor = zoom_factor;
+    gtk_widget_set_size_request(
+        app_state.drawing_area,
+        static_cast<int>(app_state.canvas_width * app_state.zoom_factor),
+        static_cast<int>(app_state.canvas_height * app_state.zoom_factor)
+    );
+
+    if (app_state.scrolled_window) {
+        GtkAdjustment* hadj = gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(app_state.scrolled_window));
+        GtkAdjustment* vadj = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(app_state.scrolled_window));
+
+        double h_page = gtk_adjustment_get_page_size(hadj);
+        double v_page = gtk_adjustment_get_page_size(vadj);
+
+        double target_h = focus_x * app_state.zoom_factor - h_page / 2.0;
+        double target_v = focus_y * app_state.zoom_factor - v_page / 2.0;
+
+        double h_max = fmax(gtk_adjustment_get_lower(hadj),
+            gtk_adjustment_get_upper(hadj) - gtk_adjustment_get_page_size(hadj));
+        double v_max = fmax(gtk_adjustment_get_lower(vadj),
+            gtk_adjustment_get_upper(vadj) - gtk_adjustment_get_page_size(vadj));
+
+        target_h = clamp_double(target_h, gtk_adjustment_get_lower(hadj), h_max);
+        target_v = clamp_double(target_v, gtk_adjustment_get_lower(vadj), v_max);
+
+        gtk_adjustment_set_value(hadj, target_h);
+        gtk_adjustment_set_value(vadj, target_v);
+    }
+
+    gtk_widget_queue_draw(app_state.drawing_area);
 }
 
 // Check if point is inside selection
@@ -1672,7 +1722,9 @@ void open_image_dialog(GtkWidget* parent) {
                 
                 g_object_unref(pixbuf);
                 
-                gtk_widget_set_size_request(app_state.drawing_area, width, height);
+                gtk_widget_set_size_request(app_state.drawing_area,
+                    static_cast<int>(width * app_state.zoom_factor),
+                    static_cast<int>(height * app_state.zoom_factor));
                 gtk_widget_queue_draw(app_state.drawing_area);
             }
             
@@ -2236,6 +2288,84 @@ void update_line_thickness_visibility() {
     }
 }
 
+void update_zoom_buttons() {
+    for (size_t i = 0; i < app_state.zoom_buttons.size(); ++i) {
+        GtkWidget* button = app_state.zoom_buttons[i];
+        bool is_active = ((int)i == app_state.active_zoom_index);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), is_active);
+    }
+}
+
+void on_zoom_toggled(GtkToggleButton* button, gpointer data) {
+    int index = GPOINTER_TO_INT(data);
+
+    if (!gtk_toggle_button_get_active(button)) {
+        if (app_state.active_zoom_index == index) {
+            gtk_toggle_button_set_active(button, TRUE);
+        }
+        return;
+    }
+
+    app_state.active_zoom_index = index;
+    for (size_t i = 0; i < app_state.zoom_buttons.size(); ++i) {
+        if ((int)i != index) {
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(app_state.zoom_buttons[i]), FALSE);
+        }
+    }
+}
+
+GtkWidget* create_zoom_button(int index) {
+    gchar* zoom_label = g_strdup_printf("%dx", (int)zoom_options[index]);
+    GtkWidget* button = gtk_toggle_button_new_with_label(zoom_label);
+    g_free(zoom_label);
+    gtk_widget_set_size_request(button, 66, 20);
+    gtk_widget_set_tooltip_text(button, "Zoom level");
+    gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+
+    GtkCssProvider* provider = gtk_css_provider_new();
+    gtk_css_provider_load_from_data(provider,
+        "togglebutton {"
+        "background: #ffffff;"
+        "background-image: none;"
+        "border: 1px solid #888;"
+        "border-radius: 0;"
+        "padding: 0;"
+        "box-shadow: none;"
+        "}"
+        "togglebutton:checked {"
+        "background: #ffffff;"
+        "background-image: none;"
+        "border: 1px solid #333;"
+        "}"
+        "togglebutton:hover {"
+        "background: #ffffff;"
+        "background-image: none;"
+        "}",
+        -1,
+        NULL
+    );
+    gtk_style_context_add_provider(
+        gtk_widget_get_style_context(button),
+        GTK_STYLE_PROVIDER(provider),
+        GTK_STYLE_PROVIDER_PRIORITY_USER
+    );
+    g_object_unref(provider);
+
+    g_signal_connect(button, "toggled", G_CALLBACK(on_zoom_toggled), GINT_TO_POINTER(index));
+    return button;
+}
+
+void update_zoom_visibility() {
+/*    if (!app_state.zoom_box) {
+        return;
+    }*/
+    if (app_state.current_tool == TOOL_ZOOM) {
+        gtk_widget_show_all(app_state.zoom_box);
+    } else {
+        gtk_widget_hide(app_state.zoom_box);
+    }
+}
+
 // Color button callback
 gboolean on_color_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data) {
     int index = GPOINTER_TO_INT(data);
@@ -2550,16 +2680,30 @@ int main(int argc, char* argv[]) {
     update_line_thickness_buttons();
     update_line_thickness_visibility();
 
+    app_state.zoom_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+    gtk_widget_set_margin_bottom(app_state.zoom_box, 5);
+    for (int i = 0; i < (int)(sizeof(zoom_options) / sizeof(zoom_options[0])); ++i) {
+        GtkWidget* zoom_button = create_zoom_button(i);
+        app_state.zoom_buttons.push_back(zoom_button);
+        gtk_box_pack_start(GTK_BOX(app_state.zoom_box), zoom_button, FALSE, FALSE, 0);
+    }
+    gtk_box_pack_start(GTK_BOX(tool_column), app_state.zoom_box, FALSE, FALSE, 0);
+    gtk_widget_hide(app_state.zoom_box);
+    update_zoom_buttons();
+    update_zoom_visibility();
+
     gtk_box_pack_start(GTK_BOX(content_box), tool_column, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(content_box), toolbox, FALSE, FALSE, 0);
-    
+
     GtkWidget* scrolled = gtk_scrolled_window_new(NULL, NULL);
+    app_state.scrolled_window = scrolled;
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
                                    GTK_POLICY_AUTOMATIC,
                                    GTK_POLICY_AUTOMATIC);
     
     app_state.drawing_area = gtk_drawing_area_new();
-    gtk_widget_set_size_request(app_state.drawing_area, app_state.canvas_width, app_state.canvas_height);
+    gtk_widget_set_size_request(app_state.drawing_area,
+        static_cast<int>(app_state.canvas_width * app_state.zoom_factor),
+        static_cast<int>(app_state.canvas_height * app_state.zoom_factor));
     
     g_signal_connect(app_state.drawing_area, "draw", G_CALLBACK(on_draw), NULL);
     g_signal_connect(app_state.drawing_area, "button-press-event", G_CALLBACK(on_button_press), NULL);
