@@ -221,6 +221,21 @@ void apply_zoom(double zoom_factor, double focus_x, double focus_y) {
     gtk_widget_queue_draw(app_state.drawing_area);
 }
 
+void reset_zoom_to_default() {
+    if (!app_state.drawing_area) {
+        return;
+    }
+
+    apply_zoom(1.0, app_state.canvas_width / 2.0, app_state.canvas_height / 2.0);
+
+    if (app_state.scrolled_window) {
+        GtkAdjustment* hadj = gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(app_state.scrolled_window));
+        GtkAdjustment* vadj = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(app_state.scrolled_window));
+        gtk_adjustment_set_value(hadj, gtk_adjustment_get_lower(hadj));
+        gtk_adjustment_set_value(vadj, gtk_adjustment_get_lower(vadj));
+    }
+}
+
 // Check if point is inside selection
 bool point_in_selection(double x, double y) {
     if (!app_state.has_selection) return false;
@@ -1370,7 +1385,12 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
         double canvas_y = to_canvas_coordinate(event->y);
 
         if (app_state.current_tool == TOOL_ZOOM && event->button == 1) {
-            apply_zoom(zoom_options[app_state.active_zoom_index], canvas_x, canvas_y);
+            double selected_zoom = zoom_options[app_state.active_zoom_index];
+            if (selected_zoom == 1.0) {
+                reset_zoom_to_default();
+            } else {
+                apply_zoom(selected_zoom, canvas_x, canvas_y);
+            }
             return TRUE;
         }
         // Handle text tool
