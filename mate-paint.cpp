@@ -1388,24 +1388,24 @@ gboolean on_key_release(GtkWidget* widget, GdkEventKey* event, gpointer data) {
 // Mouse button press
 gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data) {
     if ((event->button == 1 || event->button == 3) && app_state.surface) {
+        double canvas_x = to_canvas_coordinate(event->x);
+        double canvas_y = to_canvas_coordinate(event->y);
+
         if (app_state.floating_selection_active) {
-            if (app_state.floating_drag_completed || !point_in_selection(event->x, event->y)) {
+            if (app_state.floating_drag_completed || !point_in_selection(canvas_x, canvas_y)) {
                 commit_floating_selection();
                 return TRUE;
             }
 
             start_selection_drag();
             app_state.dragging_selection = true;
-            app_state.selection_drag_offset_x = event->x - fmin(app_state.selection_x1, app_state.selection_x2);
-            app_state.selection_drag_offset_y = event->y - fmin(app_state.selection_y1, app_state.selection_y2);
+            app_state.selection_drag_offset_x = canvas_x - fmin(app_state.selection_x1, app_state.selection_x2);
+            app_state.selection_drag_offset_y = canvas_y - fmin(app_state.selection_y1, app_state.selection_y2);
             app_state.is_drawing = true;
             return TRUE;
         }
 
         // Handle zoom tool
-        double canvas_x = to_canvas_coordinate(event->x);
-        double canvas_y = to_canvas_coordinate(event->y);
-
         if (app_state.current_tool == TOOL_ZOOM && event->button == 1) {
             double selected_zoom = zoom_options[app_state.active_zoom_index];
             if (selected_zoom == 1.0) {
@@ -1417,7 +1417,7 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
         }
         // Handle text tool
         if (app_state.current_tool == TOOL_TEXT) {
-            if (app_state.text_active && !point_in_text_box(event->x, event->y)) {
+            if (app_state.text_active && !point_in_text_box(canvas_x, canvas_y)) {
                 // Clicked outside text box
                 if (event->button == 1) {
                     // Left-click - finalize text
@@ -1431,14 +1431,14 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
                 // Start new text box (only with left-click)
                 if (event->button == 1) {
                     app_state.text_active = true;
-                    app_state.text_x = event->x;
-                    app_state.text_y = event->y;
+                    app_state.text_x = canvas_x;
+                    app_state.text_y = canvas_y;
                     app_state.text_content.clear();
                     
                     // Initialize text box size
                     update_text_box_size();
                     
-                    create_text_window(event->x, event->y);
+                    create_text_window(canvas_x, canvas_y);
                     start_ant_animation();
                     gtk_widget_queue_draw(widget);
                 }
@@ -1449,19 +1449,19 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
         }
 
         if ((app_state.current_tool == TOOL_RECT_SELECT || app_state.current_tool == TOOL_LASSO_SELECT) &&
-            app_state.has_selection && point_in_selection(event->x, event->y)) {
+            app_state.has_selection && point_in_selection(canvas_x, canvas_y)) {
             start_selection_drag();
             if (app_state.floating_selection_active) {
                 app_state.dragging_selection = true;
-                app_state.selection_drag_offset_x = event->x - fmin(app_state.selection_x1, app_state.selection_x2);
-                app_state.selection_drag_offset_y = event->y - fmin(app_state.selection_y1, app_state.selection_y2);
+                app_state.selection_drag_offset_x = canvas_x - fmin(app_state.selection_x1, app_state.selection_x2);
+                app_state.selection_drag_offset_y = canvas_y - fmin(app_state.selection_y1, app_state.selection_y2);
                 app_state.is_drawing = true;
                 return TRUE;
             }
         }
 
         // Check if clicking outside selection area - clear selection
-        if (app_state.has_selection && !point_in_selection(event->x, event->y)) {
+        if (app_state.has_selection && !point_in_selection(canvas_x, canvas_y)) {
             clear_selection();
         }
         
@@ -1473,12 +1473,12 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
         app_state.is_right_button = (event->button == 3);
 
         if (app_state.current_tool == TOOL_EYEDROPPER) {
-            pick_color_at(static_cast<int>(event->x), static_cast<int>(event->y), app_state.is_right_button);
+            pick_color_at(static_cast<int>(canvas_x), static_cast<int>(canvas_y), app_state.is_right_button);
             return TRUE;
         }
 
         if (app_state.current_tool == TOOL_FILL) {
-            flood_fill_at(static_cast<int>(event->x), static_cast<int>(event->y));
+            flood_fill_at(static_cast<int>(canvas_x), static_cast<int>(canvas_y));
             gtk_widget_queue_draw(widget);
             return TRUE;
         }
@@ -1490,10 +1490,10 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
                     app_state.polygon_finished = false;
                 }
 
-                app_state.polygon_points.push_back({event->x, event->y});
+                app_state.polygon_points.push_back({canvas_x, canvas_y});
                 app_state.is_drawing = true;
-                app_state.current_x = event->x;
-                app_state.current_y = event->y;
+                app_state.current_x = canvas_x;
+                app_state.current_y = canvas_y;
                 start_ant_animation();
                 gtk_widget_queue_draw(widget);
                 return TRUE;
@@ -1520,16 +1520,16 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
         }
         
         app_state.is_drawing = true;
-        app_state.last_x = event->x;
-        app_state.last_y = event->y;
-        app_state.start_x = event->x;
-        app_state.start_y = event->y;
-        app_state.current_x = event->x;
-        app_state.current_y = event->y;
+        app_state.last_x = canvas_x;
+        app_state.last_y = canvas_y;
+        app_state.start_x = canvas_x;
+        app_state.start_y = canvas_y;
+        app_state.current_x = canvas_x;
+        app_state.current_y = canvas_y;
         
         if (app_state.current_tool == TOOL_LASSO_SELECT) {
             app_state.lasso_points.clear();
-            app_state.lasso_points.push_back({event->x, event->y});
+            app_state.lasso_points.push_back({canvas_x, canvas_y});
         }
         
         if (tool_needs_preview(app_state.current_tool)) {
@@ -1542,16 +1542,18 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
 // Mouse motion
 gboolean on_motion_notify(GtkWidget* widget, GdkEventMotion* event, gpointer data) {
     if (app_state.is_drawing && app_state.surface) {
-        app_state.current_x = event->x;
-        app_state.current_y = event->y;
+        double canvas_x = to_canvas_coordinate(event->x);
+        double canvas_y = to_canvas_coordinate(event->y);
+        app_state.current_x = canvas_x;
+        app_state.current_y = canvas_y;
 
         if (app_state.dragging_selection && app_state.has_selection) {
             double old_x = fmin(app_state.selection_x1, app_state.selection_x2);
             double old_y = fmin(app_state.selection_y1, app_state.selection_y2);
             double width = fabs(app_state.selection_x2 - app_state.selection_x1);
             double height = fabs(app_state.selection_y2 - app_state.selection_y1);
-            double new_x = event->x - app_state.selection_drag_offset_x;
-            double new_y = event->y - app_state.selection_drag_offset_y;
+            double new_x = canvas_x - app_state.selection_drag_offset_x;
+            double new_y = canvas_y - app_state.selection_drag_offset_y;
 
             double dx = new_x - old_x;
             double dy = new_y - old_y;
@@ -1570,7 +1572,7 @@ gboolean on_motion_notify(GtkWidget* widget, GdkEventMotion* event, gpointer dat
 
             gtk_widget_queue_draw(widget);
         } else if (app_state.current_tool == TOOL_LASSO_SELECT) {
-            app_state.lasso_points.push_back({event->x, event->y});
+            app_state.lasso_points.push_back({canvas_x, canvas_y});
             gtk_widget_queue_draw(widget);
         } else if (tool_needs_preview(app_state.current_tool)) {
             gtk_widget_queue_draw(widget);
@@ -1579,22 +1581,22 @@ gboolean on_motion_notify(GtkWidget* widget, GdkEventMotion* event, gpointer dat
             
             switch (app_state.current_tool) {
                 case TOOL_PENCIL:
-                    draw_pencil(cr, event->x, event->y);
+                    draw_pencil(cr, canvas_x, canvas_y);
                     break;
                 case TOOL_PAINTBRUSH:
-                    draw_paintbrush(cr, event->x, event->y);
+                    draw_paintbrush(cr, canvas_x, canvas_y);
                     break;
                 case TOOL_AIRBRUSH:
-                    draw_airbrush(cr, event->x, event->y);
+                    draw_airbrush(cr, canvas_x, canvas_y);
                     break;
                 case TOOL_ERASER:
-                    draw_eraser(cr, event->x, event->y);
+                    draw_eraser(cr, canvas_x, canvas_y);
                     break;
             }
             
             cairo_destroy(cr);
-            app_state.last_x = event->x;
-            app_state.last_y = event->y;
+            app_state.last_x = canvas_x;
+            app_state.last_y = canvas_y;
             gtk_widget_queue_draw(widget);
         }
     }
@@ -1616,8 +1618,8 @@ gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpointer da
             return TRUE;
         }
 
-        double end_x = event->x;
-        double end_y = event->y;
+        double end_x = to_canvas_coordinate(event->x);
+        double end_y = to_canvas_coordinate(event->y);
         
         if (app_state.shift_pressed) {
             if (app_state.current_tool == TOOL_LINE) {
