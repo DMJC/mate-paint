@@ -10,6 +10,22 @@ typedef cairo_surface_t GdkDrawable;
 typedef cairo_surface_t GdkPixmap;
 typedef cairo_surface_t GdkBitmap;
 
+#ifndef GDK_DRAWABLE
+#define GDK_DRAWABLE(obj) ((GdkDrawable *) (obj))
+#endif
+
+#ifndef GDK_PIXMAP
+#define GDK_PIXMAP(obj) ((GdkPixmap *) (obj))
+#endif
+
+#ifndef GDK_IS_PIXMAP
+#define GDK_IS_PIXMAP(obj) ((obj) != NULL)
+#endif
+
+#ifndef GDK_IS_GC
+#define GDK_IS_GC(obj) ((obj) != NULL)
+#endif
+
 #ifndef GDK_LINE_SOLID
 typedef enum {
 	GDK_LINE_SOLID,
@@ -250,6 +266,56 @@ gdk_draw_pixbuf (GdkDrawable *drawable,
 }
 
 static inline GdkColormap *gdk_drawable_get_colormap (GdkDrawable *drawable) { (void) drawable; return NULL; }
+
+static inline void
+gdk_cairo_set_source_pixmap (cairo_t *cr,
+                             GdkPixmap *pixmap,
+                             gdouble pixmap_x,
+                             gdouble pixmap_y)
+{
+	cairo_set_source_surface (cr, pixmap, pixmap_x, pixmap_y);
+}
+
+static inline GdkPixbuf *
+gdk_pixbuf_get_from_drawable (GdkPixbuf   *dest,
+                              GdkDrawable *src,
+                              GdkColormap *cmap,
+                              gint         src_x,
+                              gint         src_y,
+                              gint         dest_x,
+                              gint         dest_y,
+                              gint         width,
+                              gint         height)
+{
+	GdkPixbuf *snapshot;
+
+	(void) cmap;
+
+	snapshot = gdk_pixbuf_get_from_surface (src, src_x, src_y, width, height);
+	if (!snapshot)
+		return NULL;
+
+	if (!dest)
+		return snapshot;
+
+	gdk_pixbuf_copy_area (snapshot, 0, 0, width, height, dest, dest_x, dest_y);
+	g_object_unref (snapshot);
+	return dest;
+}
+
+static inline void
+gdk_pixbuf_render_pixmap_and_mask (GdkPixbuf  *pixbuf,
+                                   GdkPixmap **pixmap_return,
+                                   GdkBitmap **mask_return,
+                                   gint        alpha_threshold)
+{
+	(void) alpha_threshold;
+
+	if (pixmap_return)
+		*pixmap_return = gdk_cairo_surface_create_from_pixbuf (pixbuf, 1, NULL);
+	if (mask_return)
+		*mask_return = NULL;
+}
 
 #endif /* GTK_MAJOR_VERSION >= 3 */
 

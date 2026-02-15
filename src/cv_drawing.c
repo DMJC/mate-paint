@@ -399,8 +399,9 @@ on_cv_drawing_expose_event	(   GtkWidget	   *widget,
 {
 	gdk_cairo_set_source_pixmap (cr, cv.pixmap, 0, 0);
 	cairo_rectangle (cr, 0, 0,
-	                 cv_widget_get_width (widget),
-	                 cv_widget_get_height (widget));
+
+	                 gtk_widget_get_allocated_width (widget),
+	                 gtk_widget_get_allocated_height (widget));
 	cairo_fill (cr);
 
 	if ( cv_tool != NULL )

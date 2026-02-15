@@ -27,6 +27,8 @@
 void cv_resize_set_canvas		( gp_canvas * canvas );
 void cv_resize_draw				( void );
 void cv_resize_adjust_box_size	(gint width, gint height);
+gint cv_widget_get_width		(GtkWidget *widget);
+gint cv_widget_get_height		(GtkWidget *widget);
 
 //GtkWidget *get_cv_ev_box ( void );
 
