@@ -210,7 +210,7 @@ bool tool_needs_preview(Tool tool) {
     return tool == TOOL_LASSO_SELECT || tool == TOOL_RECT_SELECT ||
            tool == TOOL_LINE || tool == TOOL_CURVE ||
            tool == TOOL_RECTANGLE || tool == TOOL_POLYGON ||
-           tool == TOOL_ELLIPSE || tool == TOOL_ROUNDED_RECT || tool == TOOL_AIRBRUSH;
+           tool == TOOL_ELLIPSE || tool == TOOL_ROUNDED_RECT;
 }
 
 int tool_to_index(Tool tool) {
@@ -553,8 +553,8 @@ void commit_floating_selection(bool record_undo) {
         return;
     }
 
-    double x = fmin(app_state.selection_x1, app_state.selection_x2);
-    double y = fmin(app_state.selection_y1, app_state.selection_y2);
+    double x = std::round(fmin(app_state.selection_x1, app_state.selection_x2));
+    double y = std::round(fmin(app_state.selection_y1, app_state.selection_y2));
 
     if (record_undo) {
         push_undo_state();
@@ -582,6 +582,27 @@ void append_selection_path(cairo_t* cr) {
     cairo_close_path(cr);
 }
 
+struct SelectionPixelBounds {
+    int x;
+    int y;
+    int width;
+    int height;
+};
+
+SelectionPixelBounds get_selection_pixel_bounds() {
+    double x1 = fmin(app_state.selection_x1, app_state.selection_x2);
+    double y1 = fmin(app_state.selection_y1, app_state.selection_y2);
+    double x2 = fmax(app_state.selection_x1, app_state.selection_x2);
+    double y2 = fmax(app_state.selection_y1, app_state.selection_y2);
+
+    int pixel_x = static_cast<int>(std::floor(x1));
+    int pixel_y = static_cast<int>(std::floor(y1));
+    int pixel_x2 = static_cast<int>(std::ceil(x2));
+    int pixel_y2 = static_cast<int>(std::ceil(y2));
+
+    return {pixel_x, pixel_y, pixel_x2 - pixel_x, pixel_y2 - pixel_y};
+}
+
 void start_selection_drag() {
     if (!app_state.has_selection || !app_state.surface) return;
 
@@ -592,13 +613,9 @@ void start_selection_drag() {
         app_state.drag_undo_snapshot_taken = true;
     }
 
-    double x1 = fmin(app_state.selection_x1, app_state.selection_x2);
-    double y1 = fmin(app_state.selection_y1, app_state.selection_y2);
-    double x2 = fmax(app_state.selection_x1, app_state.selection_x2);
-    double y2 = fmax(app_state.selection_y1, app_state.selection_y2);
-
-    int w = (int)ceil(x2 - x1);
-    int h = (int)ceil(y2 - y1);
+    SelectionPixelBounds bounds = get_selection_pixel_bounds();
+    int w = bounds.width;
+    int h = bounds.height;
     if (w <= 0 || h <= 0) return;
 
     app_state.floating_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
@@ -606,11 +623,11 @@ void start_selection_drag() {
     configure_crisp_rendering(float_cr);
 
     if (app_state.selection_is_rect) {
-        cairo_set_source_surface(float_cr, app_state.surface, -x1, -y1);
+        cairo_set_source_surface(float_cr, app_state.surface, -bounds.x, -bounds.y);
         cairo_paint(float_cr);
     } else if (app_state.selection_path.size() > 2) {
         cairo_save(float_cr);
-        cairo_translate(float_cr, -x1, -y1);
+        cairo_translate(float_cr, -bounds.x, -bounds.y);
 	append_selection_path(float_cr);
         cairo_clip(float_cr);
         cairo_set_source_surface(float_cr, app_state.surface, 0, 0);
@@ -628,12 +645,17 @@ void start_selection_drag() {
         app_state.bg_color.alpha
     );
     if (app_state.selection_is_rect) {
-        cairo_rectangle(cr, x1, y1, x2 - x1, y2 - y1);
+        cairo_rectangle(cr, bounds.x, bounds.y, w, h);
     } else if (app_state.selection_path.size() > 2) {
-        append_selection_path(float_cr);
+        append_selection_path(cr);
     }
     cairo_fill(cr);
     cairo_destroy(cr);
+
+    app_state.selection_x1 = bounds.x;
+    app_state.selection_y1 = bounds.y;
+    app_state.selection_x2 = bounds.x + w;
+    app_state.selection_y2 = bounds.y + h;
 
     app_state.floating_selection_active = true;
     app_state.floating_drag_completed = false;
@@ -643,13 +665,9 @@ void start_selection_drag() {
 void copy_selection() {
     if (!app_state.has_selection || !app_state.surface) return;
     
-    double x1 = fmin(app_state.selection_x1, app_state.selection_x2);
-    double y1 = fmin(app_state.selection_y1, app_state.selection_y2);
-    double x2 = fmax(app_state.selection_x1, app_state.selection_x2);
-    double y2 = fmax(app_state.selection_y1, app_state.selection_y2);
-
-    int w = (int)ceil(x2 - x1);
-    int h = (int)ceil(y2 - y1);
+    SelectionPixelBounds bounds = get_selection_pixel_bounds();
+    int w = bounds.width;
+    int h = bounds.height;
 
     if (w <= 0 || h <= 0) return;
 
@@ -673,11 +691,11 @@ void copy_selection() {
         cairo_set_source_surface(cr, app_state.floating_surface, 0, 0);
         cairo_paint(cr);
     } else if (app_state.selection_is_rect) {
-        cairo_set_source_surface(cr, app_state.surface, -x1, -y1);
+        cairo_set_source_surface(cr, app_state.surface, -bounds.x, -bounds.y);
         cairo_paint(cr);
     } else if (app_state.selection_path.size() > 2) {
         cairo_save(cr);
-        cairo_translate(cr, -x1, -y1);
+        cairo_translate(cr, -bounds.x, -bounds.y);
         append_selection_path(cr);
         cairo_clip(cr);
         cairo_set_source_surface(cr, app_state.surface, 0, 0);
@@ -709,14 +727,11 @@ void cut_selection() {
     );
 
     if (app_state.selection_is_rect) {
-        double x1 = fmin(app_state.selection_x1, app_state.selection_x2);
-        double y1 = fmin(app_state.selection_y1, app_state.selection_y2);
-        double x2 = fmax(app_state.selection_x1, app_state.selection_x2);
-        double y2 = fmax(app_state.selection_y1, app_state.selection_y2);
+        SelectionPixelBounds bounds = get_selection_pixel_bounds();
 
         push_undo_state();
 
-        cairo_rectangle(cr, x1, y1, x2 - x1, y2 - y1);
+        cairo_rectangle(cr, bounds.x, bounds.y, bounds.width, bounds.height);
     } else if (app_state.selection_path.size() > 2) {
         append_selection_path(cr);
     }
@@ -1534,8 +1549,9 @@ gboolean on_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
         cairo_paint(cr);
 
         if (app_state.floating_selection_active && app_state.floating_surface) {
-            double x = fmin(app_state.selection_x1, app_state.selection_x2);
-            double y = fmin(app_state.selection_y1, app_state.selection_y2);
+		    double x = std::round(fmin(app_state.selection_x1, app_state.selection_x2));
+		    double y = std::round(fmin(app_state.selection_y1, app_state.selection_y2));
+
             cairo_set_source_surface(cr, app_state.floating_surface, x, y);
             cairo_pattern_set_filter(cairo_get_source(cr), CAIRO_FILTER_NEAREST);
             cairo_paint(cr);
@@ -1843,6 +1859,14 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
         app_state.current_x = canvas_x;
         app_state.current_y = canvas_y;
         
+        if (app_state.current_tool == TOOL_AIRBRUSH) {
+            cairo_t* cr = cairo_create(app_state.surface);
+            configure_crisp_rendering(cr);
+            draw_airbrush(cr, canvas_x, canvas_y);
+            cairo_destroy(cr);
+            gtk_widget_queue_draw(widget);
+        }
+        
         if (app_state.current_tool == TOOL_LASSO_SELECT) {
             app_state.lasso_points.clear();
             app_state.lasso_points.push_back({canvas_x, canvas_y});
@@ -1868,8 +1892,8 @@ gboolean on_motion_notify(GtkWidget* widget, GdkEventMotion* event, gpointer dat
             double old_y = fmin(app_state.selection_y1, app_state.selection_y2);
             double width = fabs(app_state.selection_x2 - app_state.selection_x1);
             double height = fabs(app_state.selection_y2 - app_state.selection_y1);
-            double new_x = canvas_x - app_state.selection_drag_offset_x;
-            double new_y = canvas_y - app_state.selection_drag_offset_y;
+            double new_x = std::round(canvas_x - app_state.selection_drag_offset_x);
+            double new_y = std::round(canvas_y - app_state.selection_drag_offset_y);
 
             double dx = new_x - old_x;
             double dy = new_y - old_y;
