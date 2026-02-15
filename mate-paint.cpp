@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include <cairo.h>
+#include <algorithm>
 #include <vector>
 #include <cmath>
 #include <memory>
@@ -1630,6 +1631,156 @@ void on_file_quit(GtkMenuItem* item, gpointer data) {
     gtk_main_quit();
 }
 
+void on_edit_copy(GtkMenuItem* item, gpointer data) {
+    copy_selection();
+}
+
+void on_edit_cut(GtkMenuItem* item, gpointer data) {
+    cut_selection();
+}
+
+void on_edit_paste(GtkMenuItem* item, gpointer data) {
+    paste_selection();
+}
+
+void on_image_scale(GtkMenuItem* item, gpointer data) {
+    if (!app_state.surface) return;
+
+    GtkWidget* dialog = gtk_dialog_new_with_buttons(
+        "Scale Image",
+        GTK_WINDOW(app_state.window),
+        (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+        "_Cancel", GTK_RESPONSE_CANCEL,
+        "_Scale", GTK_RESPONSE_OK,
+        NULL
+    );
+
+    GtkWidget* content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    GtkWidget* row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+    gtk_container_set_border_width(GTK_CONTAINER(row), 10);
+    gtk_container_add(GTK_CONTAINER(content), row);
+
+    GtkWidget* percent_label = gtk_label_new("Scale (%):");
+    GtkWidget* percent_spin = gtk_spin_button_new_with_range(1, 1000, 1);
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(percent_spin), 100);
+
+    gtk_box_pack_start(GTK_BOX(row), percent_label, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(row), percent_spin, FALSE, FALSE, 0);
+
+    gtk_widget_show_all(dialog);
+
+    int response = gtk_dialog_run(GTK_DIALOG(dialog));
+    if (response != GTK_RESPONSE_OK) {
+        gtk_widget_destroy(dialog);
+        return;
+    }
+
+    double scale = gtk_spin_button_get_value(GTK_SPIN_BUTTON(percent_spin)) / 100.0;
+    gtk_widget_destroy(dialog);
+
+    int new_width = std::max(1, (int)std::lround(app_state.canvas_width * scale));
+    int new_height = std::max(1, (int)std::lround(app_state.canvas_height * scale));
+
+    cairo_surface_t* old_surface = app_state.surface;
+    cairo_surface_t* scaled_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, new_width, new_height);
+
+    cairo_t* cr = cairo_create(scaled_surface);
+    cairo_scale(cr, (double)new_width / app_state.canvas_width, (double)new_height / app_state.canvas_height);
+    cairo_set_source_surface(cr, old_surface, 0, 0);
+    cairo_pattern_set_filter(cairo_get_source(cr), CAIRO_FILTER_BILINEAR);
+    cairo_paint(cr);
+    cairo_destroy(cr);
+
+    app_state.surface = scaled_surface;
+    app_state.canvas_width = new_width;
+    app_state.canvas_height = new_height;
+    cairo_surface_destroy(old_surface);
+
+    clear_selection();
+    if (app_state.text_active) {
+        cancel_text();
+    }
+
+    gtk_widget_set_size_request(app_state.drawing_area, new_width, new_height);
+    gtk_widget_queue_draw(app_state.drawing_area);
+}
+
+void on_image_resize_canvas(GtkMenuItem* item, gpointer data) {
+    if (!app_state.surface) return;
+
+    GtkWidget* dialog = gtk_dialog_new_with_buttons(
+        "Resize Image",
+        GTK_WINDOW(app_state.window),
+        (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+        "_Cancel", GTK_RESPONSE_CANCEL,
+        "_Resize", GTK_RESPONSE_OK,
+        NULL
+    );
+
+    GtkWidget* content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    GtkWidget* container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
+    gtk_container_set_border_width(GTK_CONTAINER(container), 10);
+    gtk_container_add(GTK_CONTAINER(content), container);
+
+    GtkWidget* width_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+    GtkWidget* width_label = gtk_label_new("Width:");
+    GtkWidget* width_spin = gtk_spin_button_new_with_range(1, 10000, 1);
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(width_spin), app_state.canvas_width);
+    gtk_box_pack_start(GTK_BOX(width_row), width_label, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(width_row), width_spin, FALSE, FALSE, 0);
+
+    GtkWidget* height_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+    GtkWidget* height_label = gtk_label_new("Height:");
+    GtkWidget* height_spin = gtk_spin_button_new_with_range(1, 10000, 1);
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(height_spin), app_state.canvas_height);
+    gtk_box_pack_start(GTK_BOX(height_row), height_label, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(height_row), height_spin, FALSE, FALSE, 0);
+
+    gtk_box_pack_start(GTK_BOX(container), width_row, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(container), height_row, FALSE, FALSE, 0);
+
+    gtk_widget_show_all(dialog);
+
+    int response = gtk_dialog_run(GTK_DIALOG(dialog));
+    if (response != GTK_RESPONSE_OK) {
+        gtk_widget_destroy(dialog);
+        return;
+    }
+
+    int new_width = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(width_spin));
+    int new_height = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(height_spin));
+    gtk_widget_destroy(dialog);
+
+    cairo_surface_t* old_surface = app_state.surface;
+    cairo_surface_t* resized_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, new_width, new_height);
+
+    cairo_t* cr = cairo_create(resized_surface);
+    cairo_set_source_rgba(
+        cr,
+        app_state.bg_color.red,
+        app_state.bg_color.green,
+        app_state.bg_color.blue,
+        app_state.bg_color.alpha
+    );
+    cairo_paint(cr);
+    cairo_set_source_surface(cr, old_surface, 0, 0);
+    cairo_paint(cr);
+    cairo_destroy(cr);
+
+    app_state.surface = resized_surface;
+    app_state.canvas_width = new_width;
+    app_state.canvas_height = new_height;
+    cairo_surface_destroy(old_surface);
+
+    clear_selection();
+    if (app_state.text_active) {
+        cancel_text();
+    }
+
+    gtk_widget_set_size_request(app_state.drawing_area, new_width, new_height);
+    gtk_widget_queue_draw(app_state.drawing_area);
+}
+
 // Tool button callback
 void on_tool_clicked(GtkButton* button, gpointer data) {
     Tool new_tool = (Tool)GPOINTER_TO_INT(data);
@@ -1939,8 +2090,33 @@ int main(int argc, char* argv[]) {
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(file_menu_item), file_menu);
     gtk_menu_shell_append(GTK_MENU_SHELL(menubar), file_menu_item);
     
+    GtkWidget* edit_menu = gtk_menu_new();
     GtkWidget* edit_menu_item = gtk_menu_item_new_with_label("Edit");
+    GtkWidget* edit_cut = gtk_menu_item_new_with_label("Cut");
+    GtkWidget* edit_copy = gtk_menu_item_new_with_label("Copy");
+    GtkWidget* edit_paste = gtk_menu_item_new_with_label("Paste");
+
+    g_signal_connect(edit_cut, "activate", G_CALLBACK(on_edit_cut), NULL);
+    g_signal_connect(edit_copy, "activate", G_CALLBACK(on_edit_copy), NULL);
+    g_signal_connect(edit_paste, "activate", G_CALLBACK(on_edit_paste), NULL);
+
+    gtk_menu_shell_append(GTK_MENU_SHELL(edit_menu), edit_cut);
+    gtk_menu_shell_append(GTK_MENU_SHELL(edit_menu), edit_copy);
+    gtk_menu_shell_append(GTK_MENU_SHELL(edit_menu), edit_paste);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(edit_menu_item), edit_menu);
+
+    GtkWidget* image_menu = gtk_menu_new();
     GtkWidget* image_menu_item = gtk_menu_item_new_with_label("Image");
+    GtkWidget* image_scale = gtk_menu_item_new_with_label("Scale Image...");
+    GtkWidget* image_resize = gtk_menu_item_new_with_label("Resize Image...");
+
+    g_signal_connect(image_scale, "activate", G_CALLBACK(on_image_scale), NULL);
+    g_signal_connect(image_resize, "activate", G_CALLBACK(on_image_resize_canvas), NULL);
+
+    gtk_menu_shell_append(GTK_MENU_SHELL(image_menu), image_scale);
+    gtk_menu_shell_append(GTK_MENU_SHELL(image_menu), image_resize);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(image_menu_item), image_menu);
+
     GtkWidget* help_menu_item = gtk_menu_item_new_with_label("Help");
     
     gtk_menu_shell_append(GTK_MENU_SHELL(menubar), edit_menu_item);
