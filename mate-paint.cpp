@@ -1289,6 +1289,8 @@ void draw_preview(cairo_t* cr) {
 // Canvas draw callback
 gboolean on_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
     if (app_state.surface) {
+        cairo_save(cr);
+        cairo_scale(cr, app_state.zoom_factor, app_state.zoom_factor);
         cairo_set_source_surface(cr, app_state.surface, 0, 0);
         cairo_paint(cr);
 
@@ -1313,6 +1315,7 @@ gboolean on_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
         if (tool_needs_preview(app_state.current_tool)) {
             draw_preview(cr);
         }
+        cairo_restore(cr);
     }
     return FALSE;
 }
@@ -1362,6 +1365,14 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
             return TRUE;
         }
 
+        // Handle zoom tool
+        double canvas_x = to_canvas_coordinate(event->x);
+        double canvas_y = to_canvas_coordinate(event->y);
+
+        if (app_state.current_tool == TOOL_ZOOM && event->button == 1) {
+            apply_zoom(zoom_options[app_state.active_zoom_index], canvas_x, canvas_y);
+            return TRUE;
+        }
         // Handle text tool
         if (app_state.current_tool == TOOL_TEXT) {
             if (app_state.text_active && !point_in_text_box(event->x, event->y)) {
