@@ -7,6 +7,7 @@
 #include <cmath>
 #include <memory>
 #include <string>
+#include <queue>
 
 // Tool types
 enum Tool {
@@ -98,6 +99,9 @@ struct AppState {
     GtkWidget* bg_button = nullptr;
     GtkWidget* drawing_area = nullptr;
     GtkWidget* window = nullptr;
+    GtkWidget* line_thickness_box = nullptr;
+    std::vector<GtkWidget*> line_thickness_buttons;
+    int active_line_thickness_index = 1;
     
     std::string current_filename;
 };
@@ -141,6 +145,12 @@ bool tool_needs_preview(Tool tool) {
            tool == TOOL_LINE || tool == TOOL_CURVE ||
            tool == TOOL_RECTANGLE || tool == TOOL_POLYGON ||
            tool == TOOL_ELLIPSE || tool == TOOL_ROUNDED_RECT;
+}
+
+bool tool_supports_line_thickness(Tool tool) {
+    return tool == TOOL_PENCIL || tool == TOOL_PAINTBRUSH || tool == TOOL_ERASER ||
+           tool == TOOL_LINE || tool == TOOL_CURVE || tool == TOOL_RECTANGLE ||
+           tool == TOOL_POLYGON || tool == TOOL_ELLIPSE || tool == TOOL_ROUNDED_RECT;
 }
 
 // Check if point is inside selection
@@ -661,6 +671,91 @@ GdkRGBA get_active_color() {
     return app_state.is_right_button ? app_state.bg_color : app_state.fg_color;
 }
 
+bool point_in_canvas(int x, int y) {
+    return x >= 0 && x < app_state.canvas_width && y >= 0 && y < app_state.canvas_height;
+}
+
+double clamp_color_channel(double channel) {
+    return fmax(0.0, fmin(1.0, channel));
+}
+
+guint32 rgba_to_pixel(const GdkRGBA& color) {
+    guint8 r = static_cast<guint8>(std::round(clamp_color_channel(color.red) * 255.0));
+    guint8 g = static_cast<guint8>(std::round(clamp_color_channel(color.green) * 255.0));
+    guint8 b = static_cast<guint8>(std::round(clamp_color_channel(color.blue) * 255.0));
+    guint8 a = static_cast<guint8>(std::round(clamp_color_channel(color.alpha) * 255.0));
+    return (static_cast<guint32>(a) << 24) |
+           (static_cast<guint32>(r) << 16) |
+           (static_cast<guint32>(g) << 8) |
+            static_cast<guint32>(b);
+}
+
+GdkRGBA pixel_to_rgba(guint32 pixel) {
+    GdkRGBA color;
+    color.alpha = ((pixel >> 24) & 0xFF) / 255.0;
+    color.red = ((pixel >> 16) & 0xFF) / 255.0;
+    color.green = ((pixel >> 8) & 0xFF) / 255.0;
+    color.blue = (pixel & 0xFF) / 255.0;
+    return color;
+}
+
+guint32 read_pixel(int x, int y) {
+    unsigned char* data = cairo_image_surface_get_data(app_state.surface);
+    int stride = cairo_image_surface_get_stride(app_state.surface);
+    guint32* row = reinterpret_cast<guint32*>(data + y * stride);
+    return row[x];
+}
+
+
+void pick_color_at(int x, int y, bool set_background) {
+    if (!point_in_canvas(x, y)) return;
+
+    cairo_surface_flush(app_state.surface);
+    GdkRGBA sampled = pixel_to_rgba(read_pixel(x, y));
+    if (set_background) {
+        app_state.bg_color = sampled;
+    } else {
+        app_state.fg_color = sampled;
+    }
+    update_color_indicators();
+}
+
+void flood_fill_at(int start_x, int start_y) {
+    if (!point_in_canvas(start_x, start_y)) return;
+
+    cairo_surface_flush(app_state.surface);
+    guint32 target = read_pixel(start_x, start_y);
+    guint32 replacement = rgba_to_pixel(get_active_color());
+    if (target == replacement) return;
+
+    unsigned char* data = cairo_image_surface_get_data(app_state.surface);
+    int stride = cairo_image_surface_get_stride(app_state.surface);
+
+    std::queue<std::pair<int, int>> pixels;
+    pixels.push({start_x, start_y});
+
+    while (!pixels.empty()) {
+        std::pair<int, int> current = pixels.front();
+        pixels.pop();
+
+        int x = current.first;
+        int y = current.second;
+
+        if (!point_in_canvas(x, y)) continue;
+
+        guint32* row = reinterpret_cast<guint32*>(data + y * stride);
+        if (row[x] != target) continue;
+
+        row[x] = replacement;
+        pixels.push({x - 1, y});
+        pixels.push({x + 1, y});
+        pixels.push({x, y - 1});
+        pixels.push({x, y + 1});
+    }
+
+    cairo_surface_mark_dirty(app_state.surface);
+}
+
 // Drawing functions for each tool
 void draw_line(cairo_t* cr, double x1, double y1, double x2, double y2) {
     GdkRGBA color = get_active_color();
@@ -1113,9 +1208,21 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
         if (app_state.text_active && app_state.current_tool != TOOL_TEXT) {
             finalize_text();
         }
+
+        app_state.is_right_button = (event->button == 3);
+
+        if (app_state.current_tool == TOOL_EYEDROPPER) {
+            pick_color_at(static_cast<int>(event->x), static_cast<int>(event->y), app_state.is_right_button);
+            return TRUE;
+        }
+
+        if (app_state.current_tool == TOOL_FILL) {
+            flood_fill_at(static_cast<int>(event->x), static_cast<int>(event->y));
+            gtk_widget_queue_draw(widget);
+            return TRUE;
+        }
         
         app_state.is_drawing = true;
-        app_state.is_right_button = (event->button == 3);
         app_state.last_x = event->x;
         app_state.last_y = event->y;
         app_state.start_x = event->x;
@@ -1177,7 +1284,7 @@ gboolean on_motion_notify(GtkWidget* widget, GdkEventMotion* event, gpointer dat
 
 // Mouse button release
 gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpointer data) {
-    if ((event->button == 1 || event->button == 3) && app_state.surface) {
+    if ((event->button == 1 || event->button == 3) && app_state.surface && app_state.is_drawing) {
         double end_x = event->x;
         double end_y = event->y;
         
@@ -1370,6 +1477,104 @@ void open_image_dialog(GtkWidget* parent) {
 
 // Menu callbacks
 void on_file_new(GtkMenuItem* item, gpointer data) {
+    GtkWidget* dialog = gtk_dialog_new_with_buttons(
+        "New Image",
+        GTK_WINDOW(app_state.window),
+        (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+        "_Cancel", GTK_RESPONSE_CANCEL,
+        "_Create", GTK_RESPONSE_OK,
+        NULL
+    );
+
+    GtkWidget* content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    GtkWidget* container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
+    gtk_container_set_border_width(GTK_CONTAINER(container), 10);
+    gtk_container_add(GTK_CONTAINER(content), container);
+
+    GtkWidget* resolution_label = gtk_label_new("Resolution:");
+    gtk_widget_set_halign(resolution_label, GTK_ALIGN_START);
+    gtk_box_pack_start(GTK_BOX(container), resolution_label, FALSE, FALSE, 0);
+
+    GtkWidget* resolution_combo = gtk_combo_box_text_new();
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(resolution_combo), "256x256");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(resolution_combo), "512x512");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(resolution_combo), "1024x1024");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(resolution_combo), "640x480");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(resolution_combo), "800x600");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(resolution_combo), "Custom");
+    gtk_combo_box_set_active(GTK_COMBO_BOX(resolution_combo), 4);
+    gtk_box_pack_start(GTK_BOX(container), resolution_combo, FALSE, FALSE, 0);
+
+    GtkWidget* custom_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+    GtkWidget* x_label = gtk_label_new("X:");
+    GtkWidget* x_spin = gtk_spin_button_new_with_range(1, 10000, 1);
+    GtkWidget* separator_label = gtk_label_new("x");
+    GtkWidget* y_label = gtk_label_new("Y:");
+    GtkWidget* y_spin = gtk_spin_button_new_with_range(1, 10000, 1);
+    GtkWidget* pixels_label = gtk_label_new("pixels");
+
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(x_spin), 800);
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(y_spin), 600);
+
+    gtk_box_pack_start(GTK_BOX(custom_row), x_label, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(custom_row), x_spin, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(custom_row), separator_label, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(custom_row), y_label, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(custom_row), y_spin, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(custom_row), pixels_label, FALSE, FALSE, 0);
+    gtk_widget_set_sensitive(custom_row, FALSE);
+    gtk_box_pack_start(GTK_BOX(container), custom_row, FALSE, FALSE, 0);
+
+    g_signal_connect(resolution_combo, "changed", G_CALLBACK(+[] (GtkComboBox* combo, gpointer user_data) {
+        GtkWidget* row = GTK_WIDGET(user_data);
+        GtkWidget* x_input = GTK_WIDGET(g_object_get_data(G_OBJECT(row), "x-spin"));
+        GtkWidget* y_input = GTK_WIDGET(g_object_get_data(G_OBJECT(row), "y-spin"));
+
+        gchar* selected = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo));
+        bool is_custom = selected && g_strcmp0(selected, "Custom") == 0;
+        gtk_widget_set_sensitive(row, is_custom);
+
+        if (!is_custom && selected) {
+            int width = 0;
+            int height = 0;
+            if (sscanf(selected, "%dx%d", &width, &height) == 2) {
+                gtk_spin_button_set_value(GTK_SPIN_BUTTON(x_input), width);
+                gtk_spin_button_set_value(GTK_SPIN_BUTTON(y_input), height);
+            }
+        }
+
+        g_free(selected);
+    }), custom_row);
+
+    g_object_set_data(G_OBJECT(custom_row), "x-spin", x_spin);
+    g_object_set_data(G_OBJECT(custom_row), "y-spin", y_spin);
+
+    gtk_widget_show_all(dialog);
+
+    int response = gtk_dialog_run(GTK_DIALOG(dialog));
+    if (response != GTK_RESPONSE_OK) {
+        gtk_widget_destroy(dialog);
+        return;
+    }
+
+    int new_width = 800;
+    int new_height = 600;
+    gchar* selected = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(resolution_combo));
+    if (selected && g_strcmp0(selected, "Custom") == 0) {
+        new_width = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(x_spin));
+        new_height = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(y_spin));
+    } else if (selected) {
+        if (sscanf(selected, "%dx%d", &new_width, &new_height) != 2) {
+            new_width = 800;
+            new_height = 600;
+        }
+    }
+    g_free(selected);
+    gtk_widget_destroy(dialog);
+
+    app_state.canvas_width = new_width;
+    app_state.canvas_height = new_height;
+    gtk_widget_set_size_request(app_state.drawing_area, new_width, new_height);
     init_surface(app_state.drawing_area);
     app_state.current_filename.clear();
     clear_selection();
@@ -1438,12 +1643,58 @@ gboolean on_color_button_press(GtkWidget* widget, GdkEventButton* event, gpointe
     return TRUE;
 }
 
+const char* get_tool_icon_filename(Tool tool) {
+    switch (tool) {
+        case TOOL_LASSO_SELECT: return "stock-tool-free-select.png";
+        case TOOL_RECT_SELECT: return "stock-tool-rect-select.png";
+        case TOOL_ERASER: return "stock-tool-eraser.png";
+        case TOOL_FILL: return "stock-tool-bucket-fill.png";
+        case TOOL_EYEDROPPER: return "stock-tool-color-picker.png";
+        case TOOL_ZOOM: return "stock-tool-zoom.png";
+        case TOOL_PENCIL: return "stock-tool-pencil.png";
+        case TOOL_PAINTBRUSH: return "stock-tool-paintbrush.png";
+        case TOOL_AIRBRUSH: return "stock-tool-airbrush.png";
+        case TOOL_TEXT: return "stock-tool-text.png";
+        case TOOL_LINE: return "stock_draw-line.png";
+        case TOOL_CURVE: return "stock_draw-curve.png";
+        case TOOL_RECTANGLE: return "stock_draw-rectangle.png";
+        case TOOL_POLYGON: return "stock_draw-fill_polygon.png";
+        case TOOL_ELLIPSE: return "stock_draw-ellipse.png";
+        case TOOL_ROUNDED_RECT: return "stock_draw-rounded-rectangle.png";
+        default: return NULL;
+    }
+}
+
+GtkWidget* create_tool_icon(Tool tool) {
+    const char* icon_file = get_tool_icon_filename(tool);
+    if (!icon_file) {
+        return gtk_image_new();
+    }
+
+    const char* icon_roots[] = {
+        "/usr/share/mate-paint",
+        "."
+    };
+
+    for (gsize i = 0; i < G_N_ELEMENTS(icon_roots); i++) {
+        gchar* icon_path = g_build_filename(icon_roots[i], "data", "icons", "16x16", "actions", icon_file, NULL);
+        if (g_file_test(icon_path, G_FILE_TEST_EXISTS)) {
+            GtkWidget* icon = gtk_image_new_from_file(icon_path);
+            g_free(icon_path);
+            return icon;
+        }
+        g_free(icon_path);
+    }
+
+    return gtk_image_new();
+}
+
 // Create tool button with tooltip
-GtkWidget* create_tool_button(const char* icon_name, Tool tool, const char* tooltip) {
+GtkWidget* create_tool_button(Tool tool, const char* tooltip) {
     GtkWidget* button = gtk_button_new();
     gtk_widget_set_size_request(button, 28, 28);
     
-    GtkWidget* icon = gtk_image_new_from_icon_name(icon_name, GTK_ICON_SIZE_SMALL_TOOLBAR);
+    GtkWidget* icon = create_tool_icon(tool);
     gtk_button_set_image(GTK_BUTTON(button), icon);
     
     // Set tooltip
@@ -1556,82 +1807,82 @@ int main(int argc, char* argv[]) {
     
     // Create tool buttons with tooltips
     gtk_grid_attach(GTK_GRID(toolbox), 
-        create_tool_button("edit-select", TOOL_LASSO_SELECT, 
+        create_tool_button(TOOL_LASSO_SELECT, 
             "Lasso Select - Draw freehand selection"), 
         0, 0, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
-        create_tool_button("edit-select-all", TOOL_RECT_SELECT, 
+        create_tool_button(TOOL_RECT_SELECT, 
             "Rectangle Select - Select rectangular regions (Ctrl+C to copy, Ctrl+X to cut)"), 
         1, 0, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
-        create_tool_button("fill-color", TOOL_FILL, 
+        create_tool_button(TOOL_FILL, 
             "Fill Tool - Fill areas with color"), 
         0, 1, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
-        create_tool_button("color-picker", TOOL_EYEDROPPER, 
+        create_tool_button(TOOL_EYEDROPPER, 
             "Eyedropper - Pick color from canvas"), 
         1, 1, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
-        create_tool_button("edit-clear", TOOL_ERASER, 
+        create_tool_button(TOOL_ERASER, 
             "Eraser - Erase with background color"), 
         0, 2, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
-        create_tool_button("zoom-in", TOOL_ZOOM, 
+        create_tool_button(TOOL_ZOOM, 
             "Zoom Tool - Zoom in/out"), 
         1, 2, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
-        create_tool_button("draw-brush", TOOL_PENCIL, 
+        create_tool_button(TOOL_PENCIL, 
             "Pencil - Draw thin lines"), 
         0, 3, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
-        create_tool_button("draw-brush", TOOL_PAINTBRUSH, 
+        create_tool_button(TOOL_PAINTBRUSH, 
             "Paintbrush - Draw with brush strokes"), 
         1, 3, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
-        create_tool_button("weather-fog", TOOL_AIRBRUSH, 
+        create_tool_button(TOOL_AIRBRUSH, 
             "Airbrush - Spray paint effect"), 
         0, 4, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
-        create_tool_button("font-x-generic", TOOL_TEXT, 
+        create_tool_button(TOOL_TEXT, 
             "Text Tool - Add text (Left-click outside to finalize, Right-click outside to cancel)"), 
         1, 4, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
-        create_tool_button("draw-line", TOOL_LINE, 
+        create_tool_button(TOOL_LINE, 
             "Line Tool - Draw straight lines (hold Shift for horizontal/vertical)"), 
         0, 5, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
-        create_tool_button("draw-path", TOOL_CURVE, 
+        create_tool_button(TOOL_CURVE, 
             "Curve Tool - Draw curved lines"), 
         1, 5, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
-        create_tool_button("draw-rectangle", TOOL_RECTANGLE, 
+        create_tool_button(TOOL_RECTANGLE, 
             "Rectangle - Draw rectangles"), 
         0, 6, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
-        create_tool_button("draw-polygon", TOOL_POLYGON, 
+        create_tool_button(TOOL_POLYGON, 
             "Polygon - Draw multi-sided shapes"), 
         1, 6, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
-        create_tool_button("draw-circle", TOOL_ELLIPSE, 
+        create_tool_button(TOOL_ELLIPSE, 
             "Ellipse/Circle - Draw ellipses (hold Shift for circles)"), 
         0, 7, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
-        create_tool_button("object-select", TOOL_ROUNDED_RECT, 
+        create_tool_button(TOOL_ROUNDED_RECT, 
             "Rounded Rectangle - Draw rectangles with rounded corners"), 
         1, 7, 1, 1);
     
@@ -1713,4 +1964,3 @@ int main(int argc, char* argv[]) {
     
     return 0;
 }
-
