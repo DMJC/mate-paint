@@ -1371,6 +1371,10 @@ void draw_selection_overlay(cairo_t* cr) {
 void draw_preview(cairo_t* cr) {
     if (!app_state.is_drawing) return;
     
+    // Dragging an existing floating selection should only show the active
+    // selection outline, not a new preview marquee from the selection tool.
+    if (app_state.dragging_selection) return;
+
     cairo_save(cr);
     
     double preview_x = app_state.current_x;
@@ -2574,6 +2578,32 @@ void on_image_flip_vertical(GtkMenuItem* item, gpointer data) {
     gtk_widget_queue_draw(app_state.drawing_area);
 }
 
+void on_help_manual(GtkMenuItem* item, gpointer data) {
+    GtkWidget* dialog = gtk_message_dialog_new(
+        GTK_WINDOW(app_state.window),
+        static_cast<GtkDialogFlags>(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+        GTK_MESSAGE_INFO,
+        GTK_BUTTONS_OK,
+        "Manual is not available yet."
+    );
+    gtk_window_set_title(GTK_WINDOW(dialog), "Manual");
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+}
+
+void on_help_about(GtkMenuItem* item, gpointer data) {
+    GtkWidget* dialog = gtk_message_dialog_new(
+        GTK_WINDOW(app_state.window),
+        static_cast<GtkDialogFlags>(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+        GTK_MESSAGE_INFO,
+        GTK_BUTTONS_OK,
+        "Mate-Paint\nversion 1.0\nCopyright 2006\nJames Carthew"
+    );
+    gtk_window_set_title(GTK_WINDOW(dialog), "About");
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+}
+
 // Tool button callback
 void on_tool_clicked(GtkButton* button, gpointer data) {
     Tool new_tool = (Tool)GPOINTER_TO_INT(data);
@@ -3057,7 +3087,17 @@ int main(int argc, char* argv[]) {
     gtk_menu_shell_append(GTK_MENU_SHELL(image_menu), image_flip_horizontal);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(image_menu_item), image_menu);
 
+    GtkWidget* help_menu = gtk_menu_new();
     GtkWidget* help_menu_item = gtk_menu_item_new_with_label("Help");
+    GtkWidget* help_manual = gtk_menu_item_new_with_label("Manual");
+    GtkWidget* help_about = gtk_menu_item_new_with_label("About");
+
+    g_signal_connect(help_manual, "activate", G_CALLBACK(on_help_manual), NULL);
+    g_signal_connect(help_about, "activate", G_CALLBACK(on_help_about), NULL);
+
+    gtk_menu_shell_append(GTK_MENU_SHELL(help_menu), help_manual);
+    gtk_menu_shell_append(GTK_MENU_SHELL(help_menu), help_about);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(help_menu_item), help_menu);
     
     gtk_menu_shell_append(GTK_MENU_SHELL(menubar), edit_menu_item);
     gtk_menu_shell_append(GTK_MENU_SHELL(menubar), image_menu_item);
