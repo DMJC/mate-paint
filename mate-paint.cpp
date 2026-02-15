@@ -38,6 +38,7 @@ void clear_selection();
 void copy_selection();
 void cut_selection();
 void paste_selection();
+void commit_floating_selection();
 void finalize_text();
 void cancel_text();
 void update_text_box_size();
@@ -76,6 +77,12 @@ struct AppState {
     double selection_x2 = 0;
     double selection_y2 = 0;
     std::vector<std::pair<double, double>> selection_path;
+    cairo_surface_t* floating_surface = nullptr;
+    bool floating_selection_active = false;
+    bool dragging_selection = false;
+    bool floating_drag_completed = false;
+    double selection_drag_offset_x = 0;
+    double selection_drag_offset_y = 0;
     
     // Text tool state
     bool text_active = false;
@@ -404,11 +411,92 @@ void finalize_text() {
 
 // Clear selection
 void clear_selection() {
+    if (app_state.floating_surface) {
+        cairo_surface_destroy(app_state.floating_surface);
+        app_state.floating_surface = nullptr;
+    }
+    app_state.floating_selection_active = false;
+    app_state.dragging_selection = false;
+    app_state.floating_drag_completed = false;
     app_state.has_selection = false;
     app_state.selection_path.clear();
     if (app_state.drawing_area) {
         gtk_widget_queue_draw(app_state.drawing_area);
     }
+}
+
+void commit_floating_selection() {
+    if (!app_state.floating_selection_active || !app_state.floating_surface || !app_state.surface) {
+        return;
+    }
+
+    double x = fmin(app_state.selection_x1, app_state.selection_x2);
+    double y = fmin(app_state.selection_y1, app_state.selection_y2);
+
+    cairo_t* cr = cairo_create(app_state.surface);
+    cairo_set_source_surface(cr, app_state.floating_surface, x, y);
+    cairo_paint(cr);
+    cairo_destroy(cr);
+
+    clear_selection();
+}
+
+void start_selection_drag() {
+    if (!app_state.has_selection || !app_state.surface) return;
+
+    if (app_state.floating_selection_active) return;
+
+    double x1 = fmin(app_state.selection_x1, app_state.selection_x2);
+    double y1 = fmin(app_state.selection_y1, app_state.selection_y2);
+    double x2 = fmax(app_state.selection_x1, app_state.selection_x2);
+    double y2 = fmax(app_state.selection_y1, app_state.selection_y2);
+
+    int w = (int)ceil(x2 - x1);
+    int h = (int)ceil(y2 - y1);
+    if (w <= 0 || h <= 0) return;
+
+    app_state.floating_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
+    cairo_t* float_cr = cairo_create(app_state.floating_surface);
+
+    if (app_state.selection_is_rect) {
+        cairo_set_source_surface(float_cr, app_state.surface, -x1, -y1);
+        cairo_paint(float_cr);
+    } else if (app_state.selection_path.size() > 2) {
+        cairo_save(float_cr);
+        cairo_translate(float_cr, -x1, -y1);
+        cairo_move_to(float_cr, app_state.selection_path[0].first, app_state.selection_path[0].second);
+        for (size_t i = 1; i < app_state.selection_path.size(); i++) {
+            cairo_line_to(float_cr, app_state.selection_path[i].first, app_state.selection_path[i].second);
+        }
+        cairo_close_path(float_cr);
+        cairo_clip(float_cr);
+        cairo_set_source_surface(float_cr, app_state.surface, 0, 0);
+        cairo_paint(float_cr);
+        cairo_restore(float_cr);
+    }
+    cairo_destroy(float_cr);
+
+    cairo_t* cr = cairo_create(app_state.surface);
+    cairo_set_source_rgba(cr,
+        app_state.bg_color.red,
+        app_state.bg_color.green,
+        app_state.bg_color.blue,
+        app_state.bg_color.alpha
+    );
+    if (app_state.selection_is_rect) {
+        cairo_rectangle(cr, x1, y1, x2 - x1, y2 - y1);
+    } else if (app_state.selection_path.size() > 2) {
+        cairo_move_to(cr, app_state.selection_path[0].first, app_state.selection_path[0].second);
+        for (size_t i = 1; i < app_state.selection_path.size(); i++) {
+            cairo_line_to(cr, app_state.selection_path[i].first, app_state.selection_path[i].second);
+        }
+        cairo_close_path(cr);
+    }
+    cairo_fill(cr);
+    cairo_destroy(cr);
+
+    app_state.floating_selection_active = true;
+    app_state.floating_drag_completed = false;
 }
 
 // Copy selection to clipboard
@@ -435,7 +523,11 @@ void copy_selection() {
         app_state.clipboard_height = h;
         
         cairo_t* cr = cairo_create(app_state.clipboard_surface);
-        cairo_set_source_surface(cr, app_state.surface, -x1, -y1);
+        if (app_state.floating_selection_active && app_state.floating_surface) {
+            cairo_set_source_surface(cr, app_state.floating_surface, 0, 0);
+        } else {
+            cairo_set_source_surface(cr, app_state.surface, -x1, -y1);
+        }
         cairo_paint(cr);
         cairo_destroy(cr);
     }
@@ -446,6 +538,11 @@ void cut_selection() {
     if (!app_state.has_selection || !app_state.surface) return;
     
     copy_selection();
+
+    if (app_state.floating_selection_active) {
+        clear_selection();
+        return;
+    }
     
     if (app_state.selection_is_rect) {
         double x1 = fmin(app_state.selection_x1, app_state.selection_x2);
@@ -475,22 +572,25 @@ void cut_selection() {
 // Paste from clipboard
 void paste_selection() {
     if (!app_state.clipboard_surface || !app_state.surface) return;
-    
+
+    clear_selection();
+
     double paste_x = 20;
     double paste_y = 20;
-    
-    cairo_t* cr = cairo_create(app_state.surface);
-    cairo_set_source_surface(cr, app_state.clipboard_surface, paste_x, paste_y);
-    cairo_paint(cr);
-    cairo_destroy(cr);
-    
+
+    app_state.floating_surface = cairo_surface_reference(app_state.clipboard_surface);
+    app_state.floating_selection_active = true;
+    app_state.floating_drag_completed = false;
+    app_state.dragging_selection = false;
+
     app_state.has_selection = true;
     app_state.selection_is_rect = true;
+    app_state.selection_path.clear();
     app_state.selection_x1 = paste_x;
     app_state.selection_y1 = paste_y;
     app_state.selection_x2 = paste_x + app_state.clipboard_width;
     app_state.selection_y2 = paste_y + app_state.clipboard_height;
-    
+
     if (app_state.drawing_area) {
         gtk_widget_queue_draw(app_state.drawing_area);
     }
@@ -1139,6 +1239,13 @@ gboolean on_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
     if (app_state.surface) {
         cairo_set_source_surface(cr, app_state.surface, 0, 0);
         cairo_paint(cr);
+
+        if (app_state.floating_selection_active && app_state.floating_surface) {
+            double x = fmin(app_state.selection_x1, app_state.selection_x2);
+            double y = fmin(app_state.selection_y1, app_state.selection_y2);
+            cairo_set_source_surface(cr, app_state.floating_surface, x, y);
+            cairo_paint(cr);
+        }
         
         // Draw active selection
         if (app_state.has_selection) {
@@ -1189,6 +1296,20 @@ gboolean on_key_release(GtkWidget* widget, GdkEventKey* event, gpointer data) {
 // Mouse button press
 gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data) {
     if ((event->button == 1 || event->button == 3) && app_state.surface) {
+        if (app_state.floating_selection_active) {
+            if (app_state.floating_drag_completed || !point_in_selection(event->x, event->y)) {
+                commit_floating_selection();
+                return TRUE;
+            }
+
+            start_selection_drag();
+            app_state.dragging_selection = true;
+            app_state.selection_drag_offset_x = event->x - fmin(app_state.selection_x1, app_state.selection_x2);
+            app_state.selection_drag_offset_y = event->y - fmin(app_state.selection_y1, app_state.selection_y2);
+            app_state.is_drawing = true;
+            return TRUE;
+        }
+
         // Handle text tool
         if (app_state.current_tool == TOOL_TEXT) {
             if (app_state.text_active && !point_in_text_box(event->x, event->y)) {
@@ -1221,7 +1342,19 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
             // If clicking inside text box, do nothing (keep editing)
             return TRUE;
         }
-        
+
+        if ((app_state.current_tool == TOOL_RECT_SELECT || app_state.current_tool == TOOL_LASSO_SELECT) &&
+            app_state.has_selection && point_in_selection(event->x, event->y)) {
+            start_selection_drag();
+            if (app_state.floating_selection_active) {
+                app_state.dragging_selection = true;
+                app_state.selection_drag_offset_x = event->x - fmin(app_state.selection_x1, app_state.selection_x2);
+                app_state.selection_drag_offset_y = event->y - fmin(app_state.selection_y1, app_state.selection_y2);
+                app_state.is_drawing = true;
+                return TRUE;
+            }
+        }
+
         // Check if clicking outside selection area - clear selection
         if (app_state.has_selection && !point_in_selection(event->x, event->y)) {
             clear_selection();
@@ -1272,8 +1405,32 @@ gboolean on_motion_notify(GtkWidget* widget, GdkEventMotion* event, gpointer dat
     if (app_state.is_drawing && app_state.surface) {
         app_state.current_x = event->x;
         app_state.current_y = event->y;
-        
-        if (app_state.current_tool == TOOL_LASSO_SELECT) {
+
+        if (app_state.dragging_selection && app_state.has_selection) {
+            double old_x = fmin(app_state.selection_x1, app_state.selection_x2);
+            double old_y = fmin(app_state.selection_y1, app_state.selection_y2);
+            double width = fabs(app_state.selection_x2 - app_state.selection_x1);
+            double height = fabs(app_state.selection_y2 - app_state.selection_y1);
+            double new_x = event->x - app_state.selection_drag_offset_x;
+            double new_y = event->y - app_state.selection_drag_offset_y;
+
+            double dx = new_x - old_x;
+            double dy = new_y - old_y;
+
+            app_state.selection_x1 = new_x;
+            app_state.selection_y1 = new_y;
+            app_state.selection_x2 = new_x + width;
+            app_state.selection_y2 = new_y + height;
+
+            if (!app_state.selection_is_rect) {
+                for (auto& point : app_state.selection_path) {
+                    point.first += dx;
+                    point.second += dy;
+                }
+            }
+
+            gtk_widget_queue_draw(widget);
+        } else if (app_state.current_tool == TOOL_LASSO_SELECT) {
             app_state.lasso_points.push_back({event->x, event->y});
             gtk_widget_queue_draw(widget);
         } else if (tool_needs_preview(app_state.current_tool)) {
@@ -1308,6 +1465,14 @@ gboolean on_motion_notify(GtkWidget* widget, GdkEventMotion* event, gpointer dat
 // Mouse button release
 gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpointer data) {
     if ((event->button == 1 || event->button == 3) && app_state.surface && app_state.is_drawing) {
+        if (app_state.dragging_selection) {
+            app_state.dragging_selection = false;
+            app_state.is_drawing = false;
+            app_state.floating_drag_completed = true;
+            gtk_widget_queue_draw(widget);
+            return TRUE;
+        }
+
         double end_x = event->x;
         double end_y = event->y;
         
@@ -1345,6 +1510,7 @@ gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpointer da
             case TOOL_RECT_SELECT:
                 app_state.has_selection = true;
                 app_state.selection_is_rect = true;
+                app_state.floating_selection_active = false;
                 app_state.selection_x1 = app_state.start_x;
                 app_state.selection_y1 = app_state.start_y;
                 app_state.selection_x2 = end_x;
@@ -1353,8 +1519,19 @@ gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpointer da
             case TOOL_LASSO_SELECT:
                 app_state.has_selection = true;
                 app_state.selection_is_rect = false;
+                app_state.floating_selection_active = false;
                 app_state.selection_path = app_state.lasso_points;
                 app_state.lasso_points.clear();
+                if (!app_state.selection_path.empty()) {
+                    app_state.selection_x1 = app_state.selection_x2 = app_state.selection_path[0].first;
+                    app_state.selection_y1 = app_state.selection_y2 = app_state.selection_path[0].second;
+                    for (const auto& point : app_state.selection_path) {
+                        app_state.selection_x1 = fmin(app_state.selection_x1, point.first);
+                        app_state.selection_y1 = fmin(app_state.selection_y1, point.second);
+                        app_state.selection_x2 = fmax(app_state.selection_x2, point.first);
+                        app_state.selection_y2 = fmax(app_state.selection_y2, point.second);
+                    }
+                }
                 break;
         }
         
@@ -1370,6 +1547,10 @@ gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpointer da
 
 // File operations
 void save_image_dialog(GtkWidget* parent) {
+    if (app_state.floating_selection_active) {
+        commit_floating_selection();
+    }
+
     GtkWidget* dialog = gtk_file_chooser_dialog_new(
         "Save Image",
         GTK_WINDOW(parent),
@@ -1781,6 +1962,124 @@ void on_image_resize_canvas(GtkMenuItem* item, gpointer data) {
     gtk_widget_queue_draw(app_state.drawing_area);
 }
 
+void on_image_rotate_clockwise(GtkMenuItem* item, gpointer data) {
+    if (!app_state.surface) return;
+
+    const int old_width = app_state.canvas_width;
+    const int old_height = app_state.canvas_height;
+    const int new_width = old_height;
+    const int new_height = old_width;
+
+    cairo_surface_t* old_surface = app_state.surface;
+    cairo_surface_t* rotated_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, new_width, new_height);
+    cairo_t* cr = cairo_create(rotated_surface);
+
+    cairo_translate(cr, new_width, 0);
+    cairo_rotate(cr, M_PI / 2.0);
+    cairo_set_source_surface(cr, old_surface, 0, 0);
+    cairo_paint(cr);
+    cairo_destroy(cr);
+
+    app_state.surface = rotated_surface;
+    app_state.canvas_width = new_width;
+    app_state.canvas_height = new_height;
+    cairo_surface_destroy(old_surface);
+
+    clear_selection();
+    if (app_state.text_active) {
+        cancel_text();
+    }
+
+    gtk_widget_set_size_request(app_state.drawing_area, new_width, new_height);
+    gtk_widget_queue_draw(app_state.drawing_area);
+}
+
+void on_image_rotate_counter_clockwise(GtkMenuItem* item, gpointer data) {
+    if (!app_state.surface) return;
+
+    const int old_width = app_state.canvas_width;
+    const int old_height = app_state.canvas_height;
+    const int new_width = old_height;
+    const int new_height = old_width;
+
+    cairo_surface_t* old_surface = app_state.surface;
+    cairo_surface_t* rotated_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, new_width, new_height);
+    cairo_t* cr = cairo_create(rotated_surface);
+
+    cairo_translate(cr, 0, new_height);
+    cairo_rotate(cr, -M_PI / 2.0);
+    cairo_set_source_surface(cr, old_surface, 0, 0);
+    cairo_paint(cr);
+    cairo_destroy(cr);
+
+    app_state.surface = rotated_surface;
+    app_state.canvas_width = new_width;
+    app_state.canvas_height = new_height;
+    cairo_surface_destroy(old_surface);
+
+    clear_selection();
+    if (app_state.text_active) {
+        cancel_text();
+    }
+
+    gtk_widget_set_size_request(app_state.drawing_area, new_width, new_height);
+    gtk_widget_queue_draw(app_state.drawing_area);
+}
+
+void on_image_flip_horizontal(GtkMenuItem* item, gpointer data) {
+    if (!app_state.surface) return;
+
+    const int width = app_state.canvas_width;
+    const int height = app_state.canvas_height;
+
+    cairo_surface_t* old_surface = app_state.surface;
+    cairo_surface_t* flipped_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+    cairo_t* cr = cairo_create(flipped_surface);
+
+    cairo_translate(cr, width, 0);
+    cairo_scale(cr, -1, 1);
+    cairo_set_source_surface(cr, old_surface, 0, 0);
+    cairo_paint(cr);
+    cairo_destroy(cr);
+
+    app_state.surface = flipped_surface;
+    cairo_surface_destroy(old_surface);
+
+    clear_selection();
+    if (app_state.text_active) {
+        cancel_text();
+    }
+
+    gtk_widget_queue_draw(app_state.drawing_area);
+}
+
+void on_image_flip_vertical(GtkMenuItem* item, gpointer data) {
+    if (!app_state.surface) return;
+
+    const int width = app_state.canvas_width;
+    const int height = app_state.canvas_height;
+
+    cairo_surface_t* old_surface = app_state.surface;
+    cairo_surface_t* flipped_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+    cairo_t* cr = cairo_create(flipped_surface);
+
+    cairo_translate(cr, 0, height);
+    cairo_scale(cr, 1, -1);
+    cairo_set_source_surface(cr, old_surface, 0, 0);
+    cairo_paint(cr);
+    cairo_destroy(cr);
+
+    app_state.surface = flipped_surface;
+    cairo_surface_destroy(old_surface);
+
+    clear_selection();
+    if (app_state.text_active) {
+        cancel_text();
+    }
+
+    gtk_widget_queue_draw(app_state.drawing_area);
+}
+
 // Tool button callback
 void on_tool_clicked(GtkButton* button, gpointer data) {
     Tool new_tool = (Tool)GPOINTER_TO_INT(data);
@@ -1790,10 +2089,14 @@ void on_tool_clicked(GtkButton* button, gpointer data) {
         cancel_text();
     }
     
-    // Clear selection when switching tools
+    // Clear or commit selection when switching tools
     if (new_tool != app_state.current_tool) {
         if (new_tool != TOOL_RECT_SELECT && new_tool != TOOL_LASSO_SELECT) {
-            clear_selection();
+            if (app_state.floating_selection_active) {
+                commit_floating_selection();
+            } else {
+                clear_selection();
+            }
             if (!app_state.text_active) {
                 stop_ant_animation();
             }
@@ -2109,12 +2412,25 @@ int main(int argc, char* argv[]) {
     GtkWidget* image_menu_item = gtk_menu_item_new_with_label("Image");
     GtkWidget* image_scale = gtk_menu_item_new_with_label("Scale Image...");
     GtkWidget* image_resize = gtk_menu_item_new_with_label("Resize Image...");
+    GtkWidget* image_rotate_clockwise = gtk_menu_item_new_with_label("Rotate Clockwise");
+    GtkWidget* image_rotate_counter_clockwise = gtk_menu_item_new_with_label("Rotate Counter-Clockwise");
+    GtkWidget* image_flip_vertical = gtk_menu_item_new_with_label("Flip Vertical");
+    GtkWidget* image_flip_horizontal = gtk_menu_item_new_with_label("Flip Horizontal");
 
     g_signal_connect(image_scale, "activate", G_CALLBACK(on_image_scale), NULL);
     g_signal_connect(image_resize, "activate", G_CALLBACK(on_image_resize_canvas), NULL);
+    g_signal_connect(image_rotate_clockwise, "activate", G_CALLBACK(on_image_rotate_clockwise), NULL);
+    g_signal_connect(image_rotate_counter_clockwise, "activate", G_CALLBACK(on_image_rotate_counter_clockwise), NULL);
+    g_signal_connect(image_flip_vertical, "activate", G_CALLBACK(on_image_flip_vertical), NULL);
+    g_signal_connect(image_flip_horizontal, "activate", G_CALLBACK(on_image_flip_horizontal), NULL);
 
     gtk_menu_shell_append(GTK_MENU_SHELL(image_menu), image_scale);
     gtk_menu_shell_append(GTK_MENU_SHELL(image_menu), image_resize);
+    gtk_menu_shell_append(GTK_MENU_SHELL(image_menu), gtk_separator_menu_item_new());
+    gtk_menu_shell_append(GTK_MENU_SHELL(image_menu), image_rotate_clockwise);
+    gtk_menu_shell_append(GTK_MENU_SHELL(image_menu), image_rotate_counter_clockwise);
+    gtk_menu_shell_append(GTK_MENU_SHELL(image_menu), image_flip_vertical);
+    gtk_menu_shell_append(GTK_MENU_SHELL(image_menu), image_flip_horizontal);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(image_menu_item), image_menu);
 
     GtkWidget* help_menu_item = gtk_menu_item_new_with_label("Help");
@@ -2309,6 +2625,9 @@ int main(int argc, char* argv[]) {
     }
     if (app_state.clipboard_surface) {
         cairo_surface_destroy(app_state.clipboard_surface);
+    }
+    if (app_state.floating_surface) {
+        cairo_surface_destroy(app_state.floating_surface);
     }
     
     return 0;
