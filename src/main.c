@@ -57,6 +57,7 @@ static void init_paint_brush		(GtkBuilder *builder);
 static void save_the_children		(GtkBuilder *builder, GtkWidget *drawing);
 static GtkWidget *create_fallback_window	( void );
 static GtkWidget *find_drawing_widget	(GtkWidget *widget);
+static gboolean window_has_children	(GtkWidget *window);
 
 void		
 on_menu_new_activate( GtkMenuItem *menuitem, gpointer user_data)
@@ -165,11 +166,31 @@ create_window (void)
 	GtkWidget		*widget;
 	GtkWidget		*drawing;
 	GtkBuilder		*builder;
+	GError			*error;
+	gboolean		loaded;
 
 	builder = gtk_builder_new ();
-    gtk_builder_add_from_file (builder, UI_FILE, NULL);
+	error = NULL;
+	loaded = gtk_builder_add_from_file (builder, UI_FILE, &error);
+	if (!loaded)
+	{
+		g_warning ("Failed to load UI definition '%s': %s", UI_FILE,
+		           (error != NULL) ? error->message : "unknown error");
+		if (error != NULL)
+		{
+			g_error_free (error);
+		}
+		g_object_unref (G_OBJECT (builder));
+		return create_fallback_window ();
+	}
+
 	window = GTK_WIDGET (gtk_builder_get_object (builder, "window"));
-	g_assert ( window );
+	if (!GTK_IS_WIDGET (window) || !window_has_children (window))
+	{
+		g_warning ("UI definition loaded but did not create a usable main window");
+		g_object_unref (G_OBJECT (builder));
+		return create_fallback_window ();
+	}
 
 	widget = GTK_WIDGET (gtk_builder_get_object (builder, "flip_roate_dialog"));
 	drawing = GTK_WIDGET (gtk_builder_get_object (builder, "cv_drawing"));
@@ -207,6 +228,41 @@ create_window (void)
 	/* To show all widget that is set invisible on Glade */
 	/* and call realize event */
 	gtk_widget_show_all(window);
+
+	return window;
+}
+
+static GtkWidget *
+create_fallback_window (void)
+{
+	GtkWidget *window;
+	GtkWidget *box;
+	GtkWidget *title;
+	GtkWidget *message;
+
+	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title (GTK_WINDOW (window), _("mate-paint"));
+	gtk_window_set_default_size (GTK_WINDOW (window), 640, 480);
+
+	box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+	gtk_container_set_border_width (GTK_CONTAINER (box), 18);
+	gtk_container_add (GTK_CONTAINER (window), box);
+
+	title = gtk_label_new (NULL);
+	gtk_label_set_markup (GTK_LABEL (title),
+	                      _("<b>Unable to load the application interface</b>"));
+	gtk_label_set_xalign (GTK_LABEL (title), 0.0f);
+	gtk_box_pack_start (GTK_BOX (box), title, FALSE, FALSE, 0);
+
+	message = gtk_label_new (_("mate-paint could not load its GTK UI file.\n"
+	                           "Please verify your installation includes\n"
+	                           "mate_paint.ui in the expected data directory."));
+	gtk_label_set_xalign (GTK_LABEL (message), 0.0f);
+	gtk_label_set_selectable (GTK_LABEL (message), TRUE);
+	gtk_box_pack_start (GTK_BOX (box), message, FALSE, FALSE, 0);
+
+	g_signal_connect (window, "destroy", G_CALLBACK (on_window_destroy), NULL);
+	gtk_widget_show_all (window);
 
 	return window;
 }
@@ -398,3 +454,17 @@ find_drawing_widget (GtkWidget *widget)
 	return NULL;
 }
 
+static gboolean
+window_has_children (GtkWidget *window)
+{
+	GtkWidget *child;
+
+	if (!GTK_IS_WINDOW (window))
+	{
+		return FALSE;
+	}
+
+	child = gtk_bin_get_child (GTK_BIN (window));
+
+	return GTK_IS_WIDGET (child);
+}
