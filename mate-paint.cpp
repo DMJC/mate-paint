@@ -1688,8 +1688,19 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
         if (app_state.current_tool == TOOL_POLYGON) {
             if (event->button == 1) {
                 if (app_state.polygon_finished) {
+                    push_undo_state();
+                    app_state.is_right_button = false;
+                    cairo_t* cr = cairo_create(app_state.surface);
+                    configure_crisp_rendering(cr);
+                    draw_polygon(cr, app_state.polygon_points);
+                    cairo_destroy(cr);
+
                     app_state.polygon_points.clear();
                     app_state.polygon_finished = false;
+                    app_state.is_drawing = false;
+                    stop_ant_animation();
+                    gtk_widget_queue_draw(widget);
+                    return TRUE;
                 }
 
                 app_state.polygon_points.push_back({canvas_x, canvas_y});
@@ -1703,15 +1714,14 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
 
             if (event->button == 3) {
                 if (!app_state.polygon_finished && app_state.polygon_points.size() >= 2) {
+                    app_state.polygon_finished = true;
+                    app_state.is_drawing = true;
+                } else if (app_state.polygon_finished) {
                     push_undo_state();
                     cairo_t* cr = cairo_create(app_state.surface);
                     configure_crisp_rendering(cr);
                     draw_polygon(cr, app_state.polygon_points);
                     cairo_destroy(cr);
-
-                    app_state.polygon_finished = true;
-                    app_state.is_drawing = true;
-                } else if (app_state.polygon_finished) {
                     app_state.polygon_points.clear();
                     app_state.polygon_finished = false;
                     app_state.is_drawing = false;
