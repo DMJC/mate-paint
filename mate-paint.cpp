@@ -1789,6 +1789,24 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
                 return TRUE;
             }
 
+            if (app_state.curve_has_end && (event->state & GDK_SHIFT_MASK)) {
+                app_state.curve_start_x = canvas_x;
+                app_state.curve_start_y = canvas_y;
+                app_state.current_x = canvas_x;
+                app_state.current_y = canvas_y;
+                gtk_widget_queue_draw(widget);
+                return TRUE;
+            }
+
+            if (app_state.curve_has_end && (event->state & GDK_CONTROL_MASK)) {
+                app_state.curve_end_x = canvas_x;
+                app_state.curve_end_y = canvas_y;
+                app_state.current_x = canvas_x;
+                app_state.current_y = canvas_y;
+                gtk_widget_queue_draw(widget);
+                return TRUE;
+            }
+
             if (!app_state.curve_has_end) {
                 app_state.curve_end_x = canvas_x;
                 app_state.curve_end_y = canvas_y;
