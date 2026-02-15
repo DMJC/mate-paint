@@ -1,6 +1,3 @@
-// drawing_app.cpp
-// Compile with: g++ drawing_app.cpp -o drawing_app `pkg-config --cflags --libs gtk+-3.0` -std=c++11
-
 #include <gtk/gtk.h>
 #include <cairo.h>
 #include <vector>
@@ -8,6 +5,8 @@
 #include <memory>
 #include <string>
 #include <queue>
+
+const double line_thickness_options[] = {1.0, 2.0, 4.0, 6.0, 8.0};
 
 // Tool types
 enum Tool {
@@ -26,7 +25,8 @@ enum Tool {
     TOOL_RECTANGLE,
     TOOL_POLYGON,
     TOOL_ELLIPSE,
-    TOOL_ROUNDED_RECT
+    TOOL_ROUNDED_RECT,
+    TOOL_COUNT
 };
 
 // Forward declarations
@@ -40,6 +40,9 @@ void paste_selection();
 void finalize_text();
 void cancel_text();
 void update_text_box_size();
+void update_line_thickness_visibility();
+void update_line_thickness_buttons();
+int tool_to_index(Tool tool);
 
 // Application state
 struct AppState {
@@ -102,7 +105,8 @@ struct AppState {
     GtkWidget* line_thickness_box = nullptr;
     std::vector<GtkWidget*> line_thickness_buttons;
     int active_line_thickness_index = 1;
-    
+    std::vector<int> tool_line_thickness_indices = std::vector<int>(TOOL_COUNT, 1);
+   
     std::string current_filename;
 };
 
@@ -144,7 +148,11 @@ bool tool_needs_preview(Tool tool) {
     return tool == TOOL_LASSO_SELECT || tool == TOOL_RECT_SELECT ||
            tool == TOOL_LINE || tool == TOOL_CURVE ||
            tool == TOOL_RECTANGLE || tool == TOOL_POLYGON ||
-           tool == TOOL_ELLIPSE || tool == TOOL_ROUNDED_RECT;
+           tool == TOOL_ELLIPSE || tool == TOOL_ROUNDED_RECT || tool == TOOL_AIRBRUSH;
+}
+
+int tool_to_index(Tool tool) {
+    return static_cast<int>(tool);
 }
 
 bool tool_supports_line_thickness(Tool tool) {
@@ -507,6 +515,16 @@ void constrain_to_circle(double start_x, double start_y, double& end_x, double& 
     
     end_x = start_x + (dx >= 0 ? radius : -radius);
     end_y = start_y + (dy >= 0 ? radius : -radius);
+}
+
+// Constrain rectangle bounds to a square when shift is pressed
+void constrain_to_square(double start_x, double start_y, double& end_x, double& end_y) {
+    double dx = end_x - start_x;
+    double dy = end_y - start_y;
+    double size = fmax(fabs(dx), fabs(dy));
+
+    end_x = start_x + (dx >= 0 ? size : -size);
+    end_y = start_y + (dy >= 0 ? size : -size);
 }
 
 // Ant path timer callback
@@ -1009,6 +1027,10 @@ void draw_preview(cairo_t* cr) {
             constrain_line(app_state.start_x, app_state.start_y, preview_x, preview_y);
         } else if (app_state.current_tool == TOOL_ELLIPSE) {
             constrain_to_circle(app_state.start_x, app_state.start_y, preview_x, preview_y);
+        } else if (app_state.current_tool == TOOL_RECTANGLE ||
+                   app_state.current_tool == TOOL_ROUNDED_RECT ||
+                   app_state.current_tool == TOOL_RECT_SELECT) {
+            constrain_to_square(app_state.start_x, app_state.start_y, preview_x, preview_y);
         }
     }
     
@@ -1293,6 +1315,10 @@ gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpointer da
                 constrain_line(app_state.start_x, app_state.start_y, end_x, end_y);
             } else if (app_state.current_tool == TOOL_ELLIPSE) {
                 constrain_to_circle(app_state.start_x, app_state.start_y, end_x, end_y);
+            } else if (app_state.current_tool == TOOL_RECTANGLE ||
+                       app_state.current_tool == TOOL_ROUNDED_RECT ||
+                       app_state.current_tool == TOOL_RECT_SELECT) {
+                constrain_to_square(app_state.start_x, app_state.start_y, end_x, end_y);
             }
         }
         
@@ -1624,8 +1650,136 @@ void on_tool_clicked(GtkButton* button, gpointer data) {
     }
     
     app_state.current_tool = new_tool;
+    if (tool_supports_line_thickness(new_tool)) {
+        app_state.active_line_thickness_index = app_state.tool_line_thickness_indices[tool_to_index(new_tool)];
+        app_state.line_width = line_thickness_options[app_state.active_line_thickness_index];
+        update_line_thickness_buttons();
+    }
     app_state.polygon_points.clear();
     app_state.lasso_points.clear();
+    update_line_thickness_visibility();
+}
+
+gboolean on_line_thickness_button_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
+    int index = GPOINTER_TO_INT(data);
+    if (index < 0 || index >= (int)(sizeof(line_thickness_options) / sizeof(line_thickness_options[0]))) {
+        return FALSE;
+    }
+
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(widget, &allocation);
+
+    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+    cairo_set_line_width(cr, line_thickness_options[index]);
+    cairo_move_to(cr, 4, allocation.height / 2.0);
+    cairo_line_to(cr, allocation.width - 4, allocation.height / 2.0);
+    cairo_stroke(cr);
+
+    return FALSE;
+}
+
+void update_line_thickness_buttons() {
+    for (size_t i = 0; i < app_state.line_thickness_buttons.size(); ++i) {
+        GtkWidget* button = app_state.line_thickness_buttons[i];
+        bool is_active = ((int)i == app_state.active_line_thickness_index);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), is_active);
+    }
+}
+
+void on_line_thickness_toggled(GtkToggleButton* button, gpointer data) {
+    int index = GPOINTER_TO_INT(data);
+
+    if (!gtk_toggle_button_get_active(button)) {
+        if (app_state.active_line_thickness_index == index) {
+            gtk_toggle_button_set_active(button, TRUE);
+        }
+        return;
+    }
+
+    app_state.active_line_thickness_index = index;
+    app_state.line_width = line_thickness_options[index];
+    if (tool_supports_line_thickness(app_state.current_tool)) {
+        app_state.tool_line_thickness_indices[tool_to_index(app_state.current_tool)] = index;
+    }
+
+    for (size_t i = 0; i < app_state.line_thickness_buttons.size(); ++i) {
+        if ((int)i != index) {
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(app_state.line_thickness_buttons[i]), FALSE);
+        }
+    }
+}
+
+GtkWidget* create_line_thickness_button(int index) {
+    GtkWidget* button = gtk_toggle_button_new();
+    gtk_widget_set_size_request(button, 66, 20);
+    gtk_widget_set_tooltip_text(button, "Line thickness");
+    gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+
+    GtkCssProvider* provider = gtk_css_provider_new();
+    gtk_css_provider_load_from_data(provider,
+        "togglebutton {"
+        "background: #ffffff;"
+        "background-image: none;"
+        "border: 1px solid #888;"
+        "border-radius: 0;"
+        "padding: 0;"
+        "box-shadow: none;"
+        "}"
+        "togglebutton:checked {"
+        "background: #ffffff;"
+        "background-image: none;"
+        "border: 1px solid #333;"
+        "}"
+        "togglebutton:hover {"
+        "background: #ffffff;"
+        "background-image: none;"
+        "}",
+        -1,
+        NULL
+    );
+    gtk_style_context_add_provider(
+        gtk_widget_get_style_context(button),
+        GTK_STYLE_PROVIDER(provider),
+        GTK_STYLE_PROVIDER_PRIORITY_USER
+    );
+    g_object_unref(provider);
+
+    GtkWidget* preview = gtk_drawing_area_new();
+    gtk_widget_set_size_request(preview, 58, 16);
+    GtkCssProvider* preview_provider = gtk_css_provider_new();
+    gtk_css_provider_load_from_data(preview_provider,
+        "drawingarea {"
+        "background: #ffffff;"
+        "background-image: none;"
+        "}",
+        -1,
+        NULL
+    );
+    gtk_style_context_add_provider(
+        gtk_widget_get_style_context(preview),
+        GTK_STYLE_PROVIDER(preview_provider),
+        GTK_STYLE_PROVIDER_PRIORITY_USER
+    );
+    g_object_unref(preview_provider);
+
+    g_signal_connect(preview, "draw", G_CALLBACK(on_line_thickness_button_draw), GINT_TO_POINTER(index));
+    gtk_container_add(GTK_CONTAINER(button), preview);
+
+    g_signal_connect(button, "toggled", G_CALLBACK(on_line_thickness_toggled), GINT_TO_POINTER(index));
+
+    return button;
+}
+
+void update_line_thickness_visibility() {
+    if (!app_state.line_thickness_box) {
+        return;
+    }
+
+    if (tool_supports_line_thickness(app_state.current_tool)) {
+        gtk_widget_show_all(app_state.line_thickness_box);
+    } else {
+        gtk_widget_hide(app_state.line_thickness_box);
+    }
 }
 
 // Color button callback
@@ -1749,7 +1903,7 @@ int main(int argc, char* argv[]) {
     gtk_init(&argc, &argv);
     
     app_state.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(app_state.window), "Drawing Application");
+    gtk_window_set_title(GTK_WINDOW(app_state.window), "Mate-Paint");
     gtk_window_set_default_size(GTK_WINDOW(app_state.window), 900, 700);
     g_signal_connect(app_state.window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     g_signal_connect(app_state.window, "key-press-event", G_CALLBACK(on_key_press), NULL);
@@ -1797,13 +1951,15 @@ int main(int argc, char* argv[]) {
     
     GtkWidget* content_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_box_pack_start(GTK_BOX(main_box), content_box, TRUE, TRUE, 0);
+
+    GtkWidget* tool_column = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
+    gtk_widget_set_margin_start(tool_column, 5);
+    gtk_widget_set_margin_end(tool_column, 5);
+    gtk_widget_set_margin_top(tool_column, 5);
     
     GtkWidget* toolbox = gtk_grid_new();
     gtk_grid_set_column_spacing(GTK_GRID(toolbox), 2);
     gtk_grid_set_row_spacing(GTK_GRID(toolbox), 2);
-    gtk_widget_set_margin_start(toolbox, 5);
-    gtk_widget_set_margin_end(toolbox, 5);
-    gtk_widget_set_margin_top(toolbox, 5);
     
     // Create tool buttons with tooltips
     gtk_grid_attach(GTK_GRID(toolbox), 
@@ -1886,6 +2042,23 @@ int main(int argc, char* argv[]) {
             "Rounded Rectangle - Draw rectangles with rounded corners"), 
         1, 7, 1, 1);
     
+    gtk_box_pack_start(GTK_BOX(tool_column), toolbox, FALSE, FALSE, 0);
+
+    app_state.line_thickness_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+    gtk_widget_set_margin_bottom(app_state.line_thickness_box, 5);
+    for (int i = 0; i < (int)(sizeof(line_thickness_options) / sizeof(line_thickness_options[0])); ++i) {
+        GtkWidget* thickness_button = create_line_thickness_button(i);
+        app_state.line_thickness_buttons.push_back(thickness_button);
+        gtk_box_pack_start(GTK_BOX(app_state.line_thickness_box), thickness_button, FALSE, FALSE, 0);
+    }
+
+    gtk_box_pack_start(GTK_BOX(tool_column), app_state.line_thickness_box, FALSE, FALSE, 0);
+    app_state.active_line_thickness_index = app_state.tool_line_thickness_indices[tool_to_index(app_state.current_tool)];
+    app_state.line_width = line_thickness_options[app_state.active_line_thickness_index];
+    update_line_thickness_buttons();
+    update_line_thickness_visibility();
+
+    gtk_box_pack_start(GTK_BOX(content_box), tool_column, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(content_box), toolbox, FALSE, FALSE, 0);
     
     GtkWidget* scrolled = gtk_scrolled_window_new(NULL, NULL);
