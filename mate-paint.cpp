@@ -4,6 +4,7 @@
 #include <vector>
 #include <cmath>
 #include <memory>
+#include <iterator>
 #include <string>
 #include <queue>
 
@@ -142,7 +143,10 @@ struct AppState {
     int active_zoom_index = 0;
     double zoom_factor = 1.0;
     GtkWidget* scrolled_window = nullptr;
-   
+    std::vector<GdkRGBA> palette_button_colors;
+    std::vector<bool> custom_palette_slots;
+    std::vector<GtkWidget*> palette_buttons;
+
     std::string current_filename;
 
     std::vector<UndoSnapshot> undo_stack;
@@ -181,6 +185,24 @@ const GdkRGBA palette_colors[] = {
     {0.7, 0.9, 1.0, 1.0},   // Light cyan
     {0.7, 0.7, 1.0, 1.0},   // Light blue
     {0.9, 0.7, 1.0, 1.0},   // Light purple
+};
+
+const GdkRGBA additional_palette_colors[] = {
+    {0.2, 0.0, 0.4, 1.0},   // Deep purple
+    {0.6, 0.6, 0.6, 1.0},   // Custom slot 1 default
+    {0.6, 0.6, 0.6, 1.0},   // Custom slot 2 default
+    {0.6, 0.6, 0.6, 1.0},   // Custom slot 3 default
+    {0.6, 0.6, 0.6, 1.0},   // Custom slot 4 default
+    {0.6, 0.6, 0.6, 1.0},   // Custom slot 5 default
+    {0.6, 0.6, 0.6, 1.0},   // Custom slot 6 default
+    {0.6, 0.6, 0.6, 1.0},   // Custom slot 7 default
+    {0.6, 0.6, 0.6, 1.0},   // Custom slot 8 default
+    {0.6, 0.6, 0.6, 1.0},   // Custom slot 9 default
+    {0.6, 0.6, 0.6, 1.0},   // Custom slot 10 default
+    {0.6, 0.6, 0.6, 1.0},   // Custom slot 11 default
+    {0.6, 0.6, 0.6, 1.0},   // Custom slot 12 default
+    {0.6, 0.6, 0.6, 1.0},   // Custom slot 13 default
+    {0.6, 0.6, 0.6, 1.0},   // Custom slot 14 default
 };
 
 // Check if tool needs preview
@@ -548,6 +570,18 @@ void commit_floating_selection(bool record_undo) {
     app_state.drag_undo_snapshot_taken = false;
 }
 
+void append_selection_path(cairo_t* cr) {
+    if (app_state.selection_path.size() < 3) {
+        return;
+    }
+
+    cairo_move_to(cr, app_state.selection_path[0].first, app_state.selection_path[0].second);
+    for (size_t i = 1; i < app_state.selection_path.size(); i++) {
+        cairo_line_to(cr, app_state.selection_path[i].first, app_state.selection_path[i].second);
+    }
+    cairo_close_path(cr);
+}
+
 void start_selection_drag() {
     if (!app_state.has_selection || !app_state.surface) return;
 
@@ -577,11 +611,7 @@ void start_selection_drag() {
     } else if (app_state.selection_path.size() > 2) {
         cairo_save(float_cr);
         cairo_translate(float_cr, -x1, -y1);
-        cairo_move_to(float_cr, app_state.selection_path[0].first, app_state.selection_path[0].second);
-        for (size_t i = 1; i < app_state.selection_path.size(); i++) {
-            cairo_line_to(float_cr, app_state.selection_path[i].first, app_state.selection_path[i].second);
-        }
-        cairo_close_path(float_cr);
+	append_selection_path(float_cr);
         cairo_clip(float_cr);
         cairo_set_source_surface(float_cr, app_state.surface, 0, 0);
         cairo_paint(float_cr);
@@ -600,11 +630,7 @@ void start_selection_drag() {
     if (app_state.selection_is_rect) {
         cairo_rectangle(cr, x1, y1, x2 - x1, y2 - y1);
     } else if (app_state.selection_path.size() > 2) {
-        cairo_move_to(cr, app_state.selection_path[0].first, app_state.selection_path[0].second);
-        for (size_t i = 1; i < app_state.selection_path.size(); i++) {
-            cairo_line_to(cr, app_state.selection_path[i].first, app_state.selection_path[i].second);
-        }
-        cairo_close_path(cr);
+        append_selection_path(float_cr);
     }
     cairo_fill(cr);
     cairo_destroy(cr);
@@ -617,75 +643,90 @@ void start_selection_drag() {
 void copy_selection() {
     if (!app_state.has_selection || !app_state.surface) return;
     
-    if (app_state.selection_is_rect) {
-        double x1 = fmin(app_state.selection_x1, app_state.selection_x2);
-        double y1 = fmin(app_state.selection_y1, app_state.selection_y2);
-        double x2 = fmax(app_state.selection_x1, app_state.selection_x2);
-        double y2 = fmax(app_state.selection_y1, app_state.selection_y2);
-        
-		push_undo_state();
+    double x1 = fmin(app_state.selection_x1, app_state.selection_x2);
+    double y1 = fmin(app_state.selection_y1, app_state.selection_y2);
+    double x2 = fmax(app_state.selection_x1, app_state.selection_x2);
+    double y2 = fmax(app_state.selection_y1, app_state.selection_y2);
 
-        int w = (int)(x2 - x1);
-        int h = (int)(y2 - y1);
-        
-        if (w <= 0 || h <= 0) return;
-        
-        if (app_state.clipboard_surface) {
-            cairo_surface_destroy(app_state.clipboard_surface);
-        }
-        
-        app_state.clipboard_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
-        app_state.clipboard_width = w;
-        app_state.clipboard_height = h;
-        
-        cairo_t* cr = cairo_create(app_state.clipboard_surface);
-        configure_crisp_rendering(cr);
-        if (app_state.floating_selection_active && app_state.floating_surface) {
-            cairo_set_source_surface(cr, app_state.floating_surface, 0, 0);
-        } else {
-            cairo_set_source_surface(cr, app_state.surface, -x1, -y1);
-        }
-        cairo_paint(cr);
-        cairo_destroy(cr);
+    int w = (int)ceil(x2 - x1);
+    int h = (int)ceil(y2 - y1);
+
+    if (w <= 0 || h <= 0) return;
+
+    if (app_state.clipboard_surface) {
+        cairo_surface_destroy(app_state.clipboard_surface);
     }
+
+    app_state.clipboard_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
+    app_state.clipboard_width = w;
+    app_state.clipboard_height = h;
+
+    cairo_t* cr = cairo_create(app_state.clipboard_surface);
+    configure_crisp_rendering(cr);
+
+    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cairo_set_source_rgba(cr, 0, 0, 0, 0);
+    cairo_paint(cr);
+    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+
+    if (app_state.floating_selection_active && app_state.floating_surface) {
+        cairo_set_source_surface(cr, app_state.floating_surface, 0, 0);
+        cairo_paint(cr);
+    } else if (app_state.selection_is_rect) {
+        cairo_set_source_surface(cr, app_state.surface, -x1, -y1);
+        cairo_paint(cr);
+    } else if (app_state.selection_path.size() > 2) {
+        cairo_save(cr);
+        cairo_translate(cr, -x1, -y1);
+        append_selection_path(cr);
+        cairo_clip(cr);
+        cairo_set_source_surface(cr, app_state.surface, 0, 0);
+        cairo_paint(cr);
+        cairo_restore(cr);
+    }
+
+    cairo_destroy(cr);
 }
 
 // Cut selection to clipboard
 void cut_selection() {
     if (!app_state.has_selection || !app_state.surface) return;
-    
+
     copy_selection();
 
     if (app_state.floating_selection_active) {
         clear_selection();
         return;
     }
-    
+
+    cairo_t* cr = cairo_create(app_state.surface);
+    configure_crisp_rendering(cr);
+    cairo_set_source_rgba(cr,
+        app_state.bg_color.red,
+        app_state.bg_color.green,
+        app_state.bg_color.blue,
+        app_state.bg_color.alpha
+    );
+
     if (app_state.selection_is_rect) {
         double x1 = fmin(app_state.selection_x1, app_state.selection_x2);
         double y1 = fmin(app_state.selection_y1, app_state.selection_y2);
         double x2 = fmax(app_state.selection_x1, app_state.selection_x2);
         double y2 = fmax(app_state.selection_y1, app_state.selection_y2);
-        
+
         push_undo_state();
 
-        cairo_t* cr = cairo_create(app_state.surface);
-        configure_crisp_rendering(cr);
-        cairo_set_source_rgba(cr, 
-            app_state.bg_color.red,
-            app_state.bg_color.green,
-            app_state.bg_color.blue,
-            app_state.bg_color.alpha
-        );
         cairo_rectangle(cr, x1, y1, x2 - x1, y2 - y1);
-        cairo_fill(cr);
-        cairo_destroy(cr);
-        
-        if (app_state.drawing_area) {
-            gtk_widget_queue_draw(app_state.drawing_area);
-        }
+    } else if (app_state.selection_path.size() > 2) {
+        append_selection_path(cr);
     }
-    
+    cairo_fill(cr);
+    cairo_destroy(cr);
+
+    if (app_state.drawing_area) {
+        gtk_widget_queue_draw(app_state.drawing_area);
+    }
+
     clear_selection();
 	app_state.drag_undo_snapshot_taken = false;
 }
@@ -2748,17 +2789,83 @@ void update_zoom_visibility() {
     }
 }
 
+void apply_color_button_style(GtkWidget* button, const GdkRGBA& color, bool is_custom_slot) {
+    double brightness = (color.red * 0.299) + (color.green * 0.587) + (color.blue * 0.114);
+    const char* text_color = brightness > 0.5 ? "#111" : "#fff";
+
+    gchar* css = g_strdup_printf(
+        "button { "
+        "background-color: rgb(%d,%d,%d); "
+        "color: %s; "
+        "background-image: none; "
+        "border: 1px solid #555; "
+        "min-width: 18px; "
+        "min-height: 18px; "
+        "font-weight: bold; "
+        "padding: 0; "
+        "margin: 0; "
+        "}"
+        "button:hover { "
+        "border: 1px solid #000; "
+        "}",
+        (int)(color.red * 255),
+        (int)(color.green * 255),
+        (int)(color.blue * 255),
+        is_custom_slot ? text_color : "transparent"
+    );
+
+    GtkCssProvider* provider = gtk_css_provider_new();
+    gtk_css_provider_load_from_data(provider, css, -1, NULL);
+    gtk_style_context_add_provider(
+        gtk_widget_get_style_context(button),
+        GTK_STYLE_PROVIDER(provider),
+        GTK_STYLE_PROVIDER_PRIORITY_USER
+    );
+
+    g_free(css);
+    g_object_unref(provider);
+}
+
+void show_custom_color_dialog(int index) {
+    if (index < 0 || index >= (int)app_state.palette_button_colors.size()) {
+        return;
+    }
+
+    GtkWidget* dialog = gtk_color_chooser_dialog_new("Custom color", GTK_WINDOW(app_state.window));
+    gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(dialog), &app_state.palette_button_colors[index]);
+
+    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+        GdkRGBA selected_color;
+        gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(dialog), &selected_color);
+        app_state.palette_button_colors[index] = selected_color;
+
+        if (index < (int)app_state.palette_buttons.size() && app_state.palette_buttons[index]) {
+            apply_color_button_style(app_state.palette_buttons[index], selected_color, true);
+        }
+    }
+
+    gtk_widget_destroy(dialog);
+}
+
 // Color button callback
 gboolean on_color_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data) {
     int index = GPOINTER_TO_INT(data);
-    if (index < sizeof(palette_colors) / sizeof(palette_colors[0])) {
-        if (event->button == 1) {
-            app_state.fg_color = palette_colors[index];
-            update_color_indicators();
-        } else if (event->button == 3) {
-            app_state.bg_color = palette_colors[index];
-            update_color_indicators();
-        }
+    if (index < 0 || index >= (int)app_state.palette_button_colors.size()) {
+        return TRUE;
+    }
+
+    bool is_custom_slot = index < (int)app_state.custom_palette_slots.size() && app_state.custom_palette_slots[index];
+    if (is_custom_slot && event->type == GDK_2BUTTON_PRESS) {
+        show_custom_color_dialog(index);
+        return TRUE;
+    }
+
+    if (event->button == 1) {
+        app_state.fg_color = app_state.palette_button_colors[index];
+        update_color_indicators();
+    } else if (event->button == 3) {
+        app_state.bg_color = app_state.palette_button_colors[index];
+        update_color_indicators();
     }
     return TRUE;
 }
@@ -2826,55 +2933,28 @@ GtkWidget* create_tool_button(Tool tool, const char* tooltip) {
 }
 
 // Create color button
-GtkWidget* create_color_button(GdkRGBA color, int index) {
-    GtkWidget* button = gtk_button_new();
+GtkWidget* create_color_button(GdkRGBA color, int index, bool is_custom_slot) {
+    GtkWidget* button = gtk_button_new_with_label(is_custom_slot ? "c" : "");
     gtk_widget_set_size_request(button, 18, 18);
-    
-    gchar* css = g_strdup_printf(
-        "button { "
-        "background-color: rgb(%d,%d,%d); "
-        "background-image: none; "
-        "border: 1px solid #555; "
-        "min-width: 18px; "
-        "min-height: 18px; "
-        "padding: 0; "
-        "margin: 0; "
-        "}"
-        "button:hover { "
-        "border: 1px solid #000; "
-        "}",
-        (int)(color.red * 255), 
-        (int)(color.green * 255), 
-        (int)(color.blue * 255)
-    );
-    
-    GtkCssProvider* provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_data(provider, css, -1, NULL);
-    gtk_style_context_add_provider(
-        gtk_widget_get_style_context(button),
-        GTK_STYLE_PROVIDER(provider),
-        GTK_STYLE_PROVIDER_PRIORITY_USER
-    );
-    
-    g_free(css);
-    g_object_unref(provider);
-    
+
+    apply_color_button_style(button, color, is_custom_slot);
+
     gtk_widget_add_events(button, GDK_BUTTON_PRESS_MASK);
     g_signal_connect(button, "button-press-event", G_CALLBACK(on_color_button_press), GINT_TO_POINTER(index));
-    
+
     return button;
 }
 
 int main(int argc, char* argv[]) {
     gtk_init(&argc, &argv);
-    
+
     app_state.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(app_state.window), "Mate-Paint");
     gtk_window_set_default_size(GTK_WINDOW(app_state.window), 900, 700);
     g_signal_connect(app_state.window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     g_signal_connect(app_state.window, "key-press-event", G_CALLBACK(on_key_press), NULL);
     g_signal_connect(app_state.window, "key-release-event", G_CALLBACK(on_key_release), NULL);
-    
+
     GtkWidget* main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_container_add(GTK_CONTAINER(app_state.window), main_box);
     
@@ -3125,10 +3205,35 @@ int main(int argc, char* argv[]) {
     GtkWidget* palette_grid = gtk_grid_new();
     gtk_grid_set_column_spacing(GTK_GRID(palette_grid), 2);
     gtk_grid_set_row_spacing(GTK_GRID(palette_grid), 2);
-    
+
+
+    app_state.palette_button_colors.assign(std::begin(palette_colors), std::end(palette_colors));
+    app_state.palette_button_colors.insert(
+        app_state.palette_button_colors.end(),
+        std::begin(additional_palette_colors),
+        std::end(additional_palette_colors)
+    );
+
+    app_state.custom_palette_slots.assign(app_state.palette_button_colors.size(), false);
+    const int custom_slot_count = 14;
+    const int custom_start_index = (int)app_state.palette_button_colors.size() - custom_slot_count;
+    for (int i = custom_start_index; i < (int)app_state.custom_palette_slots.size(); i++) {
+        app_state.custom_palette_slots[i] = true;
+    }
+
+    app_state.palette_buttons.clear();
+    app_state.palette_buttons.reserve(app_state.palette_button_colors.size());
+
     int colors_per_row = 14;
-    for (size_t i = 0; i < sizeof(palette_colors) / sizeof(palette_colors[0]); i++) {
-        GtkWidget* color_btn = create_color_button(palette_colors[i], i);
+    for (size_t i = 0; i < app_state.palette_button_colors.size(); i++) {
+        bool is_custom_slot = app_state.custom_palette_slots[i];
+        GtkWidget* color_btn = create_color_button(app_state.palette_button_colors[i], i, is_custom_slot);
+        if (is_custom_slot) {
+            gtk_widget_set_tooltip_text(color_btn, "Double-click to choose a custom colour");
+        }
+
+        app_state.palette_buttons.push_back(color_btn);
+
         int row = i / colors_per_row;
         int col = i % colors_per_row;
         gtk_grid_attach(GTK_GRID(palette_grid), color_btn, col, row, 1, 1);
