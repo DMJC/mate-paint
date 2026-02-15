@@ -69,6 +69,7 @@ struct AppState {
     double current_x = 0;
     double current_y = 0;
     std::vector<std::pair<double, double>> polygon_points;
+    bool polygon_finished = false;
     std::vector<std::pair<double, double>> lasso_points;
     
     // Selection state
@@ -1022,6 +1023,21 @@ void draw_rounded_rectangle(cairo_t* cr, double x1, double y1, double x2, double
     }
 }
 
+void draw_polygon(cairo_t* cr, const std::vector<std::pair<double, double>>& points) {
+    if (points.size() < 2) return;
+
+    GdkRGBA color = get_active_color();
+    cairo_set_source_rgba(cr, color.red, color.green, color.blue, color.alpha);
+    cairo_set_line_width(cr, app_state.line_width);
+
+    cairo_move_to(cr, points[0].first, points[0].second);
+    for (size_t i = 1; i < points.size(); i++) {
+        cairo_line_to(cr, points[i].first, points[i].second);
+    }
+    cairo_close_path(cr);
+    cairo_stroke(cr);
+}
+
 void draw_pencil(cairo_t* cr, double x, double y) {
     GdkRGBA color = get_active_color();
     cairo_set_source_rgba(cr, color.red, color.green, color.blue, color.alpha);
@@ -1291,7 +1307,13 @@ void draw_preview(cairo_t* cr) {
                 for (size_t i = 1; i < app_state.polygon_points.size(); i++) {
                     cairo_line_to(cr, app_state.polygon_points[i].first, app_state.polygon_points[i].second);
                 }
-                cairo_line_to(cr, preview_x, preview_y);
+
+                if (app_state.polygon_finished) {
+                    cairo_close_path(cr);
+                } else {
+                    cairo_line_to(cr, preview_x, preview_y);
+                }
+
                 cairo_stroke(cr);
             }
             break;
@@ -1460,6 +1482,42 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
             gtk_widget_queue_draw(widget);
             return TRUE;
         }
+
+        if (app_state.current_tool == TOOL_POLYGON) {
+            if (event->button == 1) {
+                if (app_state.polygon_finished) {
+                    app_state.polygon_points.clear();
+                    app_state.polygon_finished = false;
+                }
+
+                app_state.polygon_points.push_back({event->x, event->y});
+                app_state.is_drawing = true;
+                app_state.current_x = event->x;
+                app_state.current_y = event->y;
+                start_ant_animation();
+                gtk_widget_queue_draw(widget);
+                return TRUE;
+            }
+
+            if (event->button == 3) {
+                if (!app_state.polygon_finished && app_state.polygon_points.size() >= 2) {
+                    cairo_t* cr = cairo_create(app_state.surface);
+                    draw_polygon(cr, app_state.polygon_points);
+                    cairo_destroy(cr);
+
+                    app_state.polygon_finished = true;
+                    app_state.is_drawing = true;
+                } else if (app_state.polygon_finished) {
+                    app_state.polygon_points.clear();
+                    app_state.polygon_finished = false;
+                    app_state.is_drawing = false;
+                    stop_ant_animation();
+                }
+
+                gtk_widget_queue_draw(widget);
+                return TRUE;
+            }
+        }
         
         app_state.is_drawing = true;
         app_state.last_x = event->x;
@@ -1469,9 +1527,7 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
         app_state.current_x = event->x;
         app_state.current_y = event->y;
         
-        if (app_state.current_tool == TOOL_POLYGON) {
-            app_state.polygon_points.push_back({event->x, event->y});
-        } else if (app_state.current_tool == TOOL_LASSO_SELECT) {
+        if (app_state.current_tool == TOOL_LASSO_SELECT) {
             app_state.lasso_points.clear();
             app_state.lasso_points.push_back({event->x, event->y});
         }
@@ -1548,6 +1604,10 @@ gboolean on_motion_notify(GtkWidget* widget, GdkEventMotion* event, gpointer dat
 // Mouse button release
 gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpointer data) {
     if ((event->button == 1 || event->button == 3) && app_state.surface && app_state.is_drawing) {
+        if (app_state.current_tool == TOOL_POLYGON) {
+            return TRUE;
+        }
+
         if (app_state.dragging_selection) {
             app_state.dragging_selection = false;
             app_state.is_drawing = false;
@@ -2198,6 +2258,7 @@ void on_tool_clicked(GtkButton* button, gpointer data) {
         update_zoom_buttons();
     }
     app_state.polygon_points.clear();
+    app_state.polygon_finished = false;
     app_state.lasso_points.clear();
     update_line_thickness_visibility();
     update_zoom_visibility();
