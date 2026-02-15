@@ -45,6 +45,8 @@ void update_text_box_size();
 void update_line_thickness_visibility();
 void update_line_thickness_buttons();
 int tool_to_index(Tool tool);
+void update_zoom_buttons();
+void update_zoom_visibility();
 
 // Application state
 struct AppState {
@@ -2161,9 +2163,13 @@ void on_tool_clicked(GtkButton* button, gpointer data) {
         app_state.line_width = line_thickness_options[app_state.active_line_thickness_index];
         update_line_thickness_buttons();
     }
+        if (new_tool == TOOL_ZOOM) {
+        update_zoom_buttons();
+    }
     app_state.polygon_points.clear();
     app_state.lasso_points.clear();
     update_line_thickness_visibility();
+    update_zoom_visibility();
 }
 
 gboolean on_line_thickness_button_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
@@ -2356,9 +2362,10 @@ GtkWidget* create_zoom_button(int index) {
 }
 
 void update_zoom_visibility() {
-/*    if (!app_state.zoom_box) {
+    if (!app_state.zoom_box) {
         return;
-    }*/
+    }
+
     if (app_state.current_tool == TOOL_ZOOM) {
         gtk_widget_show_all(app_state.zoom_box);
     } else {
@@ -2679,7 +2686,6 @@ int main(int argc, char* argv[]) {
     app_state.line_width = line_thickness_options[app_state.active_line_thickness_index];
     update_line_thickness_buttons();
     update_line_thickness_visibility();
-
     app_state.zoom_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
     gtk_widget_set_margin_bottom(app_state.zoom_box, 5);
     for (int i = 0; i < (int)(sizeof(zoom_options) / sizeof(zoom_options[0])); ++i) {
@@ -2688,7 +2694,7 @@ int main(int argc, char* argv[]) {
         gtk_box_pack_start(GTK_BOX(app_state.zoom_box), zoom_button, FALSE, FALSE, 0);
     }
     gtk_box_pack_start(GTK_BOX(tool_column), app_state.zoom_box, FALSE, FALSE, 0);
-    gtk_widget_hide(app_state.zoom_box);
+    
     update_zoom_buttons();
     update_zoom_visibility();
 
@@ -2761,6 +2767,8 @@ int main(int argc, char* argv[]) {
     start_ant_animation();
     
     gtk_widget_show_all(app_state.window);
+    update_line_thickness_visibility();
+    update_zoom_visibility();
     gtk_main();
     
     stop_ant_animation();
