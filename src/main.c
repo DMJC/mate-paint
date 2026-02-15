@@ -55,6 +55,7 @@ void		on_menu_about_activate  ( GtkMenuItem *menuitem, gpointer user_data );
 static void init_eraser				(GtkBuilder *builder);
 static void init_paint_brush		(GtkBuilder *builder);
 static void save_the_children		(GtkBuilder *builder);
+static GtkWidget *create_fallback_window	( void );
 
 void		
 on_menu_new_activate( GtkMenuItem *menuitem, gpointer user_data)
@@ -176,6 +177,16 @@ create_window (void)
 	file_set_parent_window ( GTK_WINDOW(window) );	
     gtk_builder_connect_signals (builder, NULL);          
 
+#if GTK_MAJOR_VERSION >= 3
+	/*
+	 * Older UI definitions can still wire the canvas to "expose-event".
+	 * GTK3 only repaints through "draw", so hook it explicitly to avoid
+	 * a blank canvas when the builder file doesn't define the new signal.
+	 */
+	g_signal_connect (drawing, "draw",
+	                  G_CALLBACK (on_cv_drawing_expose_event), NULL);
+#endif
+
 	init_eraser (builder);
 	init_paint_brush (builder);
 	save_the_children (builder);
@@ -243,7 +254,7 @@ static void init_eraser(GtkBuilder *builder)
 		erase = GTK_WIDGET (gtk_builder_get_object (builder, name));
 		if(!GTK_IS_WIDGET(erase))
 		{
-			printf("DEBUG: init_eraser() !GTK_IS_WIDGET(erase)\n");
+			continue;
 		}
 		g_signal_connect (erase, "toggled",
 		            G_CALLBACK (on_eraser_size_toggled), (gpointer)&(size[i]));
@@ -280,7 +291,7 @@ static void init_paint_brush(GtkBuilder *builder)
 		brush = GTK_WIDGET (gtk_builder_get_object (builder, name));
 		if(!GTK_IS_WIDGET(brush))
 		{
-			printf("DEBUG: init_eraser() !GTK_IS_WIDGET(erase)\n");
+			continue;
 		}
 		g_signal_connect (brush, "toggled",
 		            G_CALLBACK (on_brush_size_toggled), (gpointer)&(size[i]));
@@ -292,6 +303,10 @@ static void save_the_children (GtkBuilder *builder)
 	GtkWidget *child, *drawing;
 
 	drawing = GTK_WIDGET (gtk_builder_get_object (builder, "cv_drawing"));
+	if (!GTK_IS_WIDGET (drawing))
+	{
+		return;
+	}
 	child = GTK_WIDGET (gtk_builder_get_object (builder, "tool-rect-select"));
 	g_object_set_data(G_OBJECT(drawing), "tool-rect-select", (gpointer)child);
 
@@ -332,6 +347,5 @@ static void save_the_children (GtkBuilder *builder)
 	//child = GTK_WIDGET (gtk_builder_get_object (builder, ""));
 	//g_object_set_data(G_OBJECT(drawing), "", (gpointer)child);
 }
-
 
 
