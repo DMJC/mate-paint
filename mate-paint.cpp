@@ -38,7 +38,7 @@ void clear_selection();
 void copy_selection();
 void cut_selection();
 void paste_selection();
-void commit_floating_selection();
+void commit_floating_selection(bool record_undo = true);
 void finalize_text();
 void cancel_text();
 void update_text_box_size();
@@ -47,6 +47,14 @@ void update_line_thickness_buttons();
 int tool_to_index(Tool tool);
 void update_zoom_buttons();
 void update_zoom_visibility();
+void push_undo_state();
+void undo_last_operation();
+
+struct UndoSnapshot {
+    cairo_surface_t* surface = nullptr;
+    int width = 0;
+    int height = 0;
+};
 
 // Application state
 struct AppState {
@@ -72,6 +80,18 @@ struct AppState {
     bool polygon_finished = false;
     std::vector<std::pair<double, double>> lasso_points;
     
+    // Curve tool state
+    bool curve_active = false;
+    bool curve_has_end = false;
+    bool curve_has_control = false;
+    bool curve_primary_right_button = false;
+    double curve_start_x = 0;
+    double curve_start_y = 0;
+    double curve_end_x = 0;
+    double curve_end_y = 0;
+    double curve_control_x = 0;
+    double curve_control_y = 0;
+
     // Selection state
     bool has_selection = false;
     bool selection_is_rect = false;
@@ -124,6 +144,10 @@ struct AppState {
     GtkWidget* scrolled_window = nullptr;
    
     std::string current_filename;
+
+    std::vector<UndoSnapshot> undo_stack;
+    static constexpr size_t max_undo_steps = 50;
+    bool drag_undo_snapshot_taken = false;
 };
 
 AppState app_state;
@@ -172,7 +196,7 @@ int tool_to_index(Tool tool) {
 }
 
 bool tool_supports_line_thickness(Tool tool) {
-    return tool == TOOL_PENCIL || tool == TOOL_PAINTBRUSH || tool == TOOL_ERASER ||
+    return tool == TOOL_PAINTBRUSH || tool == TOOL_ERASER ||
            tool == TOOL_LINE || tool == TOOL_CURVE || tool == TOOL_RECTANGLE ||
            tool == TOOL_POLYGON || tool == TOOL_ELLIPSE || tool == TOOL_ROUNDED_RECT;
 }
@@ -392,6 +416,8 @@ void finalize_text() {
         return;
     }
     
+    push_undo_state();
+
     cairo_t* cr = cairo_create(app_state.surface);
     configure_crisp_rendering(cr);
     
@@ -494,18 +520,23 @@ void clear_selection() {
     app_state.floating_drag_completed = false;
     app_state.has_selection = false;
     app_state.selection_path.clear();
+    app_state.drag_undo_snapshot_taken = false;
     if (app_state.drawing_area) {
         gtk_widget_queue_draw(app_state.drawing_area);
     }
 }
 
-void commit_floating_selection() {
+void commit_floating_selection(bool record_undo) {
     if (!app_state.floating_selection_active || !app_state.floating_surface || !app_state.surface) {
         return;
     }
 
     double x = fmin(app_state.selection_x1, app_state.selection_x2);
     double y = fmin(app_state.selection_y1, app_state.selection_y2);
+
+    if (record_undo) {
+        push_undo_state();
+    }
 
     cairo_t* cr = cairo_create(app_state.surface);
     configure_crisp_rendering(cr);
@@ -514,12 +545,18 @@ void commit_floating_selection() {
     cairo_destroy(cr);
 
     clear_selection();
+    app_state.drag_undo_snapshot_taken = false;
 }
 
 void start_selection_drag() {
     if (!app_state.has_selection || !app_state.surface) return;
 
     if (app_state.floating_selection_active) return;
+
+    if (!app_state.drag_undo_snapshot_taken) {
+        push_undo_state();
+        app_state.drag_undo_snapshot_taken = true;
+    }
 
     double x1 = fmin(app_state.selection_x1, app_state.selection_x2);
     double y1 = fmin(app_state.selection_y1, app_state.selection_y2);
@@ -586,6 +623,8 @@ void copy_selection() {
         double x2 = fmax(app_state.selection_x1, app_state.selection_x2);
         double y2 = fmax(app_state.selection_y1, app_state.selection_y2);
         
+		push_undo_state();
+
         int w = (int)(x2 - x1);
         int h = (int)(y2 - y1);
         
@@ -628,6 +667,8 @@ void cut_selection() {
         double x2 = fmax(app_state.selection_x1, app_state.selection_x2);
         double y2 = fmax(app_state.selection_y1, app_state.selection_y2);
         
+        push_undo_state();
+
         cairo_t* cr = cairo_create(app_state.surface);
         configure_crisp_rendering(cr);
         cairo_set_source_rgba(cr, 
@@ -646,6 +687,7 @@ void cut_selection() {
     }
     
     clear_selection();
+	app_state.drag_undo_snapshot_taken = false;
 }
 
 // Paste from clipboard
@@ -843,6 +885,72 @@ void update_color_indicators() {
     
     if (app_state.bg_button) {
         gtk_widget_queue_draw(app_state.bg_button);
+    }
+}
+
+cairo_surface_t* clone_surface(cairo_surface_t* source, int width, int height) {
+    if (!source || width <= 0 || height <= 0) {
+        return nullptr;
+    }
+
+    cairo_surface_t* copy = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+    cairo_t* cr = cairo_create(copy);
+    cairo_set_source_surface(cr, source, 0, 0);
+    cairo_paint(cr);
+    cairo_destroy(cr);
+    return copy;
+}
+
+void push_undo_state() {
+    if (!app_state.surface) {
+        return;
+    }
+
+    cairo_surface_t* snapshot = clone_surface(app_state.surface, app_state.canvas_width, app_state.canvas_height);
+    if (!snapshot) {
+        return;
+    }
+
+    UndoSnapshot undo_snapshot;
+    undo_snapshot.surface = snapshot;
+    undo_snapshot.width = app_state.canvas_width;
+    undo_snapshot.height = app_state.canvas_height;
+    app_state.undo_stack.push_back(undo_snapshot);
+    if (app_state.undo_stack.size() > AppState::max_undo_steps) {
+        cairo_surface_destroy(app_state.undo_stack.front().surface);
+        app_state.undo_stack.erase(app_state.undo_stack.begin());
+    }
+}
+
+void undo_last_operation() {
+    if (app_state.undo_stack.empty()) {
+        return;
+    }
+
+    UndoSnapshot snapshot = app_state.undo_stack.back();
+    app_state.undo_stack.pop_back();
+
+    if (app_state.surface) {
+        cairo_surface_destroy(app_state.surface);
+    }
+
+    app_state.surface = snapshot.surface;
+    app_state.canvas_width = snapshot.width;
+    app_state.canvas_height = snapshot.height;
+
+    clear_selection();
+    if (app_state.text_active) {
+        cancel_text();
+    }
+    app_state.drag_undo_snapshot_taken = false;
+
+    if (app_state.drawing_area) {
+        gtk_widget_set_size_request(
+            app_state.drawing_area,
+            static_cast<int>(app_state.canvas_width * app_state.zoom_factor),
+            static_cast<int>(app_state.canvas_height * app_state.zoom_factor)
+        );
+        gtk_widget_queue_draw(app_state.drawing_area);
     }
 }
 
@@ -1050,6 +1158,15 @@ void draw_polygon(cairo_t* cr, const std::vector<std::pair<double, double>>& poi
     cairo_stroke(cr);
 }
 
+void draw_curve(cairo_t* cr, double start_x, double start_y, double control_x, double control_y, double end_x, double end_y) {
+    GdkRGBA color = get_active_color();
+    cairo_set_source_rgba(cr, color.red, color.green, color.blue, color.alpha);
+    cairo_set_line_width(cr, app_state.line_width);
+    cairo_move_to(cr, start_x, start_y);
+    cairo_curve_to(cr, control_x, control_y, control_x, control_y, end_x, end_y);
+    cairo_stroke(cr);
+}
+
 void draw_pencil(cairo_t* cr, double x, double y) {
     GdkRGBA color = get_active_color();
     cairo_set_source_rgba(cr, color.red, color.green, color.blue, color.alpha);
@@ -1231,6 +1348,32 @@ void draw_preview(cairo_t* cr) {
     }
     
     switch (app_state.current_tool) {
+        case TOOL_CURVE: {
+            if (app_state.curve_active) {
+                draw_ant_path(cr);
+
+                if (app_state.curve_has_end) {
+                    if (app_state.curve_has_control) {
+                        cairo_move_to(cr, app_state.curve_start_x, app_state.curve_start_y);
+                        cairo_curve_to(
+                            cr,
+                            app_state.curve_control_x,
+                            app_state.curve_control_y,
+                            app_state.curve_control_x,
+                            app_state.curve_control_y,
+                            app_state.curve_end_x,
+                            app_state.curve_end_y
+                        );
+                    } else {
+                        cairo_move_to(cr, app_state.curve_start_x, app_state.curve_start_y);
+                        cairo_line_to(cr, app_state.curve_end_x, app_state.curve_end_y);
+                    }
+                    cairo_stroke(cr);
+                }
+            }
+            break;
+        }
+
         case TOOL_RECT_SELECT: {
             double x = fmin(app_state.start_x, preview_x);
             double y = fmin(app_state.start_y, preview_y);
@@ -1385,6 +1528,8 @@ gboolean on_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data) {
         cut_selection();
     } else if ((event->state & GDK_CONTROL_MASK) && event->keyval == GDK_KEY_v) {
         paste_selection();
+    } else if ((event->state & GDK_CONTROL_MASK) && event->keyval == GDK_KEY_z) {
+        undo_last_operation();
     }
     return FALSE;
 }
@@ -1493,6 +1638,7 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
         }
 
         if (app_state.current_tool == TOOL_FILL) {
+            push_undo_state();
             flood_fill_at(static_cast<int>(canvas_x), static_cast<int>(canvas_y));
             gtk_widget_queue_draw(widget);
             return TRUE;
@@ -1516,6 +1662,7 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
 
             if (event->button == 3) {
                 if (!app_state.polygon_finished && app_state.polygon_points.size() >= 2) {
+                    push_undo_state();
                     cairo_t* cr = cairo_create(app_state.surface);
                     configure_crisp_rendering(cr);
                     draw_polygon(cr, app_state.polygon_points);
@@ -1535,7 +1682,87 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
             }
         }
         
+        if (app_state.current_tool == TOOL_CURVE) {
+            if (!app_state.curve_active) {
+                app_state.curve_active = true;
+                app_state.curve_has_end = false;
+                app_state.curve_has_control = false;
+                app_state.curve_primary_right_button = (event->button == 3);
+                app_state.curve_start_x = canvas_x;
+                app_state.curve_start_y = canvas_y;
+                app_state.is_drawing = true;
+                app_state.current_x = canvas_x;
+                app_state.current_y = canvas_y;
+                start_ant_animation();
+                gtk_widget_queue_draw(widget);
+                return TRUE;
+            }
+
+            bool used_primary_button = ((event->button == 3) == app_state.curve_primary_right_button);
+            if (!used_primary_button) {
+                if (app_state.curve_has_end) {
+                    cairo_t* cr = cairo_create(app_state.surface);
+                    configure_crisp_rendering(cr);
+
+                    app_state.is_right_button = app_state.curve_primary_right_button;
+                    if (app_state.curve_has_control) {
+                        draw_curve(
+                            cr,
+                            app_state.curve_start_x,
+                            app_state.curve_start_y,
+                            app_state.curve_control_x,
+                            app_state.curve_control_y,
+                            app_state.curve_end_x,
+                            app_state.curve_end_y
+                        );
+                    } else {
+                        draw_line(
+                            cr,
+                            app_state.curve_start_x,
+                            app_state.curve_start_y,
+                            app_state.curve_end_x,
+                            app_state.curve_end_y
+                        );
+                    }
+
+                    cairo_destroy(cr);
+                }
+
+                app_state.curve_active = false;
+                app_state.curve_has_end = false;
+                app_state.curve_has_control = false;
+                app_state.is_drawing = false;
+                app_state.is_right_button = false;
+                stop_ant_animation();
+                gtk_widget_queue_draw(widget);
+                return TRUE;
+            }
+
+            if (!app_state.curve_has_end) {
+                app_state.curve_end_x = canvas_x;
+                app_state.curve_end_y = canvas_y;
+                app_state.curve_has_end = true;
+            } else {
+                app_state.curve_control_x = canvas_x;
+                app_state.curve_control_y = canvas_y;
+                app_state.curve_has_control = true;
+            }
+
+            app_state.is_drawing = true;
+            app_state.current_x = canvas_x;
+            app_state.current_y = canvas_y;
+            gtk_widget_queue_draw(widget);
+            return TRUE;
+        }
+
         app_state.is_drawing = true;
+        if (app_state.current_tool == TOOL_PENCIL || app_state.current_tool == TOOL_PAINTBRUSH ||
+            app_state.current_tool == TOOL_AIRBRUSH || app_state.current_tool == TOOL_ERASER ||
+            app_state.current_tool == TOOL_LINE || app_state.current_tool == TOOL_CURVE ||
+			app_state.current_tool == TOOL_RECTANGLE || app_state.current_tool == TOOL_ELLIPSE ||
+            app_state.current_tool == TOOL_ROUNDED_RECT) {
+            push_undo_state();
+        }
         app_state.last_x = canvas_x;
         app_state.last_y = canvas_y;
         app_state.start_x = canvas_x;
@@ -1622,6 +1849,10 @@ gboolean on_motion_notify(GtkWidget* widget, GdkEventMotion* event, gpointer dat
 // Mouse button release
 gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpointer data) {
     if ((event->button == 1 || event->button == 3) && app_state.surface && app_state.is_drawing) {
+        if (app_state.current_tool == TOOL_CURVE) {
+            return TRUE;
+        }
+
         if (app_state.current_tool == TOOL_POLYGON) {
             return TRUE;
         }
@@ -1630,6 +1861,7 @@ gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpointer da
             app_state.dragging_selection = false;
             app_state.is_drawing = false;
             app_state.floating_drag_completed = true;
+            commit_floating_selection(false);
             gtk_widget_queue_draw(widget);
             return TRUE;
         }
@@ -1814,6 +2046,8 @@ void open_image_dialog(GtkWidget* parent) {
                 int width = gdk_pixbuf_get_width(pixbuf);
                 int height = gdk_pixbuf_get_height(pixbuf);
                 
+                push_undo_state();
+
                 app_state.canvas_width = width;
                 app_state.canvas_height = height;
                 
@@ -1945,6 +2179,10 @@ void on_file_new(GtkMenuItem* item, gpointer data) {
     g_free(selected);
     gtk_widget_destroy(dialog);
 
+    if (app_state.surface) {
+        push_undo_state();
+    }
+
     app_state.canvas_width = new_width;
     app_state.canvas_height = new_height;
     gtk_widget_set_size_request(app_state.drawing_area, new_width, new_height);
@@ -1989,6 +2227,10 @@ void on_edit_paste(GtkMenuItem* item, gpointer data) {
     paste_selection();
 }
 
+void on_edit_undo(GtkMenuItem* item, gpointer data) {
+    undo_last_operation();
+}
+
 void on_image_scale(GtkMenuItem* item, gpointer data) {
     if (!app_state.surface) return;
 
@@ -2026,6 +2268,8 @@ void on_image_scale(GtkMenuItem* item, gpointer data) {
 
     int new_width = std::max(1, (int)std::lround(app_state.canvas_width * scale));
     int new_height = std::max(1, (int)std::lround(app_state.canvas_height * scale));
+
+    push_undo_state();
 
     cairo_surface_t* old_surface = app_state.surface;
     cairo_surface_t* scaled_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, new_width, new_height);
@@ -2098,6 +2342,8 @@ void on_image_resize_canvas(GtkMenuItem* item, gpointer data) {
     int new_height = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(height_spin));
     gtk_widget_destroy(dialog);
 
+    push_undo_state();
+
     cairo_surface_t* old_surface = app_state.surface;
     cairo_surface_t* resized_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, new_width, new_height);
 
@@ -2137,6 +2383,8 @@ void on_image_rotate_clockwise(GtkMenuItem* item, gpointer data) {
     const int new_width = old_height;
     const int new_height = old_width;
 
+    push_undo_state();
+
     cairo_surface_t* old_surface = app_state.surface;
     cairo_surface_t* rotated_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, new_width, new_height);
     cairo_t* cr = cairo_create(rotated_surface);
@@ -2170,6 +2418,8 @@ void on_image_rotate_counter_clockwise(GtkMenuItem* item, gpointer data) {
     const int new_width = old_height;
     const int new_height = old_width;
 
+    push_undo_state();
+
     cairo_surface_t* old_surface = app_state.surface;
     cairo_surface_t* rotated_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, new_width, new_height);
     cairo_t* cr = cairo_create(rotated_surface);
@@ -2201,6 +2451,8 @@ void on_image_flip_horizontal(GtkMenuItem* item, gpointer data) {
     const int width = app_state.canvas_width;
     const int height = app_state.canvas_height;
 
+    push_undo_state();
+
     cairo_surface_t* old_surface = app_state.surface;
     cairo_surface_t* flipped_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
     cairo_t* cr = cairo_create(flipped_surface);
@@ -2228,6 +2480,8 @@ void on_image_flip_vertical(GtkMenuItem* item, gpointer data) {
 
     const int width = app_state.canvas_width;
     const int height = app_state.canvas_height;
+
+    push_undo_state();
 
     cairo_surface_t* old_surface = app_state.surface;
     cairo_surface_t* flipped_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
@@ -2286,6 +2540,9 @@ void on_tool_clicked(GtkButton* button, gpointer data) {
     app_state.polygon_points.clear();
     app_state.polygon_finished = false;
     app_state.lasso_points.clear();
+    app_state.curve_active = false;
+    app_state.curve_has_end = false;
+    app_state.curve_has_control = false;
     update_line_thickness_visibility();
     update_zoom_visibility();
 }
@@ -2650,14 +2907,18 @@ int main(int argc, char* argv[]) {
     
     GtkWidget* edit_menu = gtk_menu_new();
     GtkWidget* edit_menu_item = gtk_menu_item_new_with_label("Edit");
+    GtkWidget* edit_undo = gtk_menu_item_new_with_label("Undo");
     GtkWidget* edit_cut = gtk_menu_item_new_with_label("Cut");
     GtkWidget* edit_copy = gtk_menu_item_new_with_label("Copy");
     GtkWidget* edit_paste = gtk_menu_item_new_with_label("Paste");
 
+    g_signal_connect(edit_undo, "activate", G_CALLBACK(on_edit_undo), NULL);
     g_signal_connect(edit_cut, "activate", G_CALLBACK(on_edit_cut), NULL);
     g_signal_connect(edit_copy, "activate", G_CALLBACK(on_edit_copy), NULL);
     g_signal_connect(edit_paste, "activate", G_CALLBACK(on_edit_paste), NULL);
 
+    gtk_menu_shell_append(GTK_MENU_SHELL(edit_menu), edit_undo);
+    gtk_menu_shell_append(GTK_MENU_SHELL(edit_menu), gtk_separator_menu_item_new());
     gtk_menu_shell_append(GTK_MENU_SHELL(edit_menu), edit_cut);
     gtk_menu_shell_append(GTK_MENU_SHELL(edit_menu), edit_copy);
     gtk_menu_shell_append(GTK_MENU_SHELL(edit_menu), edit_paste);
