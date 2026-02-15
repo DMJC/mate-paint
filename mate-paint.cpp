@@ -185,6 +185,10 @@ double clamp_double(double value, double min_value, double max_value) {
     return fmax(min_value, fmin(value, max_value));
 }
 
+void configure_crisp_rendering(cairo_t* cr) {
+    cairo_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
+}
+
 void apply_zoom(double zoom_factor, double focus_x, double focus_y) {
     if (!app_state.drawing_area) {
         return;
@@ -266,6 +270,7 @@ void update_text_box_size() {
     // Create a temporary cairo surface for measurements
     cairo_surface_t* temp_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
     cairo_t* cr = cairo_create(temp_surface);
+    configure_crisp_rendering(cr);
     
     // Set font
     cairo_select_font_face(cr, app_state.text_font_family.c_str(), 
@@ -388,6 +393,7 @@ void finalize_text() {
     }
     
     cairo_t* cr = cairo_create(app_state.surface);
+    configure_crisp_rendering(cr);
     
     // Set font
     cairo_select_font_face(cr, app_state.text_font_family.c_str(), 
@@ -502,6 +508,7 @@ void commit_floating_selection() {
     double y = fmin(app_state.selection_y1, app_state.selection_y2);
 
     cairo_t* cr = cairo_create(app_state.surface);
+    configure_crisp_rendering(cr);
     cairo_set_source_surface(cr, app_state.floating_surface, x, y);
     cairo_paint(cr);
     cairo_destroy(cr);
@@ -525,6 +532,7 @@ void start_selection_drag() {
 
     app_state.floating_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
     cairo_t* float_cr = cairo_create(app_state.floating_surface);
+    configure_crisp_rendering(float_cr);
 
     if (app_state.selection_is_rect) {
         cairo_set_source_surface(float_cr, app_state.surface, -x1, -y1);
@@ -545,6 +553,7 @@ void start_selection_drag() {
     cairo_destroy(float_cr);
 
     cairo_t* cr = cairo_create(app_state.surface);
+    configure_crisp_rendering(cr);
     cairo_set_source_rgba(cr,
         app_state.bg_color.red,
         app_state.bg_color.green,
@@ -591,6 +600,7 @@ void copy_selection() {
         app_state.clipboard_height = h;
         
         cairo_t* cr = cairo_create(app_state.clipboard_surface);
+        configure_crisp_rendering(cr);
         if (app_state.floating_selection_active && app_state.floating_surface) {
             cairo_set_source_surface(cr, app_state.floating_surface, 0, 0);
         } else {
@@ -619,6 +629,7 @@ void cut_selection() {
         double y2 = fmax(app_state.selection_y1, app_state.selection_y2);
         
         cairo_t* cr = cairo_create(app_state.surface);
+        configure_crisp_rendering(cr);
         cairo_set_source_rgba(cr, 
             app_state.bg_color.red,
             app_state.bg_color.green,
@@ -848,6 +859,7 @@ void init_surface(GtkWidget* widget) {
     );
     
     cairo_t* cr = cairo_create(app_state.surface);
+    configure_crisp_rendering(cr);
     cairo_set_source_rgb(cr, 1, 1, 1);
     cairo_paint(cr);
     cairo_destroy(cr);
@@ -1066,16 +1078,16 @@ void draw_paintbrush(cairo_t* cr, double x, double y) {
 
 void draw_airbrush(cairo_t* cr, double x, double y) {
     GdkRGBA color = get_active_color();
-    cairo_set_source_rgba(cr, color.red, color.green, color.blue, 0.1);
+    cairo_set_source_rgba(cr, color.red, color.green, color.blue, color.alpha);
     
     for (int i = 0; i < 20; i++) {
         double angle = g_random_double() * 2 * M_PI;
         double radius = g_random_double() * 10;
-        double px = x + cos(angle) * radius;
-        double py = y + sin(angle) * radius;
-        cairo_arc(cr, px, py, 0.5, 0, 2 * M_PI);
-        cairo_fill(cr);
+        int px = static_cast<int>(std::round(x + cos(angle) * radius));
+        int py = static_cast<int>(std::round(y + sin(angle) * radius));
+        cairo_rectangle(cr, px, py, 1, 1);
     }
+    cairo_fill(cr);
 }
 
 void draw_eraser(cairo_t* cr, double x, double y) {
@@ -1326,15 +1338,18 @@ void draw_preview(cairo_t* cr) {
 // Canvas draw callback
 gboolean on_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
     if (app_state.surface) {
+        configure_crisp_rendering(cr);
         cairo_save(cr);
         cairo_scale(cr, app_state.zoom_factor, app_state.zoom_factor);
         cairo_set_source_surface(cr, app_state.surface, 0, 0);
+        cairo_pattern_set_filter(cairo_get_source(cr), CAIRO_FILTER_NEAREST);
         cairo_paint(cr);
 
         if (app_state.floating_selection_active && app_state.floating_surface) {
             double x = fmin(app_state.selection_x1, app_state.selection_x2);
             double y = fmin(app_state.selection_y1, app_state.selection_y2);
             cairo_set_source_surface(cr, app_state.floating_surface, x, y);
+            cairo_pattern_set_filter(cairo_get_source(cr), CAIRO_FILTER_NEAREST);
             cairo_paint(cr);
         }
         
@@ -1502,6 +1517,7 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
             if (event->button == 3) {
                 if (!app_state.polygon_finished && app_state.polygon_points.size() >= 2) {
                     cairo_t* cr = cairo_create(app_state.surface);
+                    configure_crisp_rendering(cr);
                     draw_polygon(cr, app_state.polygon_points);
                     cairo_destroy(cr);
 
@@ -1578,7 +1594,7 @@ gboolean on_motion_notify(GtkWidget* widget, GdkEventMotion* event, gpointer dat
             gtk_widget_queue_draw(widget);
         } else {
             cairo_t* cr = cairo_create(app_state.surface);
-            
+            configure_crisp_rendering(cr);
             switch (app_state.current_tool) {
                 case TOOL_PENCIL:
                     draw_pencil(cr, canvas_x, canvas_y);
@@ -1634,7 +1650,7 @@ gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpointer da
         }
         
         cairo_t* cr = cairo_create(app_state.surface);
-        
+        configure_crisp_rendering(cr);        
         switch (app_state.current_tool) {
             case TOOL_LINE:
                 draw_line(cr, app_state.start_x, app_state.start_y, end_x, end_y);
@@ -1741,6 +1757,7 @@ void save_image_dialog(GtkWidget* parent) {
                     app_state.canvas_height
                 );
                 cairo_t* cr = cairo_create(rgb_surface);
+                configure_crisp_rendering(cr);
                 cairo_set_source_surface(cr, app_state.surface, 0, 0);
                 cairo_paint(cr);
                 cairo_destroy(cr);
@@ -1811,6 +1828,7 @@ void open_image_dialog(GtkWidget* parent) {
                 );
                 
                 cairo_t* cr = cairo_create(app_state.surface);
+                configure_crisp_rendering(cr);
                 gdk_cairo_set_source_pixbuf(cr, pixbuf, 0, 0);
                 cairo_paint(cr);
                 cairo_destroy(cr);
@@ -2013,9 +2031,10 @@ void on_image_scale(GtkMenuItem* item, gpointer data) {
     cairo_surface_t* scaled_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, new_width, new_height);
 
     cairo_t* cr = cairo_create(scaled_surface);
+    configure_crisp_rendering(cr);
     cairo_scale(cr, (double)new_width / app_state.canvas_width, (double)new_height / app_state.canvas_height);
     cairo_set_source_surface(cr, old_surface, 0, 0);
-    cairo_pattern_set_filter(cairo_get_source(cr), CAIRO_FILTER_BILINEAR);
+    cairo_pattern_set_filter(cairo_get_source(cr), CAIRO_FILTER_NEAREST);
     cairo_paint(cr);
     cairo_destroy(cr);
 
@@ -2083,6 +2102,7 @@ void on_image_resize_canvas(GtkMenuItem* item, gpointer data) {
     cairo_surface_t* resized_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, new_width, new_height);
 
     cairo_t* cr = cairo_create(resized_surface);
+    configure_crisp_rendering(cr);
     cairo_set_source_rgba(
         cr,
         app_state.bg_color.red,
@@ -2120,6 +2140,7 @@ void on_image_rotate_clockwise(GtkMenuItem* item, gpointer data) {
     cairo_surface_t* old_surface = app_state.surface;
     cairo_surface_t* rotated_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, new_width, new_height);
     cairo_t* cr = cairo_create(rotated_surface);
+    configure_crisp_rendering(cr);
 
     cairo_translate(cr, new_width, 0);
     cairo_rotate(cr, M_PI / 2.0);
@@ -2152,6 +2173,7 @@ void on_image_rotate_counter_clockwise(GtkMenuItem* item, gpointer data) {
     cairo_surface_t* old_surface = app_state.surface;
     cairo_surface_t* rotated_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, new_width, new_height);
     cairo_t* cr = cairo_create(rotated_surface);
+    configure_crisp_rendering(cr);
 
     cairo_translate(cr, 0, new_height);
     cairo_rotate(cr, -M_PI / 2.0);
@@ -2182,6 +2204,7 @@ void on_image_flip_horizontal(GtkMenuItem* item, gpointer data) {
     cairo_surface_t* old_surface = app_state.surface;
     cairo_surface_t* flipped_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
     cairo_t* cr = cairo_create(flipped_surface);
+    configure_crisp_rendering(cr);
 
     cairo_translate(cr, width, 0);
     cairo_scale(cr, -1, 1);
@@ -2209,6 +2232,7 @@ void on_image_flip_vertical(GtkMenuItem* item, gpointer data) {
     cairo_surface_t* old_surface = app_state.surface;
     cairo_surface_t* flipped_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
     cairo_t* cr = cairo_create(flipped_surface);
+    configure_crisp_rendering(cr);
 
     cairo_translate(cr, 0, height);
     cairo_scale(cr, 1, -1);
