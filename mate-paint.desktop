@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Mate Paint
+Comment=Create and edit images
+Exec=mate-paint
+Icon=/usr/share/mate-paint/data/icons/48x48/mp.xpm
+Terminal=false
+Categories=Graphics;2DGraphics;
+StartupNotify=true
