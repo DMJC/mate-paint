@@ -8,6 +8,7 @@
 #include <string>
 #include <cctype>
 #include <queue>
+#include <cstdio>
 
 const double line_thickness_options[] = {1.0, 2.0, 4.0, 6.0, 8.0};
 const double zoom_options[] = {1.0, 2.0, 4.0, 6.0, 8.0};
@@ -40,6 +41,10 @@ void clear_selection();
 void copy_selection();
 void cut_selection();
 void paste_selection();
+void copy_surface_to_system_clipboard(cairo_surface_t* surface);
+cairo_surface_t* get_surface_from_system_clipboard(int& width, int& height);
+bool should_expand_canvas_for_paste(int pasted_width, int pasted_height);
+void resize_canvas_for_paste(int new_width, int new_height);
 void commit_floating_selection(bool record_undo = true);
 void finalize_text();
 void cancel_text();
@@ -715,6 +720,7 @@ void copy_selection() {
     }
 
     cairo_destroy(cr);
+    copy_surface_to_system_clipboard(app_state.clipboard_surface);
 }
 
 // Cut selection to clipboard
@@ -759,27 +765,163 @@ void cut_selection() {
 
 // Paste from clipboard
 void paste_selection() {
-    if (!app_state.clipboard_surface || !app_state.surface) return;
+    if (!app_state.surface) return;
 
-    clear_selection();
+    int clipboard_width = 0;
+    int clipboard_height = 0;
+    cairo_surface_t* system_surface = get_surface_from_system_clipboard(clipboard_width, clipboard_height);
 
-    double paste_x = 20;
-    double paste_y = 20;
+    if (system_surface) {
+        if (app_state.clipboard_surface) {
+            cairo_surface_destroy(app_state.clipboard_surface);
+        }
+        app_state.clipboard_surface = system_surface;
+        app_state.clipboard_width = clipboard_width;
+        app_state.clipboard_height = clipboard_height;
+    }
 
-    app_state.floating_surface = cairo_surface_reference(app_state.clipboard_surface);
-    app_state.floating_selection_active = true;
-    app_state.floating_drag_completed = false;
-    app_state.dragging_selection = false;
+    if (!app_state.clipboard_surface) return;
 
-    app_state.has_selection = true;
-    app_state.selection_is_rect = true;
-    app_state.selection_path.clear();
-    app_state.selection_x1 = paste_x;
-    app_state.selection_y1 = paste_y;
-    app_state.selection_x2 = paste_x + app_state.clipboard_width;
-    app_state.selection_y2 = paste_y + app_state.clipboard_height;
+    if ((app_state.clipboard_width > app_state.canvas_width || app_state.clipboard_height > app_state.canvas_height) &&
+        should_expand_canvas_for_paste(app_state.clipboard_width, app_state.clipboard_height)) {
+        resize_canvas_for_paste(
+            std::max(app_state.canvas_width, app_state.clipboard_width),
+            std::max(app_state.canvas_height, app_state.clipboard_height)
+        );
+
+        clear_selection();
+
+        double paste_x = 20;
+        double paste_y = 20;
+
+        app_state.floating_surface = cairo_surface_reference(app_state.clipboard_surface);
+        app_state.floating_selection_active = true;
+        app_state.floating_drag_completed = false;
+        app_state.dragging_selection = false;
+    
+        app_state.has_selection = true;
+        app_state.selection_is_rect = true;
+        app_state.selection_path.clear();
+        app_state.selection_x1 = paste_x;
+        app_state.selection_y1 = paste_y;
+        app_state.selection_x2 = paste_x + app_state.clipboard_width;
+        app_state.selection_y2 = paste_y + app_state.clipboard_height;
+
+        if (app_state.drawing_area) {
+            gtk_widget_queue_draw(app_state.drawing_area);
+        }
+    }
+}
+void copy_surface_to_system_clipboard(cairo_surface_t* surface) {
+    if (!surface || !app_state.window) return;
+
+    GtkClipboard* clipboard = gtk_widget_get_clipboard(app_state.window, GDK_SELECTION_CLIPBOARD);
+    if (!clipboard) return;
+
+    int width = cairo_image_surface_get_width(surface);
+    int height = cairo_image_surface_get_height(surface);
+    if (width <= 0 || height <= 0) return;
+
+    GdkPixbuf* pixbuf = gdk_pixbuf_get_from_surface(surface, 0, 0, width, height);
+    if (!pixbuf) return;
+
+    gtk_clipboard_set_image(clipboard, pixbuf);
+    g_object_unref(pixbuf);
+}
+
+cairo_surface_t* get_surface_from_system_clipboard(int& width, int& height) {
+    width = 0;
+    height = 0;
+
+    if (!app_state.window) return nullptr;
+
+    GtkClipboard* clipboard = gtk_widget_get_clipboard(app_state.window, GDK_SELECTION_CLIPBOARD);
+    if (!clipboard || !gtk_clipboard_wait_is_image_available(clipboard)) return nullptr;
+
+    GdkPixbuf* pixbuf = gtk_clipboard_wait_for_image(clipboard);
+    if (!pixbuf) return nullptr;
+
+    width = gdk_pixbuf_get_width(pixbuf);
+    height = gdk_pixbuf_get_height(pixbuf);
+
+    cairo_surface_t* surface = gdk_cairo_surface_create_from_pixbuf(pixbuf, 0, nullptr);
+    g_object_unref(pixbuf);
+
+    return surface;
+}
+
+bool should_expand_canvas_for_paste(int pasted_width, int pasted_height) {
+    if (!app_state.window) return false;
+
+    GtkWidget* dialog = gtk_dialog_new_with_buttons(
+        "Pasted Image Is Larger Than Canvas",
+        GTK_WINDOW(app_state.window),
+        (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+        "_Keep Canvas Size", GTK_RESPONSE_CANCEL,
+        "_Expand Canvas", GTK_RESPONSE_ACCEPT,
+        NULL
+    );
+
+    GtkWidget* content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    GtkWidget* label = gtk_label_new(
+        "The pasted image is larger than the current canvas.\n"
+        "Would you like to keep the current canvas size or expand it to fit the pasted image?"
+    );
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0);
+    gtk_container_set_border_width(GTK_CONTAINER(content), 10);
+    gtk_container_add(GTK_CONTAINER(content), label);
+
+    char details[128];
+    std::snprintf(
+        details,
+        sizeof(details),
+        "Canvas: %d x %d    Pasted image: %d x %d",
+        app_state.canvas_width,
+        app_state.canvas_height,
+        pasted_width,
+        pasted_height
+    );
+    GtkWidget* detail_label = gtk_label_new(details);
+    gtk_label_set_xalign(GTK_LABEL(detail_label), 0.0);
+    gtk_container_add(GTK_CONTAINER(content), detail_label);
+
+    gtk_widget_show_all(dialog);
+    int response = gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+
+    return response == GTK_RESPONSE_ACCEPT;
+}
+
+void resize_canvas_for_paste(int new_width, int new_height) {
+    if (!app_state.surface) return;
+    if (new_width <= app_state.canvas_width && new_height <= app_state.canvas_height) return;
+
+    push_undo_state();
+
+    cairo_surface_t* old_surface = app_state.surface;
+    cairo_surface_t* resized_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, new_width, new_height);
+
+    cairo_t* cr = cairo_create(resized_surface);
+    configure_crisp_rendering(cr);
+    cairo_set_source_rgba(
+        cr,
+        app_state.bg_color.red,
+        app_state.bg_color.green,
+        app_state.bg_color.blue,
+        app_state.bg_color.alpha
+    );
+    cairo_paint(cr);
+    cairo_set_source_surface(cr, old_surface, 0, 0);
+    cairo_paint(cr);
+    cairo_destroy(cr);
+
+    app_state.surface = resized_surface;
+    app_state.canvas_width = new_width;
+    app_state.canvas_height = new_height;
+    cairo_surface_destroy(old_surface);
 
     if (app_state.drawing_area) {
+        gtk_widget_set_size_request(app_state.drawing_area, new_width, new_height);
         gtk_widget_queue_draw(app_state.drawing_area);
     }
 }
