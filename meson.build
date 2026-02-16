@@ -19,7 +19,6 @@ executable('mate-paint',
 
 install_subdir('data', install_dir: icon_install_dir)
 
-
-
-
-
+install_data('mate-paint.desktop',
+  install_dir: join_paths(get_option('prefix'), get_option('datadir'), 'applications')
+)
