@@ -6,6 +6,7 @@
 #include <memory>
 #include <iterator>
 #include <string>
+#include <cctype>
 #include <queue>
 
 const double line_thickness_options[] = {1.0, 2.0, 4.0, 6.0, 8.0};
@@ -50,6 +51,8 @@ void update_zoom_buttons();
 void update_zoom_visibility();
 void push_undo_state();
 void undo_last_operation();
+bool is_transparent_color(const GdkRGBA& color);
+bool save_surface_to_file(cairo_surface_t* surface, const std::string& filename);
 
 struct UndoSnapshot {
     cairo_surface_t* surface = nullptr;
@@ -77,6 +80,9 @@ struct AppState {
     double start_y = 0;
     double current_x = 0;
     double current_y = 0;
+    bool hover_in_canvas = false;
+    double hover_x = 0;
+    double hover_y = 0;
     std::vector<std::pair<double, double>> polygon_points;
     bool polygon_finished = false;
     std::vector<std::pair<double, double>> lasso_points;
@@ -158,7 +164,7 @@ AppState app_state;
 
 // Color palette
 const GdkRGBA palette_colors[] = {
-    {0.0, 0.5, 0.0, 1.0},   // Green
+    {0.0, 0.0, 0.0, 0.0},   // Transparency
     {0.0, 0.0, 0.0, 1.0},   // Black
     {0.2, 0.2, 0.2, 1.0},   // Dark gray
     {0.5, 0.5, 0.5, 1.0},   // Gray
@@ -218,9 +224,17 @@ int tool_to_index(Tool tool) {
 }
 
 bool tool_supports_line_thickness(Tool tool) {
-    return tool == TOOL_PAINTBRUSH || tool == TOOL_ERASER ||
+    return tool == TOOL_PAINTBRUSH || tool == TOOL_AIRBRUSH || tool == TOOL_ERASER ||
            tool == TOOL_LINE || tool == TOOL_CURVE || tool == TOOL_RECTANGLE ||
            tool == TOOL_POLYGON || tool == TOOL_ELLIPSE || tool == TOOL_ROUNDED_RECT;
+}
+
+bool tool_shows_brush_hover_outline(Tool tool) {
+    return tool == TOOL_PAINTBRUSH || tool == TOOL_AIRBRUSH || tool == TOOL_ERASER;
+}
+
+bool tool_shows_vertex_hover_markers(Tool tool) {
+    return tool == TOOL_LINE || tool == TOOL_CURVE || tool == TOOL_POLYGON;
 }
 
 double to_canvas_coordinate(double coordinate) {
@@ -312,83 +326,80 @@ bool point_in_text_box(double x, double y) {
 // Calculate required text box size based on content and font
 void update_text_box_size() {
     if (!app_state.text_active) return;
-    
+
     // Create a temporary cairo surface for measurements
     cairo_surface_t* temp_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
     cairo_t* cr = cairo_create(temp_surface);
     configure_crisp_rendering(cr);
-    
+
     // Set font
     cairo_select_font_face(cr, app_state.text_font_family.c_str(), 
                           CAIRO_FONT_SLANT_NORMAL, 
                           CAIRO_FONT_WEIGHT_NORMAL);
     cairo_set_font_size(cr, app_state.text_font_size);
-    
+
     // Calculate size needed for text
-    double max_width = 200.0; // Minimum width
-    double total_height = app_state.text_font_size + 10; // Start with padding
-    
+    const double min_width = 200.0;
+    const double width_padding = 20.0;
+    const double wrap_padding = 10.0;
+    const double max_canvas_width = fmax(20.0, app_state.canvas_width - app_state.text_x);
+    double target_width = fmin(min_width, max_canvas_width);
+    double total_height = app_state.text_font_size + 10;
+
     if (!app_state.text_content.empty()) {
-        std::string text = app_state.text_content;
+        const std::string& text = app_state.text_content;
+        const bool has_manual_line_break = text.find('\n') != std::string::npos;
         cairo_text_extents_t extents;
+
+
+        // Grow width with the current line while typing until we hit the canvas edge.
+        if (!has_manual_line_break) {
+            cairo_text_extents(cr, text.c_str(), &extents);
+            double content_width = extents.width + width_padding;
+            target_width = fmin(fmax(min_width, content_width), max_canvas_width);
+        } else {
+            // Once Enter is used, keep current width and wrap without expanding further right.
+            target_width = fmin(fmax(app_state.text_box_width, min_width), max_canvas_width);
+        }
+
+        // Measure wrapped line count based on the chosen width.
         std::string word;
         std::string line;
-        double line_width = 0;
         int line_count = 1;
-        
+
         for (size_t i = 0; i <= text.length(); i++) {
             if (i == text.length() || text[i] == ' ' || text[i] == '\n') {
                 if (!word.empty()) {
                     std::string test_line = line.empty() ? word : line + " " + word;
                     cairo_text_extents(cr, test_line.c_str(), &extents);
-                    
-                    if (extents.width > max_width - 10 && !line.empty()) {
-                        // Line would be too long, record current line width and start new line
-                        cairo_text_extents(cr, line.c_str(), &extents);
-                        line_width = fmax(line_width, extents.width);
-                        line = word;
-                        line_count++;
+
+                    if (extents.width > target_width - wrap_padding && !line.empty()) {
                     } else {
                         line = test_line;
-                        line_width = fmax(line_width, extents.width);
                     }
                     word.clear();
                 }
-                
+
                 if (i < text.length() && text[i] == '\n') {
-                    if (!line.empty()) {
-                        cairo_text_extents(cr, line.c_str(), &extents);
-                        line_width = fmax(line_width, extents.width);
-                        line.clear();
-                    }
+                    line.clear();
                     line_count++;
                 }
             } else {
                 word += text[i];
             }
         }
-        
-        // Check final line
-        if (!line.empty()) {
-            cairo_text_extents(cr, line.c_str(), &extents);
-            line_width = fmax(line_width, extents.width);
-        }
-        
-        // Set dimensions based on content
-        max_width = fmax(max_width, line_width + 20);
         total_height = line_count * (app_state.text_font_size + 2) + 15;
     } else {
         // Empty text, use minimum size based on font
         total_height = app_state.text_font_size * 3 + 20;
     }
-    
     cairo_destroy(cr);
     cairo_surface_destroy(temp_surface);
-    
+
     // Update text box dimensions
-    app_state.text_box_width = max_width;
+    app_state.text_box_width = target_width;
     app_state.text_box_height = fmax(total_height, app_state.text_font_size * 2 + 20);
-    
+
     // Make sure box doesn't go off canvas
     if (app_state.text_x + app_state.text_box_width > app_state.canvas_width) {
         app_state.text_box_width = app_state.canvas_width - app_state.text_x;
@@ -917,19 +928,34 @@ void create_text_window(double x, double y) {
 gboolean on_color_button_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
     bool is_foreground = GPOINTER_TO_INT(data);
     GdkRGBA* color = is_foreground ? &app_state.fg_color : &app_state.bg_color;
-    
+
     GtkAllocation alloc;
     gtk_widget_get_allocation(widget, &alloc);
-    
+
     cairo_set_source_rgba(cr, color->red, color->green, color->blue, color->alpha);
     cairo_rectangle(cr, 0, 0, alloc.width, alloc.height);
     cairo_fill(cr);
-    
+
     cairo_set_source_rgb(cr, 0.2, 0.2, 0.2);
     cairo_set_line_width(cr, 2.0);
     cairo_rectangle(cr, 1, 1, alloc.width - 2, alloc.height - 2);
     cairo_stroke(cr);
-    
+
+    if (is_transparent_color(*color)) {
+        cairo_select_font_face(cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+        cairo_set_font_size(cr, fmax(10.0, alloc.height * 0.7));
+
+        cairo_text_extents_t extents;
+        cairo_text_extents(cr, "T", &extents);
+
+        double text_x = (alloc.width - extents.width) / 2.0 - extents.x_bearing;
+        double text_y = (alloc.height - extents.height) / 2.0 - extents.y_bearing;
+
+        cairo_set_source_rgb(cr, 0.1, 0.1, 0.1);
+        cairo_move_to(cr, text_x, text_y);
+        cairo_show_text(cr, "T");
+    }
+
     return TRUE;
 }
 
@@ -1032,6 +1058,10 @@ void init_surface(GtkWidget* widget) {
 // Get active color based on mouse button
 GdkRGBA get_active_color() {
     return app_state.is_right_button ? app_state.bg_color : app_state.fg_color;
+}
+
+bool is_transparent_color(const GdkRGBA& color) {
+    return color.alpha <= 0.001;
 }
 
 bool point_in_canvas(int x, int y) {
@@ -1252,10 +1282,11 @@ void draw_paintbrush(cairo_t* cr, double x, double y) {
 void draw_airbrush(cairo_t* cr, double x, double y) {
     GdkRGBA color = get_active_color();
     cairo_set_source_rgba(cr, color.red, color.green, color.blue, color.alpha);
+    double spray_radius = app_state.line_width * 5.0;
     
     for (int i = 0; i < 20; i++) {
         double angle = g_random_double() * 2 * M_PI;
-        double radius = g_random_double() * 10;
+        double radius = g_random_double() * spray_radius;
         int px = static_cast<int>(std::round(x + cos(angle) * radius));
         int py = static_cast<int>(std::round(y + sin(angle) * radius));
         cairo_rectangle(cr, px, py, 1, 1);
@@ -1264,20 +1295,17 @@ void draw_airbrush(cairo_t* cr, double x, double y) {
 }
 
 void draw_eraser(cairo_t* cr, double x, double y) {
-    cairo_set_source_rgba(cr, 
-        app_state.bg_color.red, 
-        app_state.bg_color.green, 
-        app_state.bg_color.blue, 
-        app_state.bg_color.alpha
-    );
+    cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
     cairo_set_line_width(cr, app_state.line_width * 3);
     cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
-    
+
     if (app_state.last_x != 0 && app_state.last_y != 0) {
         cairo_move_to(cr, app_state.last_x, app_state.last_y);
         cairo_line_to(cr, x, y);
         cairo_stroke(cr);
     }
+
+    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
 }
 
 // Draw text box overlay
@@ -1382,6 +1410,36 @@ void draw_selection_overlay(cairo_t* cr) {
     }
 }
 
+void draw_black_outline_circle(cairo_t* cr, double x, double y, double radius) {
+    cairo_save(cr);
+    cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
+    cairo_set_line_width(cr, 1.0);
+    cairo_arc(cr, x, y, radius, 0, 2 * M_PI);
+    cairo_stroke(cr);
+    cairo_restore(cr);
+}
+
+void draw_hover_indicator(cairo_t* cr) {
+    if (!app_state.hover_in_canvas) {
+        return;
+    }
+
+    if (tool_shows_brush_hover_outline(app_state.current_tool) && !app_state.is_drawing) {
+        double radius = app_state.line_width;
+        if (app_state.current_tool == TOOL_ERASER) {
+            radius = app_state.line_width * 1.5;
+        } else if (app_state.current_tool == TOOL_AIRBRUSH) {
+            radius = app_state.line_width * 5.0;
+        }
+        draw_black_outline_circle(cr, app_state.hover_x, app_state.hover_y, radius);
+        return;
+    }
+
+    if (tool_shows_vertex_hover_markers(app_state.current_tool) && !app_state.is_drawing) {
+        draw_black_outline_circle(cr, app_state.hover_x, app_state.hover_y, 5.0);
+    }
+}
+
 // Draw preview overlays with ant paths
 void draw_preview(cairo_t* cr) {
     if (!app_state.is_drawing) return;
@@ -1411,6 +1469,11 @@ void draw_preview(cairo_t* cr) {
         case TOOL_CURVE: {
             if (app_state.curve_active) {
                 draw_ant_path(cr);
+
+                draw_black_outline_circle(cr, app_state.curve_start_x, app_state.curve_start_y, 5.0);
+                if (app_state.curve_has_end) {
+                    draw_black_outline_circle(cr, app_state.curve_end_x, app_state.curve_end_y, 5.0);
+                }
 
                 if (app_state.curve_has_end) {
                     if (app_state.curve_has_control) {
@@ -1463,6 +1526,8 @@ void draw_preview(cairo_t* cr) {
             cairo_move_to(cr, app_state.start_x, app_state.start_y);
             cairo_line_to(cr, preview_x, preview_y);
             cairo_stroke(cr);
+            draw_black_outline_circle(cr, app_state.start_x, app_state.start_y, 5.0);
+            draw_black_outline_circle(cr, preview_x, preview_y, 5.0);
             break;
         }
         
@@ -1530,6 +1595,10 @@ void draw_preview(cairo_t* cr) {
                 }
 
                 cairo_stroke(cr);
+                
+                for (const auto& point : app_state.polygon_points) {
+                    draw_black_outline_circle(cr, point.first, point.second, 5.0);
+                }
             }
             break;
         }
@@ -1571,6 +1640,7 @@ gboolean on_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
         if (tool_needs_preview(app_state.current_tool)) {
             draw_preview(cr);
         }
+        draw_hover_indicator(cr);
         cairo_restore(cr);
     }
     return FALSE;
@@ -1881,9 +1951,21 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
 
 // Mouse motion
 gboolean on_motion_notify(GtkWidget* widget, GdkEventMotion* event, gpointer data) {
-    if (app_state.is_drawing && app_state.surface) {
+    if (app_state.surface) {
         double canvas_x = to_canvas_coordinate(event->x);
         double canvas_y = to_canvas_coordinate(event->y);
+        app_state.hover_in_canvas = true;
+        app_state.hover_x = canvas_x;
+        app_state.hover_y = canvas_y;
+
+        if (!app_state.is_drawing) {
+            if (tool_shows_brush_hover_outline(app_state.current_tool) ||
+                tool_shows_vertex_hover_markers(app_state.current_tool)) {
+                gtk_widget_queue_draw(widget);
+            }
+            return TRUE;
+        }
+
         app_state.current_x = canvas_x;
         app_state.current_y = canvas_y;
 
@@ -1939,6 +2021,14 @@ gboolean on_motion_notify(GtkWidget* widget, GdkEventMotion* event, gpointer dat
             app_state.last_y = canvas_y;
             gtk_widget_queue_draw(widget);
         }
+    }
+    return TRUE;
+}
+
+gboolean on_leave_notify(GtkWidget* widget, GdkEventCrossing* event, gpointer data) {
+    if (app_state.hover_in_canvas) {
+        app_state.hover_in_canvas = false;
+        gtk_widget_queue_draw(widget);
     }
     return TRUE;
 }
@@ -2049,68 +2139,105 @@ void save_image_dialog(GtkWidget* parent) {
         "_Save", GTK_RESPONSE_ACCEPT,
         NULL
     );
-    
+
     gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
-    
+
     GtkFileFilter* filter_png = gtk_file_filter_new();
     gtk_file_filter_set_name(filter_png, "PNG Images");
     gtk_file_filter_add_pattern(filter_png, "*.png");
+    gtk_file_filter_add_pattern(filter_png, "*.PNG");
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_png);
-    
+
     GtkFileFilter* filter_jpg = gtk_file_filter_new();
     gtk_file_filter_set_name(filter_jpg, "JPEG Images");
     gtk_file_filter_add_pattern(filter_jpg, "*.jpg");
     gtk_file_filter_add_pattern(filter_jpg, "*.jpeg");
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_jpg);
-    
+
+    GtkFileFilter* filter_xpm = gtk_file_filter_new();
+    gtk_file_filter_set_name(filter_xpm, "XPM Images");
+    gtk_file_filter_add_pattern(filter_xpm, "*.xpm");
+    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_xpm);
+
     if (!app_state.current_filename.empty()) {
         gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), app_state.current_filename.c_str());
     } else {
         gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), "untitled.png");
     }
-    
+
     if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
         char* filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-        
+
         if (filename) {
             std::string fname(filename);
-            app_state.current_filename = fname;
-            
-            bool is_jpeg = (fname.substr(fname.find_last_of(".") + 1) == "jpg" ||
-                           fname.substr(fname.find_last_of(".") + 1) == "jpeg");
-            
-            if (is_jpeg) {
-                cairo_surface_t* rgb_surface = cairo_image_surface_create(
-                    CAIRO_FORMAT_RGB24, 
-                    app_state.canvas_width, 
-                    app_state.canvas_height
-                );
-                cairo_t* cr = cairo_create(rgb_surface);
-                configure_crisp_rendering(cr);
-                cairo_set_source_surface(cr, app_state.surface, 0, 0);
-                cairo_paint(cr);
-                cairo_destroy(cr);
-                
-                std::string temp_png = fname + ".temp.png";
-                cairo_surface_write_to_png(rgb_surface, temp_png.c_str());
-                cairo_surface_destroy(rgb_surface);
-                
-                GError* error = NULL;
-                GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file(temp_png.c_str(), &error);
-                if (pixbuf) {
-                    gdk_pixbuf_save(pixbuf, filename, "jpeg", &error, "quality", "95", NULL);
-                    g_object_unref(pixbuf);
-                }
-                remove(temp_png.c_str());
-            } else {
-                cairo_surface_write_to_png(app_state.surface, filename);
+            size_t dot_pos = fname.find_last_of('.');
+            std::string extension = (dot_pos == std::string::npos) ? "" : fname.substr(dot_pos + 1);
+            std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+            if (extension != "png") {
+                fname += ".png";
             }
-            
+
+            app_state.current_filename = fname;
+            cairo_surface_write_to_png(app_state.surface, fname.c_str());
+
             g_free(filename);
         }
     }
-    
+
     gtk_widget_destroy(dialog);
+}
+
+std::string get_file_extension_lowercase(const std::string& filename) {
+    size_t dot_pos = filename.find_last_of('.');
+    if (dot_pos == std::string::npos || dot_pos + 1 >= filename.size()) {
+        return "";
+    }
+
+    std::string extension = filename.substr(dot_pos + 1);
+    std::transform(extension.begin(), extension.end(), extension.begin(), [](unsigned char ch) {
+        return static_cast<char>(std::tolower(ch));
+    });
+    return extension;
+}
+
+bool save_surface_to_file(cairo_surface_t* surface, const std::string& filename) {
+    if (!surface || filename.empty()) {
+        return false;
+    }
+
+    std::string extension = get_file_extension_lowercase(filename);
+    if (extension == "jpg" || extension == "jpeg" || extension == "xpm") {
+        cairo_surface_t* rgb_surface = cairo_image_surface_create(
+            CAIRO_FORMAT_RGB24,
+            app_state.canvas_width,
+            app_state.canvas_height
+        );
+        cairo_t* cr = cairo_create(rgb_surface);
+        configure_crisp_rendering(cr);
+        cairo_set_source_surface(cr, surface, 0, 0);
+        cairo_paint(cr);
+        cairo_destroy(cr);
+
+        std::string temp_png = filename + ".temp.png";
+        cairo_surface_write_to_png(rgb_surface, temp_png.c_str());
+        cairo_surface_destroy(rgb_surface);
+
+        GError* error = NULL;
+        GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file(temp_png.c_str(), &error);
+        bool save_success = false;
+        if (pixbuf) {
+            if (extension == "xpm") {
+                save_success = gdk_pixbuf_save(pixbuf, filename.c_str(), "xpm", &error, NULL);
+            } else {
+                save_success = gdk_pixbuf_save(pixbuf, filename.c_str(), "jpeg", &error, "quality", "95", NULL);
+            }
+            g_object_unref(pixbuf);
+        }
+        remove(temp_png.c_str());
+        return save_success;
+    }
+
+    return cairo_surface_write_to_png(surface, filename.c_str()) == CAIRO_STATUS_SUCCESS;
 }
 
 void open_image_dialog(GtkWidget* parent) {
@@ -2122,62 +2249,51 @@ void open_image_dialog(GtkWidget* parent) {
         "_Open", GTK_RESPONSE_ACCEPT,
         NULL
     );
-    
+
     GtkFileFilter* filter_images = gtk_file_filter_new();
-    gtk_file_filter_set_name(filter_images, "Image Files");
+    gtk_file_filter_set_name(filter_images, "PNG Images");
     gtk_file_filter_add_pattern(filter_images, "*.png");
-    gtk_file_filter_add_pattern(filter_images, "*.jpg");
-    gtk_file_filter_add_pattern(filter_images, "*.jpeg");
+    gtk_file_filter_add_pattern(filter_images, "*.PNG");
+    gtk_file_filter_add_pattern(filter_images, "*.xpm");
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_images);
-    
+
     if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
         char* filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-        
+
         if (filename) {
             app_state.current_filename = filename;
-            
-            GError* error = NULL;
-            GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file(filename, &error);
-            
-            if (pixbuf) {
-                int width = gdk_pixbuf_get_width(pixbuf);
-                int height = gdk_pixbuf_get_height(pixbuf);
-                
+
+            cairo_surface_t* loaded_surface = cairo_image_surface_create_from_png(filename);
+            if (cairo_surface_status(loaded_surface) == CAIRO_STATUS_SUCCESS) {
+                int width = cairo_image_surface_get_width(loaded_surface);
+                int height = cairo_image_surface_get_height(loaded_surface);
+
                 push_undo_state();
 
                 app_state.canvas_width = width;
                 app_state.canvas_height = height;
-                
+
                 if (app_state.surface) {
                     cairo_surface_destroy(app_state.surface);
                 }
-                
-                app_state.surface = cairo_image_surface_create(
-                    CAIRO_FORMAT_ARGB32, 
-                    width, 
-                    height
-                );
-                
-                cairo_t* cr = cairo_create(app_state.surface);
-                configure_crisp_rendering(cr);
-                gdk_cairo_set_source_pixbuf(cr, pixbuf, 0, 0);
-                cairo_paint(cr);
-                cairo_destroy(cr);
-                
-                g_object_unref(pixbuf);
-                
+
+                app_state.surface = loaded_surface;
+
                 gtk_widget_set_size_request(app_state.drawing_area,
                     static_cast<int>(width * app_state.zoom_factor),
                     static_cast<int>(height * app_state.zoom_factor));
                 gtk_widget_queue_draw(app_state.drawing_area);
+            } else {
+                cairo_surface_destroy(loaded_surface);
             }
-            
+
             g_free(filename);
         }
     }
-    
+
     gtk_widget_destroy(dialog);
 }
+
 
 // Menu callbacks
 void on_file_new(GtkMenuItem* item, gpointer data) {
@@ -2298,7 +2414,15 @@ void on_file_open(GtkMenuItem* item, gpointer data) {
 
 void on_file_save(GtkMenuItem* item, gpointer data) {
     if (!app_state.current_filename.empty()) {
-        cairo_surface_write_to_png(app_state.surface, app_state.current_filename.c_str());
+        std::string filename = app_state.current_filename;
+        size_t dot_pos = filename.find_last_of('.');
+        std::string extension = (dot_pos == std::string::npos) ? "" : filename.substr(dot_pos + 1);
+        std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+        if (extension != "png") {
+            filename += ".png";
+            app_state.current_filename = filename;
+        }
+        save_surface_to_file(app_state.surface, app_state.current_filename);
     } else {
         save_image_dialog(app_state.window);
     }
@@ -2893,7 +3017,7 @@ void apply_color_button_style(GtkWidget* button, const GdkRGBA& color, bool is_c
         (int)(color.red * 255),
         (int)(color.green * 255),
         (int)(color.blue * 255),
-        is_custom_slot ? text_color : "transparent"
+        (is_custom_slot || is_transparent_color(color)) ? text_color : "transparent"
     );
 
     GtkCssProvider* provider = gtk_css_provider_new();
@@ -2950,6 +3074,18 @@ gboolean on_color_button_press(GtkWidget* widget, GdkEventButton* event, gpointe
         update_color_indicators();
     }
     return TRUE;
+}
+
+const char* get_palette_button_label(int index, bool is_custom_slot) {
+    if (index == 0) {
+        return "T";
+    }
+
+    if (is_custom_slot) {
+        return "c";
+    }
+
+    return "";
 }
 
 const char* get_tool_icon_filename(Tool tool) {
@@ -3016,7 +3152,7 @@ GtkWidget* create_tool_button(Tool tool, const char* tooltip) {
 
 // Create color button
 GtkWidget* create_color_button(GdkRGBA color, int index, bool is_custom_slot) {
-    GtkWidget* button = gtk_button_new_with_label(is_custom_slot ? "c" : "");
+    GtkWidget* button = gtk_button_new_with_label(get_palette_button_label(index, is_custom_slot));
     gtk_widget_set_size_request(button, 18, 18);
 
     apply_color_button_style(button, color, is_custom_slot);
@@ -3164,7 +3300,7 @@ int main(int argc, char* argv[]) {
     
     gtk_grid_attach(GTK_GRID(toolbox), 
         create_tool_button(TOOL_ERASER, 
-            "Eraser - Erase with background color"), 
+            "Eraser - Erase to transparency"), 
         0, 2, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
@@ -3265,12 +3401,14 @@ int main(int argc, char* argv[]) {
     g_signal_connect(app_state.drawing_area, "draw", G_CALLBACK(on_draw), NULL);
     g_signal_connect(app_state.drawing_area, "button-press-event", G_CALLBACK(on_button_press), NULL);
     g_signal_connect(app_state.drawing_area, "motion-notify-event", G_CALLBACK(on_motion_notify), NULL);
+    g_signal_connect(app_state.drawing_area, "leave-notify-event", G_CALLBACK(on_leave_notify), NULL);
     g_signal_connect(app_state.drawing_area, "button-release-event", G_CALLBACK(on_button_release), NULL);
     
     gtk_widget_set_events(app_state.drawing_area, 
         GDK_BUTTON_PRESS_MASK | 
         GDK_BUTTON_RELEASE_MASK | 
-        GDK_POINTER_MOTION_MASK
+        GDK_POINTER_MOTION_MASK |
+        GDK_LEAVE_NOTIFY_MASK
     );
     
     gtk_container_add(GTK_CONTAINER(scrolled), app_state.drawing_area);
