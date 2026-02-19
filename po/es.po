@@ -1,0 +1,330 @@
+# Spanish translations for PACKAGE package.
+# Copyright (C) 2026 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-19 20:53+0000\n"
+"PO-Revision-Date: 2026-02-19 20:53+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ASCII\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: mate-paint.cpp:987
+msgid "Pasted Image Is Larger Than Canvas"
+msgstr ""
+
+#: mate-paint.cpp:990
+msgid "_Keep Canvas Size"
+msgstr ""
+
+#: mate-paint.cpp:991
+msgid "_Expand Canvas"
+msgstr ""
+
+#: mate-paint.cpp:997
+msgid ""
+"The pasted image is larger than the current canvas.\n"
+"Would you like to keep the current canvas size or expand it to fit the "
+"pasted image?"
+msgstr ""
+
+#: mate-paint.cpp:1007
+#, c-format
+msgid "Canvas: %d x %d    Pasted image: %d x %d"
+msgstr ""
+
+#: mate-paint.cpp:1159
+msgid "Text Tool"
+msgstr ""
+
+#: mate-paint.cpp:2481
+msgid "Save Image"
+msgstr ""
+
+#: mate-paint.cpp:2484 mate-paint.cpp:2594 mate-paint.cpp:2650
+#: mate-paint.cpp:2808 mate-paint.cpp:2873
+msgid "_Cancel"
+msgstr ""
+
+#: mate-paint.cpp:2485
+msgid "_Save"
+msgstr ""
+
+#: mate-paint.cpp:2492 mate-paint.cpp:2600
+msgid "PNG Images"
+msgstr ""
+
+#: mate-paint.cpp:2498
+msgid "JPEG Images"
+msgstr ""
+
+#: mate-paint.cpp:2504
+msgid "XPM Images"
+msgstr ""
+
+#: mate-paint.cpp:2511
+msgid "untitled.png"
+msgstr ""
+
+#: mate-paint.cpp:2591
+msgid "Open Image"
+msgstr ""
+
+#: mate-paint.cpp:2595
+msgid "_Open"
+msgstr ""
+
+#: mate-paint.cpp:2647
+msgid "New Image"
+msgstr ""
+
+#: mate-paint.cpp:2651
+msgid "_Create"
+msgstr ""
+
+#: mate-paint.cpp:2660
+msgid "Resolution:"
+msgstr ""
+
+#: mate-paint.cpp:2670 mate-paint.cpp:2700 mate-paint.cpp:2729
+msgid "Custom"
+msgstr ""
+
+#: mate-paint.cpp:2675
+msgid "X:"
+msgstr ""
+
+#: mate-paint.cpp:2678
+msgid "Y:"
+msgstr ""
+
+#: mate-paint.cpp:2680
+msgid "pixels"
+msgstr ""
+
+#: mate-paint.cpp:2805
+msgid "Scale Image"
+msgstr ""
+
+#: mate-paint.cpp:2809
+msgid "_Scale"
+msgstr ""
+
+#: mate-paint.cpp:2818
+msgid "Scale (%):"
+msgstr ""
+
+#: mate-paint.cpp:2870
+msgid "Resize Image"
+msgstr ""
+
+#: mate-paint.cpp:2874
+msgid "_Resize"
+msgstr ""
+
+#: mate-paint.cpp:2884
+msgid "Width:"
+msgstr ""
+
+#: mate-paint.cpp:2891
+msgid "Height:"
+msgstr ""
+
+#: mate-paint.cpp:3225
+msgid "Manual is not available yet."
+msgstr ""
+
+#: mate-paint.cpp:3227 mate-paint.cpp:3751
+msgid "Manual"
+msgstr ""
+
+#: mate-paint.cpp:3238
+msgid ""
+"Mate-Paint\n"
+"version 1.0\n"
+"Copyright 2006\n"
+"James Carthew"
+msgstr ""
+
+#: mate-paint.cpp:3240 mate-paint.cpp:3752
+msgid "About"
+msgstr ""
+
+#: mate-paint.cpp:3341
+msgid "Line thickness"
+msgstr ""
+
+#: mate-paint.cpp:3442
+msgid "Zoom level"
+msgstr ""
+
+#: mate-paint.cpp:3532
+msgid "Custom color"
+msgstr ""
+
+#: mate-paint.cpp:3669
+msgid "Mate-Paint"
+msgstr ""
+
+#: mate-paint.cpp:3681
+msgid "File"
+msgstr ""
+
+#: mate-paint.cpp:3683
+msgid "New"
+msgstr ""
+
+#: mate-paint.cpp:3684
+msgid "Open..."
+msgstr ""
+
+#: mate-paint.cpp:3685
+msgid "Save"
+msgstr ""
+
+#: mate-paint.cpp:3686
+msgid "Save As..."
+msgstr ""
+
+#: mate-paint.cpp:3687
+msgid "Quit"
+msgstr ""
+
+#: mate-paint.cpp:3706
+msgid "Edit"
+msgstr ""
+
+#: mate-paint.cpp:3707
+msgid "Undo"
+msgstr ""
+
+#: mate-paint.cpp:3708
+msgid "Cut"
+msgstr ""
+
+#: mate-paint.cpp:3709
+msgid "Copy"
+msgstr ""
+
+#: mate-paint.cpp:3710
+msgid "Paste"
+msgstr ""
+
+#: mate-paint.cpp:3725
+msgid "Image"
+msgstr ""
+
+#: mate-paint.cpp:3726
+msgid "Scale Image..."
+msgstr ""
+
+#: mate-paint.cpp:3727
+msgid "Resize Image..."
+msgstr ""
+
+#: mate-paint.cpp:3728
+msgid "Rotate Clockwise"
+msgstr ""
+
+#: mate-paint.cpp:3729
+msgid "Rotate Counter-Clockwise"
+msgstr ""
+
+#: mate-paint.cpp:3730
+msgid "Flip Vertical"
+msgstr ""
+
+#: mate-paint.cpp:3731
+msgid "Flip Horizontal"
+msgstr ""
+
+#: mate-paint.cpp:3750
+msgid "Help"
+msgstr ""
+
+#: mate-paint.cpp:3782
+msgid "Lasso Select - Draw freehand selection"
+msgstr ""
+
+#: mate-paint.cpp:3787
+msgid ""
+"Rectangle Select - Select rectangular regions (Ctrl+C to copy, Ctrl+X to cut)"
+msgstr ""
+
+#: mate-paint.cpp:3792
+msgid "Fill Tool - Fill areas with color"
+msgstr ""
+
+#: mate-paint.cpp:3797
+msgid "Eyedropper - Pick color from canvas"
+msgstr ""
+
+#: mate-paint.cpp:3802
+msgid "Eraser - Erase to transparency"
+msgstr ""
+
+#: mate-paint.cpp:3807
+msgid "Zoom Tool - Zoom in/out"
+msgstr ""
+
+#: mate-paint.cpp:3812
+msgid "Pencil - Draw thin lines"
+msgstr ""
+
+#: mate-paint.cpp:3817
+msgid "Paintbrush - Draw with brush strokes"
+msgstr ""
+
+#: mate-paint.cpp:3822
+msgid "Airbrush - Spray paint effect"
+msgstr ""
+
+#: mate-paint.cpp:3827
+msgid ""
+"Text Tool - Add text (Left-click outside to finalize, Right-click outside to "
+"cancel)"
+msgstr ""
+
+#: mate-paint.cpp:3832
+msgid "Line Tool - Draw straight lines (hold Shift for horizontal/vertical)"
+msgstr ""
+
+#: mate-paint.cpp:3837
+msgid "Curve Tool - Draw curved lines"
+msgstr ""
+
+#: mate-paint.cpp:3842
+msgid "Rectangle - Draw rectangles"
+msgstr ""
+
+#: mate-paint.cpp:3847
+msgid "Polygon - Draw multi-sided shapes"
+msgstr ""
+
+#: mate-paint.cpp:3852
+msgid "Ellipse/Circle - Draw ellipses (hold Shift for circles)"
+msgstr ""
+
+#: mate-paint.cpp:3857
+msgid "Rounded Rectangle - Draw rectangles with rounded corners"
+msgstr ""
+
+#: mate-paint.cpp:3923
+msgid "Foreground color (left-click palette / left-click canvas)"
+msgstr ""
+
+#: mate-paint.cpp:3928
+msgid "Background color (right-click palette / right-click canvas)"
+msgstr ""
+
+#: mate-paint.cpp:3962
+msgid "Double-click to choose a custom colour"
+msgstr ""

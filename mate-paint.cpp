@@ -1,6 +1,8 @@
 #include <gtk/gtk.h>
 #include <cairo.h>
+#include <glib/gi18n.h>
 #include <glib/gstdio.h>
+#include <locale.h>
 #include <algorithm>
 #include <vector>
 #include <cmath>
@@ -982,18 +984,17 @@ bool should_expand_canvas_for_paste(int pasted_width, int pasted_height) {
     if (!app_state.window) return false;
 
     GtkWidget* dialog = gtk_dialog_new_with_buttons(
-        "Pasted Image Is Larger Than Canvas",
+        _("Pasted Image Is Larger Than Canvas"),
         GTK_WINDOW(app_state.window),
         (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-        "_Keep Canvas Size", GTK_RESPONSE_CANCEL,
-        "_Expand Canvas", GTK_RESPONSE_ACCEPT,
+        _("_Keep Canvas Size"), GTK_RESPONSE_CANCEL,
+        _("_Expand Canvas"), GTK_RESPONSE_ACCEPT,
         NULL
     );
 
     GtkWidget* content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
     GtkWidget* label = gtk_label_new(
-        "The pasted image is larger than the current canvas.\n"
-        "Would you like to keep the current canvas size or expand it to fit the pasted image?"
+        _("The pasted image is larger than the current canvas.\nWould you like to keep the current canvas size or expand it to fit the pasted image?")
     );
     gtk_label_set_xalign(GTK_LABEL(label), 0.0);
     gtk_container_set_border_width(GTK_CONTAINER(content), 10);
@@ -1003,7 +1004,7 @@ bool should_expand_canvas_for_paste(int pasted_width, int pasted_height) {
     std::snprintf(
         details,
         sizeof(details),
-        "Canvas: %d x %d    Pasted image: %d x %d",
+        _("Canvas: %d x %d    Pasted image: %d x %d"),
         app_state.canvas_width,
         app_state.canvas_height,
         pasted_width,
@@ -1155,7 +1156,7 @@ void create_text_window(double x, double y) {
     }
     
     app_state.text_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(app_state.text_window), "Text Tool");
+    gtk_window_set_title(GTK_WINDOW(app_state.text_window), _("Text Tool"));
     gtk_window_set_default_size(GTK_WINDOW(app_state.text_window), 300, 200);
     gtk_window_set_transient_for(GTK_WINDOW(app_state.text_window), GTK_WINDOW(app_state.window));
     
@@ -2477,37 +2478,37 @@ void save_image_dialog(GtkWidget* parent) {
     }
 
     GtkWidget* dialog = gtk_file_chooser_dialog_new(
-        "Save Image",
+        _("Save Image"),
         GTK_WINDOW(parent),
         GTK_FILE_CHOOSER_ACTION_SAVE,
-        "_Cancel", GTK_RESPONSE_CANCEL,
-        "_Save", GTK_RESPONSE_ACCEPT,
+        _("_Cancel"), GTK_RESPONSE_CANCEL,
+        _("_Save"), GTK_RESPONSE_ACCEPT,
         NULL
     );
 
     gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
 
     GtkFileFilter* filter_png = gtk_file_filter_new();
-    gtk_file_filter_set_name(filter_png, "PNG Images");
+    gtk_file_filter_set_name(filter_png, _("PNG Images"));
     gtk_file_filter_add_pattern(filter_png, "*.png");
     gtk_file_filter_add_pattern(filter_png, "*.PNG");
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_png);
 
     GtkFileFilter* filter_jpg = gtk_file_filter_new();
-    gtk_file_filter_set_name(filter_jpg, "JPEG Images");
+    gtk_file_filter_set_name(filter_jpg, _("JPEG Images"));
     gtk_file_filter_add_pattern(filter_jpg, "*.jpg");
     gtk_file_filter_add_pattern(filter_jpg, "*.jpeg");
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_jpg);
 
     GtkFileFilter* filter_xpm = gtk_file_filter_new();
-    gtk_file_filter_set_name(filter_xpm, "XPM Images");
+    gtk_file_filter_set_name(filter_xpm, _("XPM Images"));
     gtk_file_filter_add_pattern(filter_xpm, "*.xpm");
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_xpm);
 
     if (!app_state.current_filename.empty()) {
         gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), app_state.current_filename.c_str());
     } else {
-        gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), "untitled.png");
+        gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), _("untitled.png"));
     }
 
     if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
@@ -2587,16 +2588,16 @@ bool save_surface_to_file(cairo_surface_t* surface, const std::string& filename)
 
 void open_image_dialog(GtkWidget* parent) {
     GtkWidget* dialog = gtk_file_chooser_dialog_new(
-        "Open Image",
+        _("Open Image"),
         GTK_WINDOW(parent),
         GTK_FILE_CHOOSER_ACTION_OPEN,
-        "_Cancel", GTK_RESPONSE_CANCEL,
-        "_Open", GTK_RESPONSE_ACCEPT,
+        _("_Cancel"), GTK_RESPONSE_CANCEL,
+        _("_Open"), GTK_RESPONSE_ACCEPT,
         NULL
     );
 
     GtkFileFilter* filter_images = gtk_file_filter_new();
-    gtk_file_filter_set_name(filter_images, "PNG Images");
+    gtk_file_filter_set_name(filter_images, _("PNG Images"));
     gtk_file_filter_add_pattern(filter_images, "*.png");
     gtk_file_filter_add_pattern(filter_images, "*.PNG");
     gtk_file_filter_add_pattern(filter_images, "*.xpm");
@@ -2643,11 +2644,11 @@ void open_image_dialog(GtkWidget* parent) {
 // Menu callbacks
 void on_file_new(GtkMenuItem* item, gpointer data) {
     GtkWidget* dialog = gtk_dialog_new_with_buttons(
-        "New Image",
+        _("New Image"),
         GTK_WINDOW(app_state.window),
         (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-        "_Cancel", GTK_RESPONSE_CANCEL,
-        "_Create", GTK_RESPONSE_OK,
+        _("_Cancel"), GTK_RESPONSE_CANCEL,
+        _("_Create"), GTK_RESPONSE_OK,
         NULL
     );
 
@@ -2656,7 +2657,7 @@ void on_file_new(GtkMenuItem* item, gpointer data) {
     gtk_container_set_border_width(GTK_CONTAINER(container), 10);
     gtk_container_add(GTK_CONTAINER(content), container);
 
-    GtkWidget* resolution_label = gtk_label_new("Resolution:");
+    GtkWidget* resolution_label = gtk_label_new(_("Resolution:"));
     gtk_widget_set_halign(resolution_label, GTK_ALIGN_START);
     gtk_box_pack_start(GTK_BOX(container), resolution_label, FALSE, FALSE, 0);
 
@@ -2666,17 +2667,17 @@ void on_file_new(GtkMenuItem* item, gpointer data) {
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(resolution_combo), "1024x1024");
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(resolution_combo), "640x480");
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(resolution_combo), "800x600");
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(resolution_combo), "Custom");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(resolution_combo), _("Custom"));
     gtk_combo_box_set_active(GTK_COMBO_BOX(resolution_combo), 4);
     gtk_box_pack_start(GTK_BOX(container), resolution_combo, FALSE, FALSE, 0);
 
     GtkWidget* custom_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
-    GtkWidget* x_label = gtk_label_new("X:");
+    GtkWidget* x_label = gtk_label_new(_("X:"));
     GtkWidget* x_spin = gtk_spin_button_new_with_range(1, 10000, 1);
     GtkWidget* separator_label = gtk_label_new("x");
-    GtkWidget* y_label = gtk_label_new("Y:");
+    GtkWidget* y_label = gtk_label_new(_("Y:"));
     GtkWidget* y_spin = gtk_spin_button_new_with_range(1, 10000, 1);
-    GtkWidget* pixels_label = gtk_label_new("pixels");
+    GtkWidget* pixels_label = gtk_label_new(_("pixels"));
 
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(x_spin), 800);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(y_spin), 600);
@@ -2696,7 +2697,7 @@ void on_file_new(GtkMenuItem* item, gpointer data) {
         GtkWidget* y_input = GTK_WIDGET(g_object_get_data(G_OBJECT(row), "y-spin"));
 
         gchar* selected = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo));
-        bool is_custom = selected && g_strcmp0(selected, "Custom") == 0;
+        bool is_custom = selected && g_strcmp0(selected, _("Custom")) == 0;
         gtk_widget_set_sensitive(row, is_custom);
 
         if (!is_custom && selected) {
@@ -2725,7 +2726,7 @@ void on_file_new(GtkMenuItem* item, gpointer data) {
     int new_width = 800;
     int new_height = 600;
     gchar* selected = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(resolution_combo));
-    if (selected && g_strcmp0(selected, "Custom") == 0) {
+    if (selected && g_strcmp0(selected, _("Custom")) == 0) {
         new_width = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(x_spin));
         new_height = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(y_spin));
     } else if (selected) {
@@ -2801,11 +2802,11 @@ void on_image_scale(GtkMenuItem* item, gpointer data) {
     if (!app_state.surface) return;
 
     GtkWidget* dialog = gtk_dialog_new_with_buttons(
-        "Scale Image",
+        _("Scale Image"),
         GTK_WINDOW(app_state.window),
         (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-        "_Cancel", GTK_RESPONSE_CANCEL,
-        "_Scale", GTK_RESPONSE_OK,
+        _("_Cancel"), GTK_RESPONSE_CANCEL,
+        _("_Scale"), GTK_RESPONSE_OK,
         NULL
     );
 
@@ -2814,7 +2815,7 @@ void on_image_scale(GtkMenuItem* item, gpointer data) {
     gtk_container_set_border_width(GTK_CONTAINER(row), 10);
     gtk_container_add(GTK_CONTAINER(content), row);
 
-    GtkWidget* percent_label = gtk_label_new("Scale (%):");
+    GtkWidget* percent_label = gtk_label_new(_("Scale (%):"));
     GtkWidget* percent_spin = gtk_spin_button_new_with_range(1, 1000, 1);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(percent_spin), 100);
 
@@ -2866,11 +2867,11 @@ void on_image_resize_canvas(GtkMenuItem* item, gpointer data) {
     if (!app_state.surface) return;
 
     GtkWidget* dialog = gtk_dialog_new_with_buttons(
-        "Resize Image",
+        _("Resize Image"),
         GTK_WINDOW(app_state.window),
         (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-        "_Cancel", GTK_RESPONSE_CANCEL,
-        "_Resize", GTK_RESPONSE_OK,
+        _("_Cancel"), GTK_RESPONSE_CANCEL,
+        _("_Resize"), GTK_RESPONSE_OK,
         NULL
     );
 
@@ -2880,14 +2881,14 @@ void on_image_resize_canvas(GtkMenuItem* item, gpointer data) {
     gtk_container_add(GTK_CONTAINER(content), container);
 
     GtkWidget* width_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
-    GtkWidget* width_label = gtk_label_new("Width:");
+    GtkWidget* width_label = gtk_label_new(_("Width:"));
     GtkWidget* width_spin = gtk_spin_button_new_with_range(1, 10000, 1);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(width_spin), app_state.canvas_width);
     gtk_box_pack_start(GTK_BOX(width_row), width_label, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(width_row), width_spin, FALSE, FALSE, 0);
 
     GtkWidget* height_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
-    GtkWidget* height_label = gtk_label_new("Height:");
+    GtkWidget* height_label = gtk_label_new(_("Height:"));
     GtkWidget* height_spin = gtk_spin_button_new_with_range(1, 10000, 1);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(height_spin), app_state.canvas_height);
     gtk_box_pack_start(GTK_BOX(height_row), height_label, FALSE, FALSE, 0);
@@ -3221,9 +3222,9 @@ void on_help_manual(GtkMenuItem* item, gpointer data) {
         static_cast<GtkDialogFlags>(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
         GTK_MESSAGE_INFO,
         GTK_BUTTONS_OK,
-        "Manual is not available yet."
+        _("Manual is not available yet.")
     );
-    gtk_window_set_title(GTK_WINDOW(dialog), "Manual");
+    gtk_window_set_title(GTK_WINDOW(dialog), _("Manual"));
     gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
 }
@@ -3234,9 +3235,9 @@ void on_help_about(GtkMenuItem* item, gpointer data) {
         static_cast<GtkDialogFlags>(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
         GTK_MESSAGE_INFO,
         GTK_BUTTONS_OK,
-        "Mate-Paint\nversion 1.0\nCopyright 2006\nJames Carthew"
+        _("Mate-Paint\nversion 1.0\nCopyright 2006\nJames Carthew")
     );
-    gtk_window_set_title(GTK_WINDOW(dialog), "About");
+    gtk_window_set_title(GTK_WINDOW(dialog), _("About"));
     gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
 }
@@ -3337,7 +3338,7 @@ void on_line_thickness_toggled(GtkToggleButton* button, gpointer data) {
 GtkWidget* create_line_thickness_button(int index) {
     GtkWidget* button = gtk_toggle_button_new();
     gtk_widget_set_size_request(button, 66, 20);
-    gtk_widget_set_tooltip_text(button, "Line thickness");
+    gtk_widget_set_tooltip_text(button, _("Line thickness"));
     gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
 
     GtkCssProvider* provider = gtk_css_provider_new();
@@ -3438,7 +3439,7 @@ GtkWidget* create_zoom_button(int index) {
     GtkWidget* button = gtk_toggle_button_new_with_label(zoom_label);
     g_free(zoom_label);
     gtk_widget_set_size_request(button, 66, 20);
-    gtk_widget_set_tooltip_text(button, "Zoom level");
+    gtk_widget_set_tooltip_text(button, _("Zoom level"));
     gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
 
     GtkCssProvider* provider = gtk_css_provider_new();
@@ -3528,7 +3529,7 @@ void show_custom_color_dialog(int index) {
         return;
     }
 
-    GtkWidget* dialog = gtk_color_chooser_dialog_new("Custom color", GTK_WINDOW(app_state.window));
+    GtkWidget* dialog = gtk_color_chooser_dialog_new(_("Custom color"), GTK_WINDOW(app_state.window));
     gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(dialog), &app_state.palette_button_colors[index]);
 
     if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
@@ -3657,10 +3658,15 @@ GtkWidget* create_color_button(GdkRGBA color, int index, bool is_custom_slot) {
 }
 
 int main(int argc, char* argv[]) {
+    setlocale(LC_ALL, "");
+    bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
+    bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
+    textdomain(GETTEXT_PACKAGE);
+
     gtk_init(&argc, &argv);
 
     app_state.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(app_state.window), "Mate-Paint");
+    gtk_window_set_title(GTK_WINDOW(app_state.window), _("Mate-Paint"));
     gtk_window_set_default_size(GTK_WINDOW(app_state.window), 900, 700);
     g_signal_connect(app_state.window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     g_signal_connect(app_state.window, "key-press-event", G_CALLBACK(on_key_press), NULL);
@@ -3672,13 +3678,13 @@ int main(int argc, char* argv[]) {
     GtkWidget* menubar = gtk_menu_bar_new();
     
     GtkWidget* file_menu = gtk_menu_new();
-    GtkWidget* file_menu_item = gtk_menu_item_new_with_label("File");
+    GtkWidget* file_menu_item = gtk_menu_item_new_with_label(_("File"));
     
-    GtkWidget* file_new = gtk_menu_item_new_with_label("New");
-    GtkWidget* file_open = gtk_menu_item_new_with_label("Open...");
-    GtkWidget* file_save = gtk_menu_item_new_with_label("Save");
-    GtkWidget* file_save_as = gtk_menu_item_new_with_label("Save As...");
-    GtkWidget* file_quit = gtk_menu_item_new_with_label("Quit");
+    GtkWidget* file_new = gtk_menu_item_new_with_label(_("New"));
+    GtkWidget* file_open = gtk_menu_item_new_with_label(_("Open..."));
+    GtkWidget* file_save = gtk_menu_item_new_with_label(_("Save"));
+    GtkWidget* file_save_as = gtk_menu_item_new_with_label(_("Save As..."));
+    GtkWidget* file_quit = gtk_menu_item_new_with_label(_("Quit"));
     
     g_signal_connect(file_new, "activate", G_CALLBACK(on_file_new), NULL);
     g_signal_connect(file_open, "activate", G_CALLBACK(on_file_open), NULL);
@@ -3697,11 +3703,11 @@ int main(int argc, char* argv[]) {
     gtk_menu_shell_append(GTK_MENU_SHELL(menubar), file_menu_item);
     
     GtkWidget* edit_menu = gtk_menu_new();
-    GtkWidget* edit_menu_item = gtk_menu_item_new_with_label("Edit");
-    GtkWidget* edit_undo = gtk_menu_item_new_with_label("Undo");
-    GtkWidget* edit_cut = gtk_menu_item_new_with_label("Cut");
-    GtkWidget* edit_copy = gtk_menu_item_new_with_label("Copy");
-    GtkWidget* edit_paste = gtk_menu_item_new_with_label("Paste");
+    GtkWidget* edit_menu_item = gtk_menu_item_new_with_label(_("Edit"));
+    GtkWidget* edit_undo = gtk_menu_item_new_with_label(_("Undo"));
+    GtkWidget* edit_cut = gtk_menu_item_new_with_label(_("Cut"));
+    GtkWidget* edit_copy = gtk_menu_item_new_with_label(_("Copy"));
+    GtkWidget* edit_paste = gtk_menu_item_new_with_label(_("Paste"));
 
     g_signal_connect(edit_undo, "activate", G_CALLBACK(on_edit_undo), NULL);
     g_signal_connect(edit_cut, "activate", G_CALLBACK(on_edit_cut), NULL);
@@ -3716,13 +3722,13 @@ int main(int argc, char* argv[]) {
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(edit_menu_item), edit_menu);
 
     GtkWidget* image_menu = gtk_menu_new();
-    GtkWidget* image_menu_item = gtk_menu_item_new_with_label("Image");
-    GtkWidget* image_scale = gtk_menu_item_new_with_label("Scale Image...");
-    GtkWidget* image_resize = gtk_menu_item_new_with_label("Resize Image...");
-    GtkWidget* image_rotate_clockwise = gtk_menu_item_new_with_label("Rotate Clockwise");
-    GtkWidget* image_rotate_counter_clockwise = gtk_menu_item_new_with_label("Rotate Counter-Clockwise");
-    GtkWidget* image_flip_vertical = gtk_menu_item_new_with_label("Flip Vertical");
-    GtkWidget* image_flip_horizontal = gtk_menu_item_new_with_label("Flip Horizontal");
+    GtkWidget* image_menu_item = gtk_menu_item_new_with_label(_("Image"));
+    GtkWidget* image_scale = gtk_menu_item_new_with_label(_("Scale Image..."));
+    GtkWidget* image_resize = gtk_menu_item_new_with_label(_("Resize Image..."));
+    GtkWidget* image_rotate_clockwise = gtk_menu_item_new_with_label(_("Rotate Clockwise"));
+    GtkWidget* image_rotate_counter_clockwise = gtk_menu_item_new_with_label(_("Rotate Counter-Clockwise"));
+    GtkWidget* image_flip_vertical = gtk_menu_item_new_with_label(_("Flip Vertical"));
+    GtkWidget* image_flip_horizontal = gtk_menu_item_new_with_label(_("Flip Horizontal"));
 
     g_signal_connect(image_scale, "activate", G_CALLBACK(on_image_scale), NULL);
     g_signal_connect(image_resize, "activate", G_CALLBACK(on_image_resize_canvas), NULL);
@@ -3741,9 +3747,9 @@ int main(int argc, char* argv[]) {
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(image_menu_item), image_menu);
 
     GtkWidget* help_menu = gtk_menu_new();
-    GtkWidget* help_menu_item = gtk_menu_item_new_with_label("Help");
-    GtkWidget* help_manual = gtk_menu_item_new_with_label("Manual");
-    GtkWidget* help_about = gtk_menu_item_new_with_label("About");
+    GtkWidget* help_menu_item = gtk_menu_item_new_with_label(_("Help"));
+    GtkWidget* help_manual = gtk_menu_item_new_with_label(_("Manual"));
+    GtkWidget* help_about = gtk_menu_item_new_with_label(_("About"));
 
     g_signal_connect(help_manual, "activate", G_CALLBACK(on_help_manual), NULL);
     g_signal_connect(help_about, "activate", G_CALLBACK(on_help_about), NULL);
@@ -3773,82 +3779,82 @@ int main(int argc, char* argv[]) {
     // Create tool buttons with tooltips
     gtk_grid_attach(GTK_GRID(toolbox), 
         create_tool_button(TOOL_LASSO_SELECT, 
-            "Lasso Select - Draw freehand selection"), 
+            _("Lasso Select - Draw freehand selection")), 
         0, 0, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
         create_tool_button(TOOL_RECT_SELECT, 
-            "Rectangle Select - Select rectangular regions (Ctrl+C to copy, Ctrl+X to cut)"), 
+            _("Rectangle Select - Select rectangular regions (Ctrl+C to copy, Ctrl+X to cut)")), 
         1, 0, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
         create_tool_button(TOOL_FILL, 
-            "Fill Tool - Fill areas with color"), 
+            _("Fill Tool - Fill areas with color")), 
         0, 1, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
         create_tool_button(TOOL_EYEDROPPER, 
-            "Eyedropper - Pick color from canvas"), 
+            _("Eyedropper - Pick color from canvas")), 
         1, 1, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
         create_tool_button(TOOL_ERASER, 
-            "Eraser - Erase to transparency"), 
+            _("Eraser - Erase to transparency")), 
         0, 2, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
         create_tool_button(TOOL_ZOOM, 
-            "Zoom Tool - Zoom in/out"), 
+            _("Zoom Tool - Zoom in/out")), 
         1, 2, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
         create_tool_button(TOOL_PENCIL, 
-            "Pencil - Draw thin lines"), 
+            _("Pencil - Draw thin lines")), 
         0, 3, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
         create_tool_button(TOOL_PAINTBRUSH, 
-            "Paintbrush - Draw with brush strokes"), 
+            _("Paintbrush - Draw with brush strokes")), 
         1, 3, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
         create_tool_button(TOOL_AIRBRUSH, 
-            "Airbrush - Spray paint effect"), 
+            _("Airbrush - Spray paint effect")), 
         0, 4, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
         create_tool_button(TOOL_TEXT, 
-            "Text Tool - Add text (Left-click outside to finalize, Right-click outside to cancel)"), 
+            _("Text Tool - Add text (Left-click outside to finalize, Right-click outside to cancel)")), 
         1, 4, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
         create_tool_button(TOOL_LINE, 
-            "Line Tool - Draw straight lines (hold Shift for horizontal/vertical)"), 
+            _("Line Tool - Draw straight lines (hold Shift for horizontal/vertical)")), 
         0, 5, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
         create_tool_button(TOOL_CURVE, 
-            "Curve Tool - Draw curved lines"), 
+            _("Curve Tool - Draw curved lines")), 
         1, 5, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
         create_tool_button(TOOL_RECTANGLE, 
-            "Rectangle - Draw rectangles"), 
+            _("Rectangle - Draw rectangles")), 
         0, 6, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
         create_tool_button(TOOL_POLYGON, 
-            "Polygon - Draw multi-sided shapes"), 
+            _("Polygon - Draw multi-sided shapes")), 
         1, 6, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
         create_tool_button(TOOL_ELLIPSE, 
-            "Ellipse/Circle - Draw ellipses (hold Shift for circles)"), 
+            _("Ellipse/Circle - Draw ellipses (hold Shift for circles)")), 
         0, 7, 1, 1);
     
     gtk_grid_attach(GTK_GRID(toolbox), 
         create_tool_button(TOOL_ROUNDED_RECT, 
-            "Rounded Rectangle - Draw rectangles with rounded corners"), 
+            _("Rounded Rectangle - Draw rectangles with rounded corners")), 
         1, 7, 1, 1);
     
     gtk_box_pack_start(GTK_BOX(tool_column), toolbox, FALSE, FALSE, 0);
@@ -3914,12 +3920,12 @@ int main(int argc, char* argv[]) {
     
     app_state.fg_button = gtk_drawing_area_new();
     gtk_widget_set_size_request(app_state.fg_button, 36, 36);
-    gtk_widget_set_tooltip_text(app_state.fg_button, "Foreground color (left-click palette / left-click canvas)");
+    gtk_widget_set_tooltip_text(app_state.fg_button, _("Foreground color (left-click palette / left-click canvas)"));
     g_signal_connect(app_state.fg_button, "draw", G_CALLBACK(on_color_button_draw), GINT_TO_POINTER(1));
     
     app_state.bg_button = gtk_drawing_area_new();
     gtk_widget_set_size_request(app_state.bg_button, 36, 36);
-    gtk_widget_set_tooltip_text(app_state.bg_button, "Background color (right-click palette / right-click canvas)");
+    gtk_widget_set_tooltip_text(app_state.bg_button, _("Background color (right-click palette / right-click canvas)"));
     g_signal_connect(app_state.bg_button, "draw", G_CALLBACK(on_color_button_draw), GINT_TO_POINTER(0));
     
     gtk_box_pack_start(GTK_BOX(bottom_box), app_state.fg_button, FALSE, FALSE, 0);
@@ -3953,7 +3959,7 @@ int main(int argc, char* argv[]) {
         bool is_custom_slot = app_state.custom_palette_slots[i];
         GtkWidget* color_btn = create_color_button(app_state.palette_button_colors[i], i, is_custom_slot);
         if (is_custom_slot) {
-            gtk_widget_set_tooltip_text(color_btn, "Double-click to choose a custom colour");
+            gtk_widget_set_tooltip_text(color_btn, _("Double-click to choose a custom colour"));
         }
 
         app_state.palette_buttons.push_back(color_btn);

@@ -2,6 +2,7 @@
 Type=Application
 Name=Mate Paint
 Comment=Create and edit images
+X-GNOME-Gettext-Domain=mate-paint
 Exec=mate-paint
 Icon=/usr/share/mate-paint/data/icons/48x48/mp.xpm
 Terminal=false
