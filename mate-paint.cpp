@@ -318,7 +318,26 @@ bool point_in_selection(double x, double y) {
         return x >= x1 && x <= x2 && y >= y1 && y <= y2;
     }
     
-    return false;
+    if (app_state.selection_path.size() < 3) return false;
+
+    bool inside = false;
+    size_t j = app_state.selection_path.size() - 1;
+    for (size_t i = 0; i < app_state.selection_path.size(); i++) {
+        double xi = app_state.selection_path[i].first;
+        double yi = app_state.selection_path[i].second;
+        double xj = app_state.selection_path[j].first;
+        double yj = app_state.selection_path[j].second;
+
+        bool intersects = ((yi > y) != (yj > y)) &&
+            (x < ((xj - xi) * (y - yi) / (yj - yi) + xi));
+        if (intersects) {
+            inside = !inside;
+        }
+
+        j = i;
+    }
+
+    return inside;
 }
 
 // Check if point is inside text box
@@ -782,34 +801,36 @@ void paste_selection() {
 
     if (!app_state.clipboard_surface) return;
 
-    if ((app_state.clipboard_width > app_state.canvas_width || app_state.clipboard_height > app_state.canvas_height) &&
+    bool exceeds_canvas = app_state.clipboard_width > app_state.canvas_width ||
+        app_state.clipboard_height > app_state.canvas_height;
+    if (exceeds_canvas &&
         should_expand_canvas_for_paste(app_state.clipboard_width, app_state.clipboard_height)) {
         resize_canvas_for_paste(
             std::max(app_state.canvas_width, app_state.clipboard_width),
             std::max(app_state.canvas_height, app_state.clipboard_height)
         );
+    }
 
-        clear_selection();
+    clear_selection();
 
-        double paste_x = 20;
-        double paste_y = 20;
+    double paste_x = 20;
+    double paste_y = 20;
 
-        app_state.floating_surface = cairo_surface_reference(app_state.clipboard_surface);
-        app_state.floating_selection_active = true;
-        app_state.floating_drag_completed = false;
-        app_state.dragging_selection = false;
-    
-        app_state.has_selection = true;
-        app_state.selection_is_rect = true;
-        app_state.selection_path.clear();
-        app_state.selection_x1 = paste_x;
-        app_state.selection_y1 = paste_y;
-        app_state.selection_x2 = paste_x + app_state.clipboard_width;
-        app_state.selection_y2 = paste_y + app_state.clipboard_height;
+    app_state.floating_surface = cairo_surface_reference(app_state.clipboard_surface);
+    app_state.floating_selection_active = true;
+    app_state.floating_drag_completed = false;
+    app_state.dragging_selection = false;
 
-        if (app_state.drawing_area) {
-            gtk_widget_queue_draw(app_state.drawing_area);
-        }
+    app_state.has_selection = true;
+    app_state.selection_is_rect = true;
+    app_state.selection_path.clear();
+    app_state.selection_x1 = paste_x;
+    app_state.selection_y1 = paste_y;
+    app_state.selection_x2 = paste_x + app_state.clipboard_width;
+    app_state.selection_y2 = paste_y + app_state.clipboard_height;
+
+    if (app_state.drawing_area) {
+        gtk_widget_queue_draw(app_state.drawing_area);
     }
 }
 void copy_surface_to_system_clipboard(cairo_surface_t* surface) {
