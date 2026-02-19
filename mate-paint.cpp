@@ -2762,6 +2762,45 @@ void on_image_resize_canvas(GtkMenuItem* item, gpointer data) {
 void on_image_rotate_clockwise(GtkMenuItem* item, gpointer data) {
     if (!app_state.surface) return;
 
+    if (app_state.has_selection) {
+        if (!app_state.floating_selection_active) {
+            start_selection_drag();
+        }
+        if (!app_state.floating_selection_active || !app_state.floating_surface) {
+            return;
+        }
+
+        push_undo_state();
+
+        SelectionPixelBounds bounds = get_selection_pixel_bounds();
+        const int new_width = bounds.height;
+        const int new_height = bounds.width;
+
+        cairo_surface_t* old_floating_surface = app_state.floating_surface;
+        cairo_surface_t* rotated_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, new_width, new_height);
+        cairo_t* cr = cairo_create(rotated_surface);
+        configure_crisp_rendering(cr);
+
+        cairo_translate(cr, new_width, 0);
+        cairo_rotate(cr, M_PI / 2.0);
+        cairo_set_source_surface(cr, old_floating_surface, 0, 0);
+        cairo_paint(cr);
+        cairo_destroy(cr);
+
+        app_state.floating_surface = rotated_surface;
+        cairo_surface_destroy(old_floating_surface);
+
+        app_state.selection_is_rect = true;
+        app_state.selection_path.clear();
+        app_state.selection_x1 = bounds.x;
+        app_state.selection_y1 = bounds.y;
+        app_state.selection_x2 = bounds.x + new_width;
+        app_state.selection_y2 = bounds.y + new_height;
+
+        gtk_widget_queue_draw(app_state.drawing_area);
+        return;
+    }
+
     const int old_width = app_state.canvas_width;
     const int old_height = app_state.canvas_height;
     const int new_width = old_height;
@@ -2796,6 +2835,45 @@ void on_image_rotate_clockwise(GtkMenuItem* item, gpointer data) {
 
 void on_image_rotate_counter_clockwise(GtkMenuItem* item, gpointer data) {
     if (!app_state.surface) return;
+
+    if (app_state.has_selection) {
+        if (!app_state.floating_selection_active) {
+            start_selection_drag();
+        }
+        if (!app_state.floating_selection_active || !app_state.floating_surface) {
+            return;
+        }
+
+        push_undo_state();
+
+        SelectionPixelBounds bounds = get_selection_pixel_bounds();
+        const int new_width = bounds.height;
+        const int new_height = bounds.width;
+
+        cairo_surface_t* old_floating_surface = app_state.floating_surface;
+        cairo_surface_t* rotated_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, new_width, new_height);
+        cairo_t* cr = cairo_create(rotated_surface);
+        configure_crisp_rendering(cr);
+
+        cairo_translate(cr, 0, new_height);
+        cairo_rotate(cr, -M_PI / 2.0);
+        cairo_set_source_surface(cr, old_floating_surface, 0, 0);
+        cairo_paint(cr);
+        cairo_destroy(cr);
+
+        app_state.floating_surface = rotated_surface;
+        cairo_surface_destroy(old_floating_surface);
+
+        app_state.selection_is_rect = true;
+        app_state.selection_path.clear();
+        app_state.selection_x1 = bounds.x;
+        app_state.selection_y1 = bounds.y;
+        app_state.selection_x2 = bounds.x + new_width;
+        app_state.selection_y2 = bounds.y + new_height;
+
+        gtk_widget_queue_draw(app_state.drawing_area);
+        return;
+    }
 
     const int old_width = app_state.canvas_width;
     const int old_height = app_state.canvas_height;
@@ -2832,6 +2910,39 @@ void on_image_rotate_counter_clockwise(GtkMenuItem* item, gpointer data) {
 void on_image_flip_horizontal(GtkMenuItem* item, gpointer data) {
     if (!app_state.surface) return;
 
+    if (app_state.has_selection) {
+        if (!app_state.floating_selection_active) {
+            start_selection_drag();
+        }
+        if (!app_state.floating_selection_active || !app_state.floating_surface) {
+            return;
+        }
+
+        push_undo_state();
+
+        SelectionPixelBounds bounds = get_selection_pixel_bounds();
+
+        cairo_surface_t* old_floating_surface = app_state.floating_surface;
+        cairo_surface_t* flipped_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, bounds.width, bounds.height);
+        cairo_t* cr = cairo_create(flipped_surface);
+        configure_crisp_rendering(cr);
+
+        cairo_translate(cr, bounds.width, 0);
+        cairo_scale(cr, -1, 1);
+        cairo_set_source_surface(cr, old_floating_surface, 0, 0);
+        cairo_paint(cr);
+        cairo_destroy(cr);
+
+        app_state.floating_surface = flipped_surface;
+        cairo_surface_destroy(old_floating_surface);
+
+        app_state.selection_is_rect = true;
+        app_state.selection_path.clear();
+
+        gtk_widget_queue_draw(app_state.drawing_area);
+        return;
+    }
+
     const int width = app_state.canvas_width;
     const int height = app_state.canvas_height;
 
@@ -2861,6 +2972,39 @@ void on_image_flip_horizontal(GtkMenuItem* item, gpointer data) {
 
 void on_image_flip_vertical(GtkMenuItem* item, gpointer data) {
     if (!app_state.surface) return;
+
+    if (app_state.has_selection) {
+        if (!app_state.floating_selection_active) {
+            start_selection_drag();
+        }
+        if (!app_state.floating_selection_active || !app_state.floating_surface) {
+            return;
+        }
+
+        push_undo_state();
+
+        SelectionPixelBounds bounds = get_selection_pixel_bounds();
+
+        cairo_surface_t* old_floating_surface = app_state.floating_surface;
+        cairo_surface_t* flipped_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, bounds.width, bounds.height);
+        cairo_t* cr = cairo_create(flipped_surface);
+        configure_crisp_rendering(cr);
+
+        cairo_translate(cr, 0, bounds.height);
+        cairo_scale(cr, 1, -1);
+        cairo_set_source_surface(cr, old_floating_surface, 0, 0);
+        cairo_paint(cr);
+        cairo_destroy(cr);
+
+        app_state.floating_surface = flipped_surface;
+        cairo_surface_destroy(old_floating_surface);
+
+        app_state.selection_is_rect = true;
+        app_state.selection_path.clear();
+
+        gtk_widget_queue_draw(app_state.drawing_area);
+        return;
+    }
 
     const int width = app_state.canvas_width;
     const int height = app_state.canvas_height;
