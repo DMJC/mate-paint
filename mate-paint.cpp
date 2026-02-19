@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include <cairo.h>
+#include <glib/gstdio.h>
 #include <algorithm>
 #include <vector>
 #include <cmath>
@@ -58,6 +59,8 @@ void push_undo_state();
 void undo_last_operation();
 bool is_transparent_color(const GdkRGBA& color);
 bool save_surface_to_file(cairo_surface_t* surface, const std::string& filename);
+void load_custom_palette_colors();
+void save_custom_palette_colors();
 
 struct UndoSnapshot {
     cairo_surface_t* surface = nullptr;
@@ -92,6 +95,7 @@ struct AppState {
     bool polygon_finished = false;
     std::vector<std::pair<double, double>> lasso_points;
     bool lasso_polygon_mode = false;
+    bool ellipse_center_mode = false;
     
     // Curve tool state
     bool curve_active = false;
@@ -217,6 +221,78 @@ const GdkRGBA additional_palette_colors[] = {
     {0.6, 0.6, 0.6, 1.0},   // Custom slot 14 default
 };
 
+constexpr int custom_palette_slot_count = 14;
+
+std::string get_config_file_path() {
+    gchar* path = g_build_filename(g_get_user_config_dir(), "mate", "mate-paint", "mate-paint.cfg", NULL);
+    std::string config_path(path);
+    g_free(path);
+    return config_path;
+}
+
+int get_custom_palette_start_index() {
+    return static_cast<int>((sizeof(palette_colors) / sizeof(palette_colors[0])) + (sizeof(additional_palette_colors) / sizeof(additional_palette_colors[0])) - custom_palette_slot_count);
+}
+
+void load_custom_palette_colors() {
+    GKeyFile* key_file = g_key_file_new();
+    std::string config_path = get_config_file_path();
+    GError* error = NULL;
+    if (!g_key_file_load_from_file(key_file, config_path.c_str(), G_KEY_FILE_NONE, &error)) {
+        if (error) {
+            g_error_free(error);
+        }
+        g_key_file_unref(key_file);
+        return;
+    }
+
+    const int custom_start_index = get_custom_palette_start_index();
+    for (int i = 0; i < custom_palette_slot_count; ++i) {
+        gchar* key = g_strdup_printf("custom_color_%d", i + 1);
+        gchar* color_string = g_key_file_get_string(key_file, "palette", key, NULL);
+        g_free(key);
+
+        if (!color_string) {
+            continue;
+        }
+
+        GdkRGBA color;
+        if (gdk_rgba_parse(&color, color_string)) {
+            app_state.palette_button_colors[custom_start_index + i] = color;
+        }
+
+        g_free(color_string);
+    }
+
+    g_key_file_unref(key_file);
+}
+
+void save_custom_palette_colors() {
+    GKeyFile* key_file = g_key_file_new();
+    std::string config_path = get_config_file_path();
+
+    const int custom_start_index = get_custom_palette_start_index();
+    for (int i = 0; i < custom_palette_slot_count; ++i) {
+        gchar* key = g_strdup_printf("custom_color_%d", i + 1);
+        gchar* color_string = gdk_rgba_to_string(&app_state.palette_button_colors[custom_start_index + i]);
+        g_key_file_set_string(key_file, "palette", key, color_string);
+        g_free(color_string);
+        g_free(key);
+    }
+
+    gsize data_len = 0;
+    gchar* data = g_key_file_to_data(key_file, &data_len, NULL);
+    if (data) {
+        gchar* config_dir = g_path_get_dirname(config_path.c_str());
+        g_mkdir_with_parents(config_dir, 0755);
+        g_file_set_contents(config_path.c_str(), data, data_len, NULL);
+        g_free(config_dir);
+        g_free(data);
+    }
+
+    g_key_file_unref(key_file);
+}
+
 // Check if tool needs preview
 bool tool_needs_preview(Tool tool) {
     return tool == TOOL_LASSO_SELECT || tool == TOOL_RECT_SELECT ||
@@ -236,7 +312,7 @@ bool tool_supports_line_thickness(Tool tool) {
 }
 
 bool tool_shows_brush_hover_outline(Tool tool) {
-    return tool == TOOL_PAINTBRUSH || tool == TOOL_AIRBRUSH || tool == TOOL_ERASER || tool == TOOL_LASSO_SELECT;
+    return tool == TOOL_PAINTBRUSH || tool == TOOL_AIRBRUSH || tool == TOOL_ERASER || tool == TOOL_ELLIPSE ||  tool == TOOL_LASSO_SELECT;
 }
 
 bool tool_shows_vertex_hover_markers(Tool tool) {
@@ -1647,7 +1723,7 @@ void draw_preview(cairo_t* cr) {
     double preview_x = app_state.current_x;
     double preview_y = app_state.current_y;
     
-    if (app_state.shift_pressed) {
+    if (app_state.shift_pressed && !app_state.ellipse_center_mode) {
         if (app_state.current_tool == TOOL_LINE) {
             constrain_line(app_state.start_x, app_state.start_y, preview_x, preview_y);
         } else if (app_state.current_tool == TOOL_ELLIPSE) {
@@ -1746,10 +1822,23 @@ void draw_preview(cairo_t* cr) {
         }
         
         case TOOL_ELLIPSE: {
-            double cx = (app_state.start_x + preview_x) / 2.0;
-            double cy = (app_state.start_y + preview_y) / 2.0;
-            double rx = fabs(preview_x - app_state.start_x) / 2.0;
-            double ry = fabs(preview_y - app_state.start_y) / 2.0;
+            double cx;
+            double cy;
+            double rx;
+            double ry;
+
+            if (app_state.ellipse_center_mode) {
+                double radius = std::hypot(preview_x - app_state.start_x, preview_y - app_state.start_y);
+                cx = app_state.start_x;
+                cy = app_state.start_y;
+                rx = radius;
+                ry = radius;
+            } else {
+                cx = (app_state.start_x + preview_x) / 2.0;
+                cy = (app_state.start_y + preview_y) / 2.0;
+                rx = fabs(preview_x - app_state.start_x) / 2.0;
+                ry = fabs(preview_y - app_state.start_y) / 2.0;
+            }
             
             if (rx > 0.1 && ry > 0.1) {
                 draw_ant_path(cr);
@@ -2053,6 +2142,41 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
                 return TRUE;
             }
         }
+
+        if (app_state.current_tool == TOOL_ELLIPSE && app_state.ellipse_center_mode && event->button == 1) {
+            push_undo_state();
+
+            double radius = std::hypot(canvas_x - app_state.start_x, canvas_y - app_state.start_y);
+            double x1 = app_state.start_x - radius;
+            double y1 = app_state.start_y - radius;
+            double x2 = app_state.start_x + radius;
+            double y2 = app_state.start_y + radius;
+
+            cairo_t* cr = cairo_create(app_state.surface);
+            configure_crisp_rendering(cr);
+            draw_ellipse(cr, x1, y1, x2, y2, false);
+            cairo_destroy(cr);
+
+            app_state.ellipse_center_mode = false;
+            app_state.is_drawing = false;
+            stop_ant_animation();
+            gtk_widget_queue_draw(widget);
+            return TRUE;
+        }
+
+        if (app_state.current_tool == TOOL_ELLIPSE && event->button == 1 &&
+            ((event->state & GDK_CONTROL_MASK) != 0)) {
+            app_state.ellipse_center_mode = true;
+            app_state.is_drawing = true;
+            app_state.is_right_button = false;
+            app_state.start_x = canvas_x;
+            app_state.start_y = canvas_y;
+            app_state.current_x = canvas_x;
+            app_state.current_y = canvas_y;
+            start_ant_animation();
+            gtk_widget_queue_draw(widget);
+            return TRUE;
+        }
         
         if (app_state.current_tool == TOOL_CURVE) {
             if (!app_state.curve_active) {
@@ -2262,6 +2386,10 @@ gboolean on_leave_notify(GtkWidget* widget, GdkEventCrossing* event, gpointer da
 // Mouse button release
 gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpointer data) {
     if ((event->button == 1 || event->button == 3) && app_state.surface && app_state.is_drawing) {
+        if (app_state.current_tool == TOOL_ELLIPSE && app_state.ellipse_center_mode) {
+            return TRUE;
+        }
+
         if (app_state.current_tool == TOOL_CURVE) {
             return TRUE;
         }
@@ -2334,6 +2462,7 @@ gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpointer da
         cairo_destroy(cr);
         app_state.is_drawing = false;
         app_state.is_right_button = false;
+        app_state.ellipse_center_mode = false;
         app_state.last_x = 0;
         app_state.last_y = 0;
         gtk_widget_queue_draw(widget);
@@ -3148,6 +3277,7 @@ void on_tool_clicked(GtkButton* button, gpointer data) {
     app_state.polygon_finished = false;
     app_state.lasso_points.clear();
     app_state.lasso_polygon_mode = false;
+    app_state.ellipse_center_mode = false;
     app_state.curve_active = false;
     app_state.curve_has_end = false;
     app_state.curve_has_control = false;
@@ -3409,6 +3539,8 @@ void show_custom_color_dialog(int index) {
         if (index < (int)app_state.palette_buttons.size() && app_state.palette_buttons[index]) {
             apply_color_button_style(app_state.palette_buttons[index], selected_color, true);
         }
+
+        save_custom_palette_colors();
     }
 
     gtk_widget_destroy(dialog);
@@ -3806,11 +3938,12 @@ int main(int argc, char* argv[]) {
     );
 
     app_state.custom_palette_slots.assign(app_state.palette_button_colors.size(), false);
-    const int custom_slot_count = 14;
-    const int custom_start_index = (int)app_state.palette_button_colors.size() - custom_slot_count;
+    const int custom_start_index = (int)app_state.palette_button_colors.size() - custom_palette_slot_count;
     for (int i = custom_start_index; i < (int)app_state.custom_palette_slots.size(); i++) {
         app_state.custom_palette_slots[i] = true;
     }
+
+    load_custom_palette_colors();
 
     app_state.palette_buttons.clear();
     app_state.palette_buttons.reserve(app_state.palette_button_colors.size());
@@ -3856,6 +3989,8 @@ int main(int argc, char* argv[]) {
     if (app_state.floating_surface) {
         cairo_surface_destroy(app_state.floating_surface);
     }
+
+    save_custom_palette_colors();
     
     return 0;
 }
