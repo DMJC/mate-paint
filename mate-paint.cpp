@@ -91,6 +91,7 @@ struct AppState {
     std::vector<std::pair<double, double>> polygon_points;
     bool polygon_finished = false;
     std::vector<std::pair<double, double>> lasso_points;
+    bool lasso_polygon_mode = false;
     
     // Curve tool state
     bool curve_active = false;
@@ -235,7 +236,7 @@ bool tool_supports_line_thickness(Tool tool) {
 }
 
 bool tool_shows_brush_hover_outline(Tool tool) {
-    return tool == TOOL_PAINTBRUSH || tool == TOOL_AIRBRUSH || tool == TOOL_ERASER;
+    return tool == TOOL_PAINTBRUSH || tool == TOOL_AIRBRUSH || tool == TOOL_ERASER || tool == TOOL_LASSO_SELECT;
 }
 
 bool tool_shows_vertex_hover_markers(Tool tool) {
@@ -615,6 +616,36 @@ void append_selection_path(cairo_t* cr) {
         cairo_line_to(cr, app_state.selection_path[i].first, app_state.selection_path[i].second);
     }
     cairo_close_path(cr);
+}
+
+void finalize_lasso_selection() {
+    if (app_state.lasso_points.size() < 3) {
+        app_state.lasso_points.clear();
+        app_state.lasso_polygon_mode = false;
+        app_state.is_drawing = false;
+        stop_ant_animation();
+        return;
+    }
+
+    app_state.has_selection = true;
+    app_state.selection_is_rect = false;
+    app_state.floating_selection_active = false;
+    app_state.selection_path = app_state.lasso_points;
+    app_state.lasso_points.clear();
+
+    if (!app_state.selection_path.empty()) {
+        app_state.selection_x1 = app_state.selection_x2 = app_state.selection_path[0].first;
+        app_state.selection_y1 = app_state.selection_y2 = app_state.selection_path[0].second;
+        for (const auto& point : app_state.selection_path) {
+            app_state.selection_x1 = fmin(app_state.selection_x1, point.first);
+            app_state.selection_y1 = fmin(app_state.selection_y1, point.second);
+            app_state.selection_x2 = fmax(app_state.selection_x2, point.first);
+            app_state.selection_y2 = fmax(app_state.selection_y2, point.second);
+        }
+    }
+
+    app_state.lasso_polygon_mode = false;
+    app_state.is_drawing = false;
 }
 
 struct SelectionPixelBounds {
@@ -1679,7 +1710,15 @@ void draw_preview(cairo_t* cr) {
                 for (size_t i = 1; i < app_state.lasso_points.size(); i++) {
                     cairo_line_to(cr, app_state.lasso_points[i].first, app_state.lasso_points[i].second);
                 }
+                if (app_state.lasso_polygon_mode) {
+                    cairo_line_to(cr, preview_x, preview_y);
+                }
                 cairo_stroke(cr);
+            }
+            if (app_state.lasso_polygon_mode) {
+                for (const auto& point : app_state.lasso_points) {
+                    draw_black_outline_circle(cr, point.first, point.second, 5.0);
+                }
             }
             break;
         }
@@ -1938,6 +1977,35 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
             return TRUE;
         }
 
+        if (app_state.current_tool == TOOL_LASSO_SELECT) {
+            if (event->button == 1) {
+                if (app_state.lasso_polygon_mode) {
+                    app_state.lasso_points.push_back({canvas_x, canvas_y});
+                    app_state.current_x = canvas_x;
+                    app_state.current_y = canvas_y;
+                    app_state.is_drawing = true;
+                    gtk_widget_queue_draw(widget);
+                    return TRUE;
+                }
+
+                app_state.is_drawing = true;
+                app_state.lasso_polygon_mode = ((event->state & GDK_CONTROL_MASK) != 0);
+                app_state.lasso_points.clear();
+                app_state.lasso_points.push_back({canvas_x, canvas_y});
+                app_state.current_x = canvas_x;
+                app_state.current_y = canvas_y;
+                start_ant_animation();
+                gtk_widget_queue_draw(widget);
+                return TRUE;
+            }
+
+            if (event->button == 3 && app_state.lasso_polygon_mode) {
+                finalize_lasso_selection();
+                gtk_widget_queue_draw(widget);
+                return TRUE;
+            }
+        }
+
         if (app_state.current_tool == TOOL_POLYGON) {
             if (event->button == 1) {
                 if (app_state.polygon_finished) {
@@ -2100,11 +2168,6 @@ gboolean on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer data
             gtk_widget_queue_draw(widget);
         }
         
-        if (app_state.current_tool == TOOL_LASSO_SELECT) {
-            app_state.lasso_points.clear();
-            app_state.lasso_points.push_back({canvas_x, canvas_y});
-        }
-        
         if (tool_needs_preview(app_state.current_tool)) {
             start_ant_animation();
         }
@@ -2156,7 +2219,7 @@ gboolean on_motion_notify(GtkWidget* widget, GdkEventMotion* event, gpointer dat
             }
 
             gtk_widget_queue_draw(widget);
-        } else if (app_state.current_tool == TOOL_LASSO_SELECT) {
+        } else if (app_state.current_tool == TOOL_LASSO_SELECT && !app_state.lasso_polygon_mode) {
             app_state.lasso_points.push_back({canvas_x, canvas_y});
             gtk_widget_queue_draw(widget);
         } else if (tool_needs_preview(app_state.current_tool)) {
@@ -2204,6 +2267,10 @@ gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpointer da
         }
 
         if (app_state.current_tool == TOOL_POLYGON) {
+            return TRUE;
+        }
+
+        if (app_state.current_tool == TOOL_LASSO_SELECT && app_state.lasso_polygon_mode) {
             return TRUE;
         }
 
@@ -2260,21 +2327,7 @@ gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpointer da
                 app_state.selection_y2 = end_y;
                 break;
             case TOOL_LASSO_SELECT:
-                app_state.has_selection = true;
-                app_state.selection_is_rect = false;
-                app_state.floating_selection_active = false;
-                app_state.selection_path = app_state.lasso_points;
-                app_state.lasso_points.clear();
-                if (!app_state.selection_path.empty()) {
-                    app_state.selection_x1 = app_state.selection_x2 = app_state.selection_path[0].first;
-                    app_state.selection_y1 = app_state.selection_y2 = app_state.selection_path[0].second;
-                    for (const auto& point : app_state.selection_path) {
-                        app_state.selection_x1 = fmin(app_state.selection_x1, point.first);
-                        app_state.selection_y1 = fmin(app_state.selection_y1, point.second);
-                        app_state.selection_x2 = fmax(app_state.selection_x2, point.first);
-                        app_state.selection_y2 = fmax(app_state.selection_y2, point.second);
-                    }
-                }
+                finalize_lasso_selection();
                 break;
         }
         
@@ -3094,6 +3147,7 @@ void on_tool_clicked(GtkButton* button, gpointer data) {
     app_state.polygon_points.clear();
     app_state.polygon_finished = false;
     app_state.lasso_points.clear();
+    app_state.lasso_polygon_mode = false;
     app_state.curve_active = false;
     app_state.curve_has_end = false;
     app_state.curve_has_control = false;
