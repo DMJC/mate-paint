@@ -10,3 +10,7 @@ Installation and Prerequisites
 Credits
 --
 James Carthew - 2026
+Manual
+--
+- See `MANUAL.md` for a full guide to tools, palette usage, shortcuts, and workflow.
+

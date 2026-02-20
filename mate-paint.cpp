@@ -3222,7 +3222,7 @@ void on_help_manual(GtkMenuItem* item, gpointer data) {
         static_cast<GtkDialogFlags>(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
         GTK_MESSAGE_INFO,
         GTK_BUTTONS_OK,
-        _("Manual is not available yet.")
+        _("The Mate-Paint manual is included as MANUAL.md in the project source.")
     );
     gtk_window_set_title(GTK_WINDOW(dialog), _("Manual"));
     gtk_dialog_run(GTK_DIALOG(dialog));
