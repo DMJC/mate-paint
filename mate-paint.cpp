@@ -3217,16 +3217,11 @@ void on_image_flip_vertical(GtkMenuItem* item, gpointer data) {
 }
 
 void on_help_manual(GtkMenuItem* item, gpointer data) {
-    GtkWidget* dialog = gtk_message_dialog_new(
-        GTK_WINDOW(app_state.window),
-        static_cast<GtkDialogFlags>(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-        GTK_MESSAGE_INFO,
-        GTK_BUTTONS_OK,
-        _("The Mate-Paint manual is included as MANUAL.md in the project source.")
-    );
-    gtk_window_set_title(GTK_WINDOW(dialog), _("Manual"));
-    gtk_dialog_run(GTK_DIALOG(dialog));
-    gtk_widget_destroy(dialog);
+    // Use help URI instead of filesystem path
+    const char* uri = "help:mate-paint/contents";
+    gchar* command = g_strdup_printf("yelp %s &", uri);
+    std::system(command);
+    g_free(command);
 }
 
 void on_help_about(GtkMenuItem* item, gpointer data) {
@@ -3748,7 +3743,7 @@ int main(int argc, char* argv[]) {
 
     GtkWidget* help_menu = gtk_menu_new();
     GtkWidget* help_menu_item = gtk_menu_item_new_with_label(_("Help"));
-    GtkWidget* help_manual = gtk_menu_item_new_with_label(_("Manual"));
+    GtkWidget* help_manual = gtk_menu_item_new_with_label(_("Contents"));
     GtkWidget* help_about = gtk_menu_item_new_with_label(_("About"));
 
     g_signal_connect(help_manual, "activate", G_CALLBACK(on_help_manual), NULL);

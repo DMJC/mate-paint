@@ -29,4 +29,8 @@ install_data('mate-paint.desktop',
   install_dir: join_paths(get_option('prefix'), get_option('datadir'), 'applications')
 )
 
+install_subdir('help',
+  install_dir: join_paths(get_option('datadir'))
+)
+
 subdir('po')
