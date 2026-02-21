@@ -3230,7 +3230,7 @@ void on_help_about(GtkMenuItem* item, gpointer data) {
         static_cast<GtkDialogFlags>(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
         GTK_MESSAGE_INFO,
         GTK_BUTTONS_OK,
-        _("Mate-Paint\nversion 1.0\nCopyright 2006\nJames Carthew")
+        _("Mate-Paint\nVersion 1.0\nCopyright © 2006 James Carthew")
     );
     gtk_window_set_title(GTK_WINDOW(dialog), _("About"));
     gtk_dialog_run(GTK_DIALOG(dialog));
