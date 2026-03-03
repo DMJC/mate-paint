@@ -57,6 +57,8 @@ void update_line_thickness_buttons();
 int tool_to_index(Tool tool);
 void update_zoom_buttons();
 void update_zoom_visibility();
+void update_canvas_dimensions_label();
+void update_cursor_position_label(double canvas_x, double canvas_y, bool cursor_in_canvas);
 void push_undo_state();
 void undo_last_operation();
 bool is_transparent_color(const GdkRGBA& color);
@@ -161,6 +163,8 @@ struct AppState {
     int active_zoom_index = 0;
     double zoom_factor = 1.0;
     GtkWidget* scrolled_window = nullptr;
+    GtkWidget* canvas_dimensions_label = nullptr;
+    GtkWidget* cursor_position_label = nullptr;
     std::vector<GdkRGBA> palette_button_colors;
     std::vector<bool> custom_palette_slots;
     std::vector<GtkWidget*> palette_buttons;
@@ -327,6 +331,34 @@ double to_canvas_coordinate(double coordinate) {
 
 double clamp_double(double value, double min_value, double max_value) {
     return fmax(min_value, fmin(value, max_value));
+}
+
+void update_canvas_dimensions_label() {
+    if (!app_state.canvas_dimensions_label) {
+        return;
+    }
+
+    gchar* dimensions_text = g_strdup_printf("%dx%d", app_state.canvas_width, app_state.canvas_height);
+    gtk_label_set_text(GTK_LABEL(app_state.canvas_dimensions_label), dimensions_text);
+    g_free(dimensions_text);
+}
+
+void update_cursor_position_label(double canvas_x, double canvas_y, bool cursor_in_canvas) {
+    if (!app_state.cursor_position_label) {
+        return;
+    }
+
+    if (!cursor_in_canvas) {
+        gtk_label_set_text(GTK_LABEL(app_state.cursor_position_label), "-");
+        return;
+    }
+
+    int x = static_cast<int>(std::lround(clamp_double(canvas_x, 0.0, app_state.canvas_width * 1.0)));
+    int y = static_cast<int>(std::lround(clamp_double(canvas_y, 0.0, app_state.canvas_height * 1.0)));
+
+    gchar* position_text = g_strdup_printf("%dx%d", x, y);
+    gtk_label_set_text(GTK_LABEL(app_state.cursor_position_label), position_text);
+    g_free(position_text);
 }
 
 void configure_crisp_rendering(cairo_t* cr) {
@@ -1902,6 +1934,7 @@ void draw_preview(cairo_t* cr) {
 // Canvas draw callback
 gboolean on_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
     if (app_state.surface) {
+        update_canvas_dimensions_label();
         configure_crisp_rendering(cr);
         cairo_save(cr);
         cairo_scale(cr, app_state.zoom_factor, app_state.zoom_factor);
@@ -2308,6 +2341,7 @@ gboolean on_motion_notify(GtkWidget* widget, GdkEventMotion* event, gpointer dat
         app_state.hover_in_canvas = true;
         app_state.hover_x = canvas_x;
         app_state.hover_y = canvas_y;
+        update_cursor_position_label(canvas_x, canvas_y, true);
 
         if (!app_state.is_drawing) {
             if (tool_shows_brush_hover_outline(app_state.current_tool) ||
@@ -2379,6 +2413,7 @@ gboolean on_motion_notify(GtkWidget* widget, GdkEventMotion* event, gpointer dat
 gboolean on_leave_notify(GtkWidget* widget, GdkEventCrossing* event, gpointer data) {
     if (app_state.hover_in_canvas) {
         app_state.hover_in_canvas = false;
+        update_cursor_position_label(0.0, 0.0, false);
         gtk_widget_queue_draw(widget);
     }
     return TRUE;
@@ -3230,7 +3265,7 @@ void on_help_about(GtkMenuItem* item, gpointer data) {
         static_cast<GtkDialogFlags>(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
         GTK_MESSAGE_INFO,
         GTK_BUTTONS_OK,
-        _("Mate-Paint\nversion 1.0\nCopyright 2006\nJames Carthew")
+        _("Mate-Paint\nVersion 1.0\nCopyright © 2006 James Carthew")
     );
     gtk_window_set_title(GTK_WINDOW(dialog), _("About"));
     gtk_dialog_run(GTK_DIALOG(dialog));
@@ -3966,8 +4001,18 @@ int main(int argc, char* argv[]) {
     
     gtk_box_pack_start(GTK_BOX(bottom_box), palette_grid, FALSE, FALSE, 10);
     
-    GtkWidget* dimensions_label = gtk_label_new("800x600");
-    gtk_box_pack_end(GTK_BOX(bottom_box), dimensions_label, FALSE, FALSE, 0);
+    GtkWidget* status_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+    gtk_widget_set_halign(status_box, GTK_ALIGN_END);
+
+    app_state.canvas_dimensions_label = gtk_label_new("800x600");
+    gtk_widget_set_halign(app_state.canvas_dimensions_label, GTK_ALIGN_END);
+    gtk_box_pack_start(GTK_BOX(status_box), app_state.canvas_dimensions_label, FALSE, FALSE, 0);
+
+    app_state.cursor_position_label = gtk_label_new("-");
+    gtk_widget_set_halign(app_state.cursor_position_label, GTK_ALIGN_END);
+    gtk_box_pack_start(GTK_BOX(status_box), app_state.cursor_position_label, FALSE, FALSE, 0);
+
+    gtk_box_pack_end(GTK_BOX(bottom_box), status_box, FALSE, FALSE, 0);
     
     gtk_box_pack_end(GTK_BOX(main_box), bottom_box, FALSE, FALSE, 0);
     
