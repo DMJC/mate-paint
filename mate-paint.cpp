@@ -61,7 +61,11 @@ void update_canvas_dimensions_label();
 void update_cursor_position_label(double canvas_x, double canvas_y, bool cursor_in_canvas);
 void push_undo_state();
 void undo_last_operation();
+<<<<<<< HEAD
 void draw_canvas_grid_background(cairo_t* cr, double width, double height);
+=======
+void draw_canvas_grid_background(cairo_t* cr);
+>>>>>>> 36089092a2feee971a95df393d6a0a372e101892
 bool is_transparent_color(const GdkRGBA& color);
 bool save_surface_to_file(cairo_surface_t* surface, const std::string& filename);
 void load_custom_palette_colors();
@@ -1932,6 +1936,7 @@ void draw_preview(cairo_t* cr) {
     cairo_restore(cr);
 }
 
+<<<<<<< HEAD
 void draw_canvas_grid_background(cairo_t* cr, double width, double height) {
     static cairo_pattern_t* checker_pattern = nullptr;
 
@@ -1944,6 +1949,13 @@ void draw_canvas_grid_background(cairo_t* cr, double width, double height) {
             pattern_size,
             pattern_size
         );
+=======
+void draw_canvas_grid_background(cairo_t* cr) {
+    static cairo_pattern_t* checker_pattern = nullptr;
+
+    if (!checker_pattern) {
+        cairo_surface_t* pattern_surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, 2, 2);
+>>>>>>> 36089092a2feee971a95df393d6a0a372e101892
         cairo_t* pattern_cr = cairo_create(pattern_surface);
         configure_crisp_rendering(pattern_cr);
 
@@ -1951,8 +1963,13 @@ void draw_canvas_grid_background(cairo_t* cr, double width, double height) {
         cairo_paint(pattern_cr);
 
         cairo_set_source_rgb(pattern_cr, 0.0, 0.0, 0.0);
+<<<<<<< HEAD
         cairo_rectangle(pattern_cr, 0, 0, checker_size, checker_size);
         cairo_rectangle(pattern_cr, checker_size, checker_size, checker_size, checker_size);
+=======
+        cairo_rectangle(pattern_cr, 0, 0, 1, 1);
+        cairo_rectangle(pattern_cr, 1, 1, 1, 1);
+>>>>>>> 36089092a2feee971a95df393d6a0a372e101892
         cairo_fill(pattern_cr);
 
         cairo_destroy(pattern_cr);
@@ -1964,7 +1981,11 @@ void draw_canvas_grid_background(cairo_t* cr, double width, double height) {
     }
 
     cairo_save(cr);
+<<<<<<< HEAD
     cairo_rectangle(cr, 0, 0, width, height);
+=======
+    cairo_rectangle(cr, 0, 0, app_state.canvas_width, app_state.canvas_height);
+>>>>>>> 36089092a2feee971a95df393d6a0a372e101892
     cairo_set_source(cr, checker_pattern);
     cairo_fill(cr);
     cairo_restore(cr);
@@ -1984,6 +2005,11 @@ gboolean on_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
         cairo_save(cr);
         cairo_scale(cr, app_state.zoom_factor, app_state.zoom_factor);
 
+<<<<<<< HEAD
+=======
+        draw_canvas_grid_background(cr);
+
+>>>>>>> 36089092a2feee971a95df393d6a0a372e101892
         cairo_set_source_surface(cr, app_state.surface, 0, 0);
         cairo_pattern_set_filter(cairo_get_source(cr), CAIRO_FILTER_NEAREST);
         cairo_paint(cr);
