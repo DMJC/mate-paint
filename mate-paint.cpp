@@ -61,6 +61,7 @@ void update_canvas_dimensions_label();
 void update_cursor_position_label(double canvas_x, double canvas_y, bool cursor_in_canvas);
 void push_undo_state();
 void undo_last_operation();
+void draw_canvas_grid_background(cairo_t* cr, double width, double height);
 bool is_transparent_color(const GdkRGBA& color);
 bool save_surface_to_file(cairo_surface_t* surface, const std::string& filename);
 void load_custom_palette_colors();
@@ -1931,13 +1932,58 @@ void draw_preview(cairo_t* cr) {
     cairo_restore(cr);
 }
 
+void draw_canvas_grid_background(cairo_t* cr, double width, double height) {
+    static cairo_pattern_t* checker_pattern = nullptr;
+
+    if (!checker_pattern) {
+        const int checker_size = 1;
+        const int pattern_size = checker_size * 2;
+
+        cairo_surface_t* pattern_surface = cairo_image_surface_create(
+            CAIRO_FORMAT_RGB24,
+            pattern_size,
+            pattern_size
+        );
+        cairo_t* pattern_cr = cairo_create(pattern_surface);
+        configure_crisp_rendering(pattern_cr);
+
+        cairo_set_source_rgb(pattern_cr, 1.0, 1.0, 1.0);
+        cairo_paint(pattern_cr);
+
+        cairo_set_source_rgb(pattern_cr, 0.0, 0.0, 0.0);
+        cairo_rectangle(pattern_cr, 0, 0, checker_size, checker_size);
+        cairo_rectangle(pattern_cr, checker_size, checker_size, checker_size, checker_size);
+        cairo_fill(pattern_cr);
+
+        cairo_destroy(pattern_cr);
+
+        checker_pattern = cairo_pattern_create_for_surface(pattern_surface);
+        cairo_pattern_set_extend(checker_pattern, CAIRO_EXTEND_REPEAT);
+        cairo_pattern_set_filter(checker_pattern, CAIRO_FILTER_NEAREST);
+        cairo_surface_destroy(pattern_surface);
+    }
+
+    cairo_save(cr);
+    cairo_rectangle(cr, 0, 0, width, height);
+    cairo_set_source(cr, checker_pattern);
+    cairo_fill(cr);
+    cairo_restore(cr);
+}
+
 // Canvas draw callback
 gboolean on_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
     if (app_state.surface) {
-        update_canvas_dimensions_label();
         configure_crisp_rendering(cr);
+
+        draw_canvas_grid_background(
+            cr,
+            app_state.canvas_width * app_state.zoom_factor,
+            app_state.canvas_height * app_state.zoom_factor
+        );
+
         cairo_save(cr);
         cairo_scale(cr, app_state.zoom_factor, app_state.zoom_factor);
+
         cairo_set_source_surface(cr, app_state.surface, 0, 0);
         cairo_pattern_set_filter(cairo_get_source(cr), CAIRO_FILTER_NEAREST);
         cairo_paint(cr);
