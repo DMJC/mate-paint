@@ -2930,6 +2930,45 @@ void on_file_save_as(GtkMenuItem* item, gpointer data) {
     save_image_dialog(app_state.window);
 }
 
+// Global to store argv[0] to spawn new instance
+static const char* g_argv0 = nullptr;
+
+void on_tray_activate(GtkStatusIcon* status_icon, gpointer user_data) {
+    if (gtk_widget_get_visible(app_state.window)) {
+        gtk_widget_hide(app_state.window);
+    } else {
+        gtk_widget_show(app_state.window);
+        gtk_window_present(GTK_WINDOW(app_state.window));
+    }
+}
+
+void on_tray_popup_menu(GtkStatusIcon* status_icon, guint button, guint32 activate_time, gpointer user_data) {
+    GtkMenu* menu = GTK_MENU(user_data);
+    gtk_menu_popup(menu, NULL, NULL, gtk_status_icon_position_menu, status_icon, button, activate_time);
+}
+
+void on_take_screenshot(GtkMenuItem* item, gpointer data) {
+    GdkWindow* root_window = gdk_get_default_root_window();
+    int width = gdk_window_get_width(root_window);
+    int height = gdk_window_get_height(root_window);
+
+    GdkPixbuf* pixbuf = gdk_pixbuf_get_from_window(root_window, 0, 0, width, height);
+    if (pixbuf) {
+        gchar* filename = g_strdup_printf("/tmp/mate-paint-screenshot-%d.png", g_random_int());
+        GError* error = NULL;
+        if (gdk_pixbuf_save(pixbuf, filename, "png", &error, NULL)) {
+            if (g_argv0) {
+                const gchar* argv[] = { g_argv0, filename, NULL };
+                g_spawn_async(NULL, (gchar**)argv, NULL, G_SPAWN_SEARCH_PATH, NULL, NULL, NULL, NULL);
+            }
+        } else {
+            g_error_free(error);
+        }
+        g_free(filename);
+        g_object_unref(pixbuf);
+    }
+}
+
 void on_file_quit(GtkMenuItem* item, gpointer data) {
     gtk_main_quit();
 }
@@ -3809,6 +3848,7 @@ GtkWidget* create_color_button(GdkRGBA color, int index, bool is_custom_slot) {
 }
 
 int main(int argc, char* argv[]) {
+    g_argv0 = argv[0];
     setlocale(LC_ALL, "");
     bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
     bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
@@ -4140,13 +4180,48 @@ int main(int argc, char* argv[]) {
     
     gtk_box_pack_end(GTK_BOX(main_box), bottom_box, FALSE, FALSE, 0);
     
-    init_surface(app_state.drawing_area);
+    bool loaded_from_args = false;
+    if (argc > 1) {
+        cairo_surface_t* loaded_surface = cairo_image_surface_create_from_png(argv[1]);
+        if (cairo_surface_status(loaded_surface) == CAIRO_STATUS_SUCCESS) {
+            app_state.current_filename = argv[1];
+            app_state.canvas_width = cairo_image_surface_get_width(loaded_surface);
+            app_state.canvas_height = cairo_image_surface_get_height(loaded_surface);
+            app_state.surface = loaded_surface;
+            gtk_widget_set_size_request(app_state.drawing_area,
+                static_cast<int>(app_state.canvas_width * app_state.zoom_factor),
+                static_cast<int>(app_state.canvas_height * app_state.zoom_factor));
+            loaded_from_args = true;
+        } else {
+            cairo_surface_destroy(loaded_surface);
+        }
+    }
+
+    if (!loaded_from_args) {
+        init_surface(app_state.drawing_area);
+    }
     
     start_ant_animation();
     
     gtk_widget_show_all(app_state.window);
     update_line_thickness_visibility();
     update_zoom_visibility();
+
+    GtkStatusIcon* tray_icon = gtk_status_icon_new_from_icon_name("applications-graphics");
+    gtk_status_icon_set_tooltip_text(tray_icon, _("Mate-Paint"));
+
+    GtkWidget* tray_menu = gtk_menu_new();
+    GtkWidget* tray_screenshot = gtk_menu_item_new_with_label(_("Take Screenshot"));
+    GtkWidget* tray_quit = gtk_menu_item_new_with_label(_("Quit"));
+    gtk_menu_shell_append(GTK_MENU_SHELL(tray_menu), tray_screenshot);
+    gtk_menu_shell_append(GTK_MENU_SHELL(tray_menu), tray_quit);
+    gtk_widget_show_all(tray_menu);
+
+    g_signal_connect(tray_screenshot, "activate", G_CALLBACK(on_take_screenshot), NULL);
+    g_signal_connect(tray_quit, "activate", G_CALLBACK(gtk_main_quit), NULL);
+    g_signal_connect(tray_icon, "activate", G_CALLBACK(on_tray_activate), NULL);
+    g_signal_connect(tray_icon, "popup-menu", G_CALLBACK(on_tray_popup_menu), tray_menu);
+
     gtk_main();
     
     stop_ant_animation();
