@@ -1,4 +1,4 @@
-#include "mate-paint.hpp"
+#include "matepaint.hpp"
 #include <QPainterPath>
 #include <QDesktopServices>
 #include <QUrl>
@@ -104,7 +104,7 @@ PaintCanvas::PaintCanvas(QWidget *parent) : QWidget(parent) {
 
 void PaintCanvas::paintEvent(QPaintEvent *event) {
     QPainter p(this);
-    
+
     // Draw checkerboard
     int checker_size = 10;
     for (int y = 0; y < height(); y += checker_size) {
@@ -116,31 +116,31 @@ void PaintCanvas::paintEvent(QPaintEvent *event) {
             }
         }
     }
-    
+
     p.save();
     p.scale(app_state.zoom_factor, app_state.zoom_factor);
     p.drawImage(0, 0, app_state.surface);
-    
+
     if (app_state.floating_selection_active && !app_state.floating_surface.isNull()) {
         double x = std::round(std::min(app_state.selection_x1, app_state.selection_x2));
         double y = std::round(std::min(app_state.selection_y1, app_state.selection_y2));
         p.drawImage(x, y, app_state.floating_surface);
     }
-    
+
     if (app_state.has_selection) {
         draw_selection_overlay(p);
     }
-    
+
     if (app_state.text_active) {
         draw_text_overlay(p);
     }
-    
+
     if (tool_needs_preview(app_state.current_tool)) {
         draw_preview(p);
     }
-    
+
     draw_hover_indicator(p);
-    
+
     p.restore();
 }
 
@@ -216,14 +216,110 @@ void MainWindow::createMenus() {
 void MainWindow::createToolbox(QVBoxLayout *toolColumn) {
     QGridLayout *toolbox = new QGridLayout();
     toolbox->setSpacing(2);
-    // Add tools later
+
+    const char* tool_icons[TOOL_COUNT] = {
+        "stock-tool-free-select.png", "stock-tool-rect-select.png",
+        "stock-tool-eraser.png", "stock-tool-bucket-fill.png",
+        "stock-tool-color-picker.png", "stock-tool-zoom.png",
+        "stock-tool-pencil.png", "stock-tool-paintbrush.png",
+        "stock-tool-airbrush.png", "stock-tool-text.png",
+        "stock_draw-line.png", "stock_draw-curve.png",
+        "stock_draw-rectangle.png", "stock_draw-fill_polygon.png",
+        "stock_draw-ellipse.png", "stock_draw-rounded-rectangle.png"
+    };
+
+    QString icon_dir = "/usr/share/mate-paint/data/icons/16x16/actions/";
+    if (!QDir(icon_dir).exists()) {
+        icon_dir = "data/icons/16x16/actions/";
+    }
+
+    for (int i = 0; i < TOOL_COUNT; ++i) {
+        QPushButton* btn = new QPushButton();
+        btn->setFixedSize(28, 28);
+        btn->setIcon(QIcon(icon_dir + tool_icons[i]));
+        connect(btn, &QPushButton::clicked, this, [this, i]() { this->on_tool_clicked(i); });
+        toolbox->addWidget(btn, i / 2, i % 2);
+    }
     toolColumn->addLayout(toolbox);
+
+    app_state.line_thickness_box = new QWidget();
+    QVBoxLayout* line_layout = new QVBoxLayout(app_state.line_thickness_box);
+    line_layout->setContentsMargins(0,0,0,0);
+    line_layout->setSpacing(2);
+    for (int i = 0; i < (int)(sizeof(line_thickness_options) / sizeof(line_thickness_options[0])); ++i) {
+        LineThicknessButton* btn = new LineThicknessButton(i);
+        btn->setCheckable(true);
+        app_state.line_thickness_buttons.push_back(btn);
+        line_layout->addWidget(btn);
+        connect(btn, &QPushButton::toggled, this, &MainWindow::on_line_thickness_toggled);
+    }
+    toolColumn->addWidget(app_state.line_thickness_box);
+
+    app_state.zoom_box = new QWidget();
+    QVBoxLayout* zoom_layout = new QVBoxLayout(app_state.zoom_box);
+    zoom_layout->setContentsMargins(0,0,0,0);
+    zoom_layout->setSpacing(2);
+    for (int i = 0; i < (int)(sizeof(zoom_options) / sizeof(zoom_options[0])); ++i) {
+        QPushButton* btn = new QPushButton(QString("%1x").arg((int)zoom_options[i]));
+        btn->setCheckable(true);
+        app_state.zoom_buttons.push_back(btn);
+        zoom_layout->addWidget(btn);
+        connect(btn, &QPushButton::toggled, this, &MainWindow::on_zoom_toggled);
+    }
+    toolColumn->addWidget(app_state.zoom_box);
+
     toolColumn->addStretch();
 }
 
 void MainWindow::createBottomBar(QVBoxLayout *mainLayout) {
     QHBoxLayout *bottomBox = new QHBoxLayout();
     bottomBox->setContentsMargins(5, 5, 5, 5);
+
+    app_state.fg_button = new FgBgButton(true);
+    app_state.fg_button->setFixedSize(36, 36);
+    bottomBox->addWidget(app_state.fg_button);
+
+    app_state.bg_button = new FgBgButton(false);
+    app_state.bg_button->setFixedSize(36, 36);
+    bottomBox->addWidget(app_state.bg_button);
+
+    QGridLayout *palette_grid = new QGridLayout();
+    palette_grid->setSpacing(2);
+
+    app_state.palette_button_colors.clear();
+    for (const QColor& c : palette_colors) app_state.palette_button_colors.push_back(c);
+    for (const QColor& c : additional_palette_colors) app_state.palette_button_colors.push_back(c);
+
+    app_state.custom_palette_slots.assign(app_state.palette_button_colors.size(), false);
+    const int custom_start_index = app_state.palette_button_colors.size() - custom_palette_slot_count;
+    for (int i = custom_start_index; i < (int)app_state.custom_palette_slots.size(); i++) {
+        app_state.custom_palette_slots[i] = true;
+    }
+
+    load_custom_palette_colors();
+
+    int colors_per_row = 14;
+    for (size_t i = 0; i < app_state.palette_button_colors.size(); i++) {
+        bool is_custom_slot = app_state.custom_palette_slots[i];
+        ColorButton* color_btn = new ColorButton(i, is_custom_slot);
+        color_btn->setColor(app_state.palette_button_colors[i]);
+        app_state.palette_buttons.push_back(color_btn);
+        palette_grid->addWidget(color_btn, i / colors_per_row, i % colors_per_row);
+    }
+    bottomBox->addLayout(palette_grid);
+
+    QVBoxLayout *status_box = new QVBoxLayout();
+    status_box->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
+    app_state.canvas_dimensions_label = new QLabel("800x600");
+    app_state.canvas_dimensions_label->setAlignment(Qt::AlignRight);
+    status_box->addWidget(app_state.canvas_dimensions_label);
+
+    app_state.cursor_position_label = new QLabel("-");
+    app_state.cursor_position_label->setAlignment(Qt::AlignRight);
+    status_box->addWidget(app_state.cursor_position_label);
+
+    bottomBox->addLayout(status_box);
     mainLayout->addLayout(bottomBox);
 }
 
@@ -242,24 +338,124 @@ int main(int argc, char *argv[]) {
 
 ColorButton::ColorButton(int index, bool is_custom_slot, QWidget* parent) : QPushButton(parent), m_index(index), m_is_custom_slot(is_custom_slot) {}
 void ColorButton::setColor(const QColor& color) { m_color = color; }
-void ColorButton::paintEvent(QPaintEvent* event) {}
-void ColorButton::mousePressEvent(QMouseEvent* event) {}
-void ColorButton::mouseDoubleClickEvent(QMouseEvent* event) {}
+void ColorButton::paintEvent(QPaintEvent* event) {
+    QPainter p(this);
+    p.fillRect(rect(), m_color);
+    p.setPen(QPen(Qt::darkGray, 1));
+    p.drawRect(rect().adjusted(0, 0, -1, -1));
+    if (m_color.alpha() < 255) {
+        p.setPen(Qt::black);
+        p.drawText(rect(), Qt::AlignCenter, "T");
+    } else if (m_is_custom_slot) {
+        p.setPen(m_color.lightness() > 128 ? Qt::black : Qt::white);
+        p.drawText(rect(), Qt::AlignCenter, "c");
+    }
+}
+void ColorButton::mousePressEvent(QMouseEvent* event) {
+    if (event->button() == Qt::LeftButton) {
+        app_state.fg_color = m_color;
+        app_state.window->updateColorIndicators();
+    } else if (event->button() == Qt::RightButton) {
+        app_state.bg_color = m_color;
+        app_state.window->updateColorIndicators();
+    }
+}
+void ColorButton::mouseDoubleClickEvent(QMouseEvent* event) {
+    if (m_is_custom_slot) {
+        QColor c = QColorDialog::getColor(m_color, this, tr("Custom Color"));
+        if (c.isValid()) {
+            m_color = c;
+            app_state.palette_button_colors[m_index] = c;
+            save_custom_palette_colors();
+            update();
+        }
+    }
+}
 
 FgBgButton::FgBgButton(bool is_fg, QWidget* parent) : QPushButton(parent), m_is_fg(is_fg) {}
-void FgBgButton::paintEvent(QPaintEvent* event) {}
+void FgBgButton::paintEvent(QPaintEvent* event) {
+    QPainter p(this);
+    QColor c = m_is_fg ? app_state.fg_color : app_state.bg_color;
+    p.fillRect(rect(), c);
+    p.setPen(QPen(Qt::darkGray, 2));
+    p.drawRect(rect().adjusted(1, 1, -1, -1));
+    if (c.alpha() < 255) {
+        p.setPen(Qt::black);
+        p.drawText(rect(), Qt::AlignCenter, "T");
+    }
+}
 
 LineThicknessButton::LineThicknessButton(int index, QWidget* parent) : QPushButton(parent), m_index(index) {}
-void LineThicknessButton::paintEvent(QPaintEvent* event) {}
+void LineThicknessButton::paintEvent(QPaintEvent* event) {
+    QPushButton::paintEvent(event);
+    QPainter p(this);
+    p.setPen(QPen(Qt::black, line_thickness_options[m_index]));
+    int y = height() / 2;
+    p.drawLine(4, y, width() - 4, y);
+}
 
 
-void MainWindow::updateLineThicknessButtons() {}
-void MainWindow::updateZoomButtons() {}
-void MainWindow::updateLineThicknessVisibility() {}
-void MainWindow::updateZoomVisibility() {}
-void MainWindow::updateColorIndicators() {}
-void MainWindow::cancelText() {}
-void MainWindow::finalizeText() {}
+void MainWindow::updateLineThicknessButtons() {
+    for (size_t i = 0; i < app_state.line_thickness_buttons.size(); ++i) {
+        app_state.line_thickness_buttons[i]->setChecked((int)i == app_state.active_line_thickness_index);
+    }
+}
+void MainWindow::updateZoomButtons() {
+    for (size_t i = 0; i < app_state.zoom_buttons.size(); ++i) {
+        app_state.zoom_buttons[i]->setChecked((int)i == app_state.active_zoom_index);
+    }
+}
+void MainWindow::updateLineThicknessVisibility() {
+    bool visible = false;
+    Tool t = app_state.current_tool;
+    if (t == TOOL_PAINTBRUSH || t == TOOL_AIRBRUSH || t == TOOL_ERASER ||
+        t == TOOL_LINE || t == TOOL_CURVE || t == TOOL_RECTANGLE ||
+        t == TOOL_POLYGON || t == TOOL_ELLIPSE || t == TOOL_ROUNDED_RECT) {
+        visible = true;
+    }
+    if (app_state.line_thickness_box) app_state.line_thickness_box->setVisible(visible);
+}
+void MainWindow::updateZoomVisibility() {
+    if (app_state.zoom_box) app_state.zoom_box->setVisible(app_state.current_tool == TOOL_ZOOM);
+}
+void MainWindow::updateColorIndicators() {
+    if (app_state.fg_button) app_state.fg_button->update();
+    if (app_state.bg_button) app_state.bg_button->update();
+}
+void MainWindow::cancelText() {
+    app_state.text_active = false;
+    app_state.text_content.clear();
+
+    if (app_state.text_window) {
+        app_state.text_window->deleteLater();
+        app_state.text_window = nullptr;
+        app_state.text_entry = nullptr;
+    }
+
+    if (app_state.drawing_area) {
+        app_state.drawing_area->update();
+    }
+}
+void MainWindow::finalizeText() {
+    if (!app_state.text_active || app_state.text_content.empty()) {
+        if (app_state.text_active) cancelText();
+        return;
+    }
+
+    push_undo_state();
+
+    QPainter p(&app_state.surface);
+    configure_crisp_rendering(p);
+
+    QFont font(QString::fromStdString(app_state.text_font_family), app_state.text_font_size);
+    p.setFont(font);
+    p.setPen(app_state.fg_color);
+
+    QRectF textRect(app_state.text_x + 5, app_state.text_y + 5, app_state.text_box_width - 10, app_state.text_box_height - 10);
+    p.drawText(textRect, Qt::TextWordWrap | Qt::AlignTop | Qt::AlignLeft, QString::fromStdString(app_state.text_content));
+
+    cancelText();
+}
 
 
 void draw_ant_path(QPainter& p) {
@@ -325,7 +521,7 @@ void draw_hover_indicator(QPainter& p) {
 void constrain_line(double start_x, double start_y, double& end_x, double& end_y) {
     double dx = end_x - start_x;
     double dy = end_y - start_y;
-    
+
     if (std::abs(dx) > std::abs(dy)) {
         end_y = start_y;
     } else {
@@ -337,7 +533,7 @@ void constrain_to_circle(double start_x, double start_y, double& end_x, double& 
     double dx = end_x - start_x;
     double dy = end_y - start_y;
     double radius = std::max(std::abs(dx), std::abs(dy));
-    
+
     end_x = start_x + (dx >= 0 ? radius : -radius);
     end_y = start_y + (dy >= 0 ? radius : -radius);
 }
@@ -363,7 +559,7 @@ void append_selection_path(QPainterPath& path) {
 void draw_selection_overlay(QPainter& p) {
     if (!app_state.has_selection) return;
     draw_ant_path(p);
-    
+
     if (app_state.selection_is_rect) {
         double x1 = std::min(app_state.selection_x1, app_state.selection_x2);
         double y1 = std::min(app_state.selection_y1, app_state.selection_y2);
@@ -383,11 +579,11 @@ void draw_selection_overlay(QPainter& p) {
 
 void draw_text_overlay(QPainter& p) {
     if (!app_state.text_active) return;
-    
+
     draw_ant_path(p);
     p.setBrush(Qt::NoBrush);
     p.drawRect(QRectF(app_state.text_x, app_state.text_y, app_state.text_box_width, app_state.text_box_height));
-    
+
     if (!app_state.text_content.empty()) {
         QFont font(QString::fromStdString(app_state.text_font_family), app_state.text_font_size);
         p.setFont(font);
@@ -402,10 +598,10 @@ void draw_preview(QPainter& p) {
     if (app_state.dragging_selection) return;
 
     p.save();
-    
+
     double preview_x = app_state.current_x;
     double preview_y = app_state.current_y;
-    
+
     if (app_state.shift_pressed && !app_state.ellipse_center_mode) {
         if (app_state.current_tool == TOOL_LINE) {
             constrain_line(app_state.start_x, app_state.start_y, preview_x, preview_y);
@@ -417,7 +613,7 @@ void draw_preview(QPainter& p) {
             constrain_to_square(app_state.start_x, app_state.start_y, preview_x, preview_y);
         }
     }
-    
+
     switch (app_state.current_tool) {
         case TOOL_CURVE: {
             if (app_state.curve_active) {
@@ -446,12 +642,12 @@ void draw_preview(QPainter& p) {
             double y = std::min(app_state.start_y, preview_y);
             double w = std::abs(preview_x - app_state.start_x);
             double h = std::abs(preview_y - app_state.start_y);
-            
+
             draw_ant_path(p);
             p.drawRect(QRectF(x, y, w, h));
             break;
         }
-        
+
         case TOOL_LASSO_SELECT: {
             if (app_state.lasso_points.size() > 1) {
                 draw_ant_path(p);
@@ -472,7 +668,7 @@ void draw_preview(QPainter& p) {
             }
             break;
         }
-        
+
         case TOOL_LINE: {
             draw_ant_path(p);
             p.drawLine(QPointF(app_state.start_x, app_state.start_y), QPointF(preview_x, preview_y));
@@ -480,18 +676,18 @@ void draw_preview(QPainter& p) {
             draw_black_outline_circle(p, preview_x, preview_y, 5.0);
             break;
         }
-        
+
         case TOOL_RECTANGLE: {
             double x = std::min(app_state.start_x, preview_x);
             double y = std::min(app_state.start_y, preview_y);
             double w = std::abs(preview_x - app_state.start_x);
             double h = std::abs(preview_y - app_state.start_y);
-            
+
             draw_ant_path(p);
             p.drawRect(QRectF(x, y, w, h));
             break;
         }
-        
+
         case TOOL_ELLIPSE: {
             double cx, cy, rx, ry;
 
@@ -507,28 +703,28 @@ void draw_preview(QPainter& p) {
                 rx = std::abs(preview_x - app_state.start_x) / 2.0;
                 ry = std::abs(preview_y - app_state.start_y) / 2.0;
             }
-            
+
             if (rx > 0.1 && ry > 0.1) {
                 draw_ant_path(p);
                 p.drawEllipse(QPointF(cx, cy), rx, ry);
             }
             break;
         }
-        
+
         case TOOL_ROUNDED_RECT: {
             double x = std::min(app_state.start_x, preview_x);
             double y = std::min(app_state.start_y, preview_y);
             double w = std::abs(preview_x - app_state.start_x);
             double h = std::abs(preview_y - app_state.start_y);
             double r = std::min(w, h) * 0.1;
-            
+
             if (w > 1 && h > 1) {
                 draw_ant_path(p);
                 p.drawRoundedRect(QRectF(x, y, w, h), r, r);
             }
             break;
         }
-        
+
         case TOOL_POLYGON: {
             if (app_state.polygon_points.size() > 0) {
                 draw_ant_path(p);
@@ -545,7 +741,7 @@ void draw_preview(QPainter& p) {
                 }
 
                 p.drawPath(path);
-                
+
                 for (const auto& point : app_state.polygon_points) {
                     draw_black_outline_circle(p, point.x(), point.y(), 5.0);
                 }
@@ -572,7 +768,7 @@ void draw_rectangle(QPainter& p, double x1, double y1, double x2, double y2, boo
     double y = std::min(y1, y2);
     double w = std::abs(x2 - x1);
     double h = std::abs(y2 - y1);
-    
+
     if (filled) {
         p.setPen(Qt::NoPen);
         p.setBrush(get_active_color());
@@ -762,7 +958,17 @@ void handle_mouse_press(double x, double y, Qt::MouseButton button, Qt::Keyboard
         }
 
         if (app_state.current_tool == TOOL_ZOOM && button == Qt::LeftButton) {
-            return; // Needs zoom implementation
+            double selected_zoom = zoom_options[app_state.active_zoom_index];
+            if (selected_zoom == 1.0) {
+                app_state.zoom_factor = 1.0;
+            } else {
+                app_state.zoom_factor = selected_zoom;
+            }
+            if (app_state.drawing_area) {
+                app_state.drawing_area->setMinimumSize(app_state.canvas_width * app_state.zoom_factor, app_state.canvas_height * app_state.zoom_factor);
+                app_state.drawing_area->update();
+            }
+            return;
         }
 
         if (app_state.current_tool == TOOL_TEXT) {
@@ -780,7 +986,7 @@ void handle_mouse_press(double x, double y, Qt::MouseButton button, Qt::Keyboard
                     app_state.text_content.clear();
                     app_state.text_box_width = 200;
                     app_state.text_box_height = 100;
-                    
+
                     // Simple input dialog for now instead of full overlay widget for Qt simplicity without embedding widgets inside canvas
                     bool ok;
                     QString text = QInputDialog::getMultiLineText(app_state.window, "Text Tool", "Enter text:", "", &ok);
@@ -1540,7 +1746,7 @@ void start_selection_drag() {
     configure_crisp_rendering(p);
     p.setPen(Qt::NoPen);
     p.setBrush(app_state.bg_color);
-    
+
     if (app_state.selection_is_rect) {
         p.drawRect(bounds);
     } else if (app_state.selection_path.size() > 2) {

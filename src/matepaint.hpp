@@ -190,6 +190,8 @@ void clear_selection();
 void commit_floating_selection(bool record_undo = true);
 void start_selection_drag();
 QRect get_selection_pixel_bounds();
+void push_undo_state();
+void configure_crisp_rendering(QPainter& p);
 
 class PaintCanvas : public QWidget {
     Q_OBJECT
