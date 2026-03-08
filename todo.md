@@ -1,0 +1,5 @@
+- [ ] 1. Fix drawing area `paintEvent` to include checkerboard, overlays (text, selection, tool previews), and ant path animations.
+- [ ] 2. Port the full selection mechanism (Rect & Lasso), including floating surface mechanics and proper copy/cut/paste for sub-selections.
+- [ ] 3. Port missing tool mouse interaction states in `handle_mouse_press`, `handle_mouse_move`, and `handle_mouse_release` for ALL tools (Text, Polygon, Curve, Fill, Eyedropper, etc).
+- [ ] 4. Re-implement Text Tool floating input widget and logic in Qt.
+- [ ] 5. Review everything against original GTK file (e.g. `mate-paint-gtk.cpp.bak`) to ensure no lost logic.
