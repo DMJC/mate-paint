@@ -9,12 +9,13 @@ project('mate-paint', 'cpp',
 i18n = import('i18n')
 
 gtk_dep = dependency('gtk+-3.0')
+appindicator_dep = dependency('appindicator3-0.1')
 
 icon_install_dir = join_paths(get_option('prefix'), get_option('datadir'), meson.project_name())
 
 executable('mate-paint',
   'mate-paint.cpp',
-  dependencies: gtk_dep,
+  dependencies: [gtk_dep, appindicator_dep],
   cpp_args: [
     '-DICON_INSTALL_DIR="' + icon_install_dir + '"',
     '-DGETTEXT_PACKAGE="mate-paint"',

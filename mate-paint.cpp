@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
 #include <cairo.h>
 #include <glib/gi18n.h>
+#include <libappindicator/app-indicator.h>
 #include <glib/gstdio.h>
 #include <locale.h>
 #include <algorithm>
@@ -2933,18 +2934,13 @@ void on_file_save_as(GtkMenuItem* item, gpointer data) {
 // Global to store argv[0] to spawn new instance
 static const char* g_argv0 = nullptr;
 
-void on_tray_activate(GtkStatusIcon* status_icon, gpointer user_data) {
+void on_tray_activate(GtkMenuItem* item, gpointer user_data) {
     if (gtk_widget_get_visible(app_state.window)) {
         gtk_widget_hide(app_state.window);
     } else {
         gtk_widget_show(app_state.window);
         gtk_window_present(GTK_WINDOW(app_state.window));
     }
-}
-
-void on_tray_popup_menu(GtkStatusIcon* status_icon, guint button, guint32 activate_time, gpointer user_data) {
-    GtkMenu* menu = GTK_MENU(user_data);
-    gtk_menu_popup(menu, NULL, NULL, gtk_status_icon_position_menu, status_icon, button, activate_time);
 }
 
 void on_take_screenshot(GtkMenuItem* item, gpointer data) {
@@ -4207,20 +4203,25 @@ int main(int argc, char* argv[]) {
     update_line_thickness_visibility();
     update_zoom_visibility();
 
-    GtkStatusIcon* tray_icon = gtk_status_icon_new_from_icon_name("applications-graphics");
-    gtk_status_icon_set_tooltip_text(tray_icon, _("Mate-Paint"));
+    AppIndicator* indicator = app_indicator_new("mate-paint", "applications-graphics", APP_INDICATOR_CATEGORY_APPLICATION_STATUS);
+    app_indicator_set_status(indicator, APP_INDICATOR_STATUS_ACTIVE);
+    app_indicator_set_title(indicator, _("Mate-Paint"));
 
     GtkWidget* tray_menu = gtk_menu_new();
+    GtkWidget* tray_toggle = gtk_menu_item_new_with_label(_("Show / Hide Main Window"));
     GtkWidget* tray_screenshot = gtk_menu_item_new_with_label(_("Take Screenshot"));
     GtkWidget* tray_quit = gtk_menu_item_new_with_label(_("Quit"));
+
+    gtk_menu_shell_append(GTK_MENU_SHELL(tray_menu), tray_toggle);
     gtk_menu_shell_append(GTK_MENU_SHELL(tray_menu), tray_screenshot);
     gtk_menu_shell_append(GTK_MENU_SHELL(tray_menu), tray_quit);
     gtk_widget_show_all(tray_menu);
 
+    g_signal_connect(tray_toggle, "activate", G_CALLBACK(on_tray_activate), NULL);
     g_signal_connect(tray_screenshot, "activate", G_CALLBACK(on_take_screenshot), NULL);
     g_signal_connect(tray_quit, "activate", G_CALLBACK(gtk_main_quit), NULL);
-    g_signal_connect(tray_icon, "activate", G_CALLBACK(on_tray_activate), NULL);
-    g_signal_connect(tray_icon, "popup-menu", G_CALLBACK(on_tray_popup_menu), tray_menu);
+
+    app_indicator_set_menu(indicator, GTK_MENU(tray_menu));
 
     gtk_main();
     
