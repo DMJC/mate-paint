@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QMainWindow>
+#include <KXmlGuiWindow>
 #include <QWidget>
 #include <QImage>
 #include <QPainter>
@@ -241,7 +242,7 @@ private:
     int m_index;
 };
 
-class MainWindow : public QMainWindow {
+class MainWindow : public KXmlGuiWindow {
     Q_OBJECT
 public:
     MainWindow();

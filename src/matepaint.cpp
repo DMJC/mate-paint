@@ -1,3 +1,8 @@
+#include <KActionCollection>
+#include <KStandardAction>
+#include <KLocalizedString>
+#include <KAboutData>
+#include <KLocalizedString>
 #include "matepaint.hpp"
 #include <QPainterPath>
 #include <QDesktopServices>
@@ -148,7 +153,7 @@ void PaintCanvas::paintEvent(QPaintEvent *event) {
 
 MainWindow::MainWindow() {
     app_state.window = this;
-    setWindowTitle(tr("Mate-Paint"));
+    setWindowTitle(i18n("Mate-Paint"));
     resize(900, 700);
 
     QWidget *centralWidget = new QWidget(this);
@@ -183,34 +188,48 @@ MainWindow::MainWindow() {
 }
 
 void MainWindow::createMenus() {
-    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(tr("&New"), this, &MainWindow::on_file_new, QKeySequence::New);
-    fileMenu->addAction(tr("&Open..."), this, &MainWindow::on_file_open, QKeySequence::Open);
-    fileMenu->addAction(tr("&Save"), this, &MainWindow::on_file_save, QKeySequence::Save);
-    fileMenu->addAction(tr("Save &As..."), this, &MainWindow::on_file_save_as, QKeySequence::SaveAs);
+    QMenu *fileMenu = menuBar()->addMenu(i18n("&File"));
+    KStandardAction::openNew(this, SLOT(on_file_new()), actionCollection());
+    KStandardAction::open(this, SLOT(on_file_open()), actionCollection());
+    KStandardAction::save(this, SLOT(on_file_save()), actionCollection());
+    KStandardAction::saveAs(this, SLOT(on_file_save_as()), actionCollection());
+    KStandardAction::quit(qApp, SLOT(quit()), actionCollection());
+
+    fileMenu->addAction(actionCollection()->action(KStandardAction::name(KStandardAction::New)));
+    fileMenu->addAction(actionCollection()->action(KStandardAction::name(KStandardAction::Open)));
+    fileMenu->addAction(actionCollection()->action(KStandardAction::name(KStandardAction::Save)));
+    fileMenu->addAction(actionCollection()->action(KStandardAction::name(KStandardAction::SaveAs)));
     fileMenu->addSeparator();
-    fileMenu->addAction(tr("&Quit"), this, &MainWindow::on_file_quit, QKeySequence::Quit);
+    fileMenu->addAction(actionCollection()->action(KStandardAction::name(KStandardAction::Quit)));
 
-    QMenu *editMenu = menuBar()->addMenu(tr("&Edit"));
-    editMenu->addAction(tr("&Undo"), this, &MainWindow::on_edit_undo, QKeySequence::Undo);
-    editMenu->addAction(tr("&Redo"), this, &MainWindow::on_edit_redo, QKeySequence::Redo);
+    QMenu *editMenu = menuBar()->addMenu(i18n("&Edit"));
+    KStandardAction::undo(this, SLOT(on_edit_undo()), actionCollection());
+    KStandardAction::redo(this, SLOT(on_edit_redo()), actionCollection());
+    KStandardAction::cut(this, SLOT(on_edit_cut()), actionCollection());
+    KStandardAction::copy(this, SLOT(on_edit_copy()), actionCollection());
+    KStandardAction::paste(this, SLOT(on_edit_paste()), actionCollection());
+
+    editMenu->addAction(actionCollection()->action(KStandardAction::name(KStandardAction::Undo)));
+    editMenu->addAction(actionCollection()->action(KStandardAction::name(KStandardAction::Redo)));
     editMenu->addSeparator();
-    editMenu->addAction(tr("Cu&t"), this, &MainWindow::on_edit_cut, QKeySequence::Cut);
-    editMenu->addAction(tr("&Copy"), this, &MainWindow::on_edit_copy, QKeySequence::Copy);
-    editMenu->addAction(tr("&Paste"), this, &MainWindow::on_edit_paste, QKeySequence::Paste);
+    editMenu->addAction(actionCollection()->action(KStandardAction::name(KStandardAction::Cut)));
+    editMenu->addAction(actionCollection()->action(KStandardAction::name(KStandardAction::Copy)));
+    editMenu->addAction(actionCollection()->action(KStandardAction::name(KStandardAction::Paste)));
 
-    QMenu *imageMenu = menuBar()->addMenu(tr("&Image"));
-    imageMenu->addAction(tr("Scale Image..."), this, &MainWindow::on_image_scale);
-    imageMenu->addAction(tr("Resize Image..."), this, &MainWindow::on_image_resize_canvas);
+    QMenu *imageMenu = menuBar()->addMenu(i18n("&Image"));
+    imageMenu->addAction(i18n("Scale Image..."), this, &MainWindow::on_image_scale);
+    imageMenu->addAction(i18n("Resize Image..."), this, &MainWindow::on_image_resize_canvas);
     imageMenu->addSeparator();
-    imageMenu->addAction(tr("Rotate Clockwise"), this, &MainWindow::on_image_rotate_clockwise);
-    imageMenu->addAction(tr("Rotate Counter-Clockwise"), this, &MainWindow::on_image_rotate_counter_clockwise);
-    imageMenu->addAction(tr("Flip Vertical"), this, &MainWindow::on_image_flip_vertical);
-    imageMenu->addAction(tr("Flip Horizontal"), this, &MainWindow::on_image_flip_horizontal);
+    imageMenu->addAction(QIcon::fromTheme("object-rotate-right"), i18n("Rotate Clockwise"), this, &MainWindow::on_image_rotate_clockwise);
+    imageMenu->addAction(QIcon::fromTheme("object-rotate-left"), i18n("Rotate Counter-Clockwise"), this, &MainWindow::on_image_rotate_counter_clockwise);
+    imageMenu->addAction(QIcon::fromTheme("object-flip-vertical"), i18n("Flip Vertical"), this, &MainWindow::on_image_flip_vertical);
+    imageMenu->addAction(QIcon::fromTheme("object-flip-horizontal"), i18n("Flip Horizontal"), this, &MainWindow::on_image_flip_horizontal);
 
-    QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
-    helpMenu->addAction(tr("Contents"), this, &MainWindow::on_help_manual, QKeySequence::HelpContents);
-    helpMenu->addAction(tr("About"), this, &MainWindow::on_help_about);
+    QMenu *helpMenu = menuBar()->addMenu(i18n("&Help"));
+    helpMenu->addAction(QIcon::fromTheme("help-contents"), i18n("Contents"), this, &MainWindow::on_help_manual, QKeySequence::HelpContents);
+    helpMenu->addAction(QIcon::fromTheme("help-about"), i18n("About"), this, &MainWindow::on_help_about);
+
+    setupGUI(Default, "matepaintui.rc");
 }
 
 void MainWindow::createToolbox(QVBoxLayout *toolColumn) {
@@ -228,10 +247,7 @@ void MainWindow::createToolbox(QVBoxLayout *toolColumn) {
         "stock_draw-ellipse.png", "stock_draw-rounded-rectangle.png"
     };
 
-    QString icon_dir = "/usr/share/mate-paint/data/icons/16x16/actions/";
-    if (!QDir(icon_dir).exists()) {
-        icon_dir = "data/icons/16x16/actions/";
-    }
+    QString icon_dir = ":/data/icons/16x16/actions/";
 
     for (int i = 0; i < TOOL_COUNT; ++i) {
         QPushButton* btn = new QPushButton();
@@ -327,8 +343,7 @@ void MainWindow::createBottomBar(QVBoxLayout *mainLayout) {
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
-
-    // Setup translations etc if needed
+    KLocalizedString::setApplicationDomain("matepaint");
 
     MainWindow window;
     window.show();
@@ -362,7 +377,7 @@ void ColorButton::mousePressEvent(QMouseEvent* event) {
 }
 void ColorButton::mouseDoubleClickEvent(QMouseEvent* event) {
     if (m_is_custom_slot) {
-        QColor c = QColorDialog::getColor(m_color, this, tr("Custom Color"));
+        QColor c = QColorDialog::getColor(m_color, this, i18n("Custom Color"));
         if (c.isValid()) {
             m_color = c;
             app_state.palette_button_colors[m_index] = c;
@@ -987,15 +1002,24 @@ void handle_mouse_press(double x, double y, Qt::MouseButton button, Qt::Keyboard
                     app_state.text_box_width = 200;
                     app_state.text_box_height = 100;
 
-                    // Simple input dialog for now instead of full overlay widget for Qt simplicity without embedding widgets inside canvas
-                    bool ok;
-                    QString text = QInputDialog::getMultiLineText(app_state.window, "Text Tool", "Enter text:", "", &ok);
-                    if (ok && !text.isEmpty()) {
-                        app_state.text_content = text.toStdString();
-                        app_state.window->finalizeText();
-                    } else {
-                        app_state.window->cancelText();
+                    QWidget* w = new QWidget(app_state.window, Qt::Window | Qt::FramelessWindowHint);
+                    app_state.text_window = w;
+                    QVBoxLayout* l = new QVBoxLayout(w);
+                    l->setContentsMargins(0,0,0,0);
+                    QTextEdit* text_entry = new QTextEdit(w);
+                    app_state.text_entry = text_entry;
+                    l->addWidget(text_entry);
+                    QObject::connect(text_entry, &QTextEdit::textChanged, [=]() {
+                        app_state.text_content = text_entry->toPlainText().toStdString();
+                        if (app_state.drawing_area) app_state.drawing_area->update();
+                    });
+
+                    if (app_state.drawing_area) {
+                        QPoint pt = app_state.drawing_area->mapToGlobal(QPoint(x * app_state.zoom_factor, y * app_state.zoom_factor));
+                        w->setGeometry(pt.x(), pt.y(), app_state.text_box_width, app_state.text_box_height);
                     }
+                    w->show();
+                    text_entry->setFocus();
                 }
                 return;
             }
@@ -1377,7 +1401,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 void MainWindow::on_file_new() {
     // simplified for brevity in this prompt context
     QDialog dialog(this);
-    dialog.setWindowTitle(tr("New Image"));
+    dialog.setWindowTitle(i18n("New Image"));
     QVBoxLayout layout(&dialog);
     QComboBox combo;
     combo.addItem("256x256");
@@ -1387,7 +1411,7 @@ void MainWindow::on_file_new() {
     combo.addItem("800x600");
     combo.addItem("Custom");
     combo.setCurrentIndex(4);
-    layout.addWidget(new QLabel(tr("Resolution:")));
+    layout.addWidget(new QLabel(i18n("Resolution:")));
     layout.addWidget(&combo);
 
     QWidget customWidget;
@@ -1434,7 +1458,7 @@ void MainWindow::on_file_new() {
 }
 
 void MainWindow::on_file_open() {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Image"), "", tr("Images (*.png *.xpm *.jpg *.jpeg)"));
+    QString fileName = QFileDialog::getOpenFileName(this, i18n("Open Image"), "", i18n("Images (*.png *.xpm *.jpg *.jpeg)"));
     if (!fileName.isEmpty()) {
         QImage image(fileName);
         if (!image.isNull()) {
@@ -1458,7 +1482,7 @@ void MainWindow::on_file_save() {
 }
 
 void MainWindow::on_file_save_as() {
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Image"), "", tr("Images (*.png *.xpm *.jpg *.jpeg)"));
+    QString fileName = QFileDialog::getSaveFileName(this, i18n("Save Image"), "", i18n("Images (*.png *.xpm *.jpg *.jpeg)"));
     if (!fileName.isEmpty()) {
         app_state.current_filename = fileName.toStdString();
         app_state.surface.save(fileName);
@@ -1467,7 +1491,7 @@ void MainWindow::on_file_save_as() {
 
 void MainWindow::on_image_scale() {
     bool ok;
-    int scale = QInputDialog::getInt(this, tr("Scale Image"), tr("Scale (%):"), 100, 1, 1000, 1, &ok);
+    int scale = QInputDialog::getInt(this, i18n("Scale Image"), i18n("Scale (%):"), 100, 1, 1000, 1, &ok);
     if (ok) {
         push_undo_state();
         double factor = scale / 100.0;
@@ -1529,7 +1553,20 @@ void MainWindow::on_image_flip_horizontal() {
 }
 
 void MainWindow::on_help_about() {
-    QMessageBox::about(this, tr("About Mate-Paint"), tr("Mate-Paint\nVersion 1.0\nCopyright © 2006 James Carthew\nPorted to Qt"));
+    KAboutData aboutData(
+        QStringLiteral("matepaint"),
+        i18n("Mate-Paint"),
+        QStringLiteral("1.0"),
+        i18n("A simple drawing tool"),
+        KAboutLicense::GPL,
+        i18n("(c) 2006 James Carthew")
+    );
+    KAboutData::setApplicationData(aboutData);
+    // Usually KHelpMenu shows the about dialog in KDE apps, but we can do it manually or via QMessageBox for simplicity here if needed.
+    // For a true KDE app, we use KAboutApplicationDialog:
+    // #include <KAboutApplicationDialog>
+    // KAboutApplicationDialog(aboutData, this).exec();
+    QMessageBox::about(this, i18n("About Mate-Paint"), i18n("Mate-Paint\nVersion 1.0\nCopyright © 2006 James Carthew\nPorted to Qt/KDE"));
 }
 
 
