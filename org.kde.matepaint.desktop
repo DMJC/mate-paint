@@ -2,9 +2,9 @@
 Type=Application
 Name=Mate Paint
 Comment=Create and edit images
-X-GNOME-Gettext-Domain=mate-paint
-Exec=mate-paint
-Icon=/usr/share/mate-paint/data/icons/48x48/mp.xpm
+X-GNOME-Gettext-Domain=matepaint
+Exec=matepaint
+Icon=/usr/share/matepaint/data/icons/48x48/mp.xpm
 Terminal=false
 Categories=Graphics;2DGraphics;
 StartupNotify=true
