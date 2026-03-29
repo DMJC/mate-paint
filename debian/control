@@ -1,0 +1,31 @@
+Source: mate-paint
+Section: graphics
+Priority: optional
+Maintainer: James Carthew <jcarthew@gmail.com>
+Build-Depends:
+ debhelper-compat (= 13),
+ meson (>= 0.50),
+ ninja-build,
+ pkg-config,
+ libgtk-3-dev,
+ libglib2.0-dev,
+ libgdk-pixbuf-2.0-dev,
+ gettext
+Standards-Version: 4.6.2
+Homepage: https://github.com/DMJC/mate-paint
+Vcs-Browser: https://github.com/DMJC/mate-paint
+Vcs-Git: https://github.com/DMJC/mate-paint.git
+
+Package: mate-paint
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends}
+Description: Simple paint application for the MATE Desktop
+ mate-paint is a lightweight raster graphics editor designed for
+ the MATE Desktop Environment. It provides a familiar paint-style
+ interface with tools including freehand drawing, geometric shapes,
+ text, fill, selection, and image transformations.
+ .
+ Supported file formats include BMP, GIF, JPEG, PNG, TIFF, PBM,
+ PGM, PPM, ICO, PCX, SVG, and WBMP.

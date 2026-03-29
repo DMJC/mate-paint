@@ -1,0 +1,12 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		--prefix=/usr \
+		--libdir=/usr/lib \
+		--libexecdir=/usr/lib/mate-paint \
+		--sysconfdir=/etc \
+		--localstatedir=/var
